@@ -1,7 +1,7 @@
 ﻿namespace Core.Models
 {
     /// <summary>
-    /// Represents a class of tasks.
+    /// Represents a model of tasks.
     /// </summary>
     internal class Task
     {
