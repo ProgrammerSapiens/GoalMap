@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a model of tasks.
     /// </summary>
-    internal class Task
+    public class Task
     {
         private int id;
         private string title;
