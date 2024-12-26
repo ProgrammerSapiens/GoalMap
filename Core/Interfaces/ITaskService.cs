@@ -9,7 +9,7 @@
         /// Retrieves a task by its unique identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the task.</param>
-        /// <returns></returns>
+        /// <returns>The task with the specified identifier.</returns>
         Task GetTaskById(int id);
 
         /// <summary>
