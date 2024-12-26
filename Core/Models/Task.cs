@@ -1,7 +1,7 @@
 ﻿namespace Core.Models
 {
     /// <summary>
-    /// Represents a model of tasks.
+    /// Represents the task's model.
     /// </summary>
     public class Task
     {
@@ -34,7 +34,7 @@
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("Title cannot be empty or null");
+                    throw new ArgumentException(nameof(value), "The title of the task cannot be empty or null");
                 title = value;
             }
         }
@@ -49,7 +49,7 @@
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("Description cannot be empty or null");
+                    throw new ArgumentException(nameof(value), "The description of the task cannot be empty or null");
                 description = value;
             }
         }
@@ -64,7 +64,7 @@
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("TaskType cannot be empty or null");
+                    throw new ArgumentException(nameof(value), "The taskType of the task cannot be empty or null");
                 taskType = value;
             }
         }
@@ -79,7 +79,7 @@
             set
             {
                 if (value < 1 || value > 5)
-                    throw new ArgumentOutOfRangeException(nameof(difficulty), "Difficulty must be between 1 and 5");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The difficulty of the task must be between 1 and 5");
                 difficulty = value;
             }
         }
@@ -94,7 +94,7 @@
             set
             {
                 if (value.HasValue && value.Value < DateTime.Now)
-                    throw new ArgumentOutOfRangeException(nameof(Deadline), "Deadline cannot be in the past");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The deadline of the task cannot be in the past");
                 deadline = value;
             }
         }
@@ -109,7 +109,7 @@
             set
             {
                 if (value.HasValue && value.Value < DateTime.Now)
-                    throw new ArgumentOutOfRangeException(nameof(Deadline), "TaskDate cannot be in the past");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The taskDate of the task cannot be in the past");
                 taskDate = value;
             }
         }
@@ -137,7 +137,11 @@
         /// <summary>
         /// Gets or sets the ID of the user assigned to the task.
         /// </summary>
-        public int UserId { get; set; }
+        public int UserId
+        {
+            get => userId;
+            set => userId = value;
+        }
 
         /// <summary>
         /// Gets or sets the user assigned to the task.
@@ -149,7 +153,7 @@
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException(nameof(user), "The task must be linked to the user");
+                    throw new ArgumentNullException(nameof(value), "The task must be linked to the user");
                 user = value;
             }
         }
@@ -165,7 +169,6 @@
         /// <param name="userId">The ID of the user assigned to the task.</param>
         /// <param name="typeCategory">The category of the task.</param>
         /// <param name="user">The user assigned to the task.</param>
-        /// <exception cref="ArgumentException">Thrown if any required parameter is null or invalid.</exception>
         public Task(int id, string title, string description, string taskType, int difficulty, int userId, TaskCategory typeCategory, User user)
         {
             this.id = id;
