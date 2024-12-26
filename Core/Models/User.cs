@@ -1,7 +1,7 @@
 ﻿namespace Core.Models
 {
     /// <summary>
-    /// Represents a model of users.
+    /// Represents the user's model.
     /// </summary>
     public class User
     {
@@ -21,13 +21,14 @@
         /// <summary>
         /// Gets or sets the name of the user.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the user name is null or empty.</exception>
         public string UserName
         {
             get => userName;
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("UserName cannot be null or empty", nameof(value));
+                    throw new ArgumentException(nameof(value), "The userName of the user cannot be null or empty");
                 userName = value;
             }
         }
@@ -35,13 +36,14 @@
         /// <summary>
         /// Gets or sets the hashed password of the user.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the hashed password is null or empty.</exception>
         public string PasswordHash
         {
             get => passwordHash;
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("PasswordHash cannot be null or empty", nameof(value));
+                    throw new ArgumentException(nameof(value), "The passwordHash of the user cannot be null or empty");
                 passwordHash = value;
             }
         }
@@ -49,13 +51,14 @@
         /// <summary>
         /// Gets or sets the experience points of the user.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Throwm if the experience is negative.</exception>
         public int Experience
         {
             get => experience;
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), "Experience cannot be negative.");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The experience of the user cannot be negative.");
                 experience = value;
             }
         }
