@@ -3,7 +3,7 @@
 namespace Core.Interfaces
 {
     /// <summary>
-    /// Provides methids for managing task categories, including CRUD operations.
+    /// Provides methods for managing task categories, including CRUD operations.
     /// </summary>
     internal interface ITaskCategoryService
     {
