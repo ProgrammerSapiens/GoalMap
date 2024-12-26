@@ -29,7 +29,7 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the credentials are valid; otherwise, <c>false</c>.
         /// </returns>
-        bool AughtnticateUser(string username, string password);
+        bool AuthenticateUser(string username, string password);
 
         /// <summary>
         /// Registers a new user in the system.
