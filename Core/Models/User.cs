@@ -5,18 +5,17 @@
     /// </summary>
     public class User
     {
-        private int id;
+        private Guid id;
         private string userName;
         private string passwordHash;
         private int experience;
-        private int level;
-        private ICollection<Task> tasks;
-        private ICollection<TaskCategory> categories;
+        private ICollection<Task>? tasks;
+        private ICollection<TaskCategory>? categories;
 
         /// <summary>
         /// Gets the unique identifier of the user.
         /// </summary>
-        public int Id => id;
+        public Guid Id => id;
 
         /// <summary>
         /// Gets or sets the name of the user.
@@ -24,7 +23,7 @@
         /// <exception cref="ArgumentException">Thrown if the user name is null or empty.</exception>
         public string UserName
         {
-            get => userName;
+            get { return userName; }
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -39,7 +38,7 @@
         /// <exception cref="ArgumentException">Thrown if the hashed password is null or empty.</exception>
         public string PasswordHash
         {
-            get => passwordHash;
+            get { return passwordHash; }
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -54,7 +53,7 @@
         /// <exception cref="ArgumentOutOfRangeException">Throwm if the experience is negative.</exception>
         public int Experience
         {
-            get => experience;
+            get { return experience; }
             set
             {
                 if (value < 0)
@@ -66,33 +65,38 @@
         /// <summary>
         /// Gets the current level of the user.
         /// </summary>
-        public int Level => level;
+        public int Level => (int)Math.Sqrt(Experience / 100);
 
         /// <summary>
         /// Gets or sets tasks assigned to the user.
         /// </summary>
-        public ICollection<Task> Tasks => tasks ??= new List<Task>();
+        public ICollection<Task>? Tasks
+        {
+            get { return tasks; }
+            set { tasks = value; }
+        }
 
         /// <summary>
         /// Gets or sets categories created by a user.
         /// </summary>
-        public ICollection<TaskCategory> Categories => categories ??= new List<TaskCategory>();
+        public ICollection<TaskCategory>? Categories
+        {
+            get { return categories; }
+            set { categories = value; }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class with the specified parameters.
         /// </summary>
-        /// <param name="id">The unique identifier of the user.</param>
         /// <param name="userName">The name of the user.</param>
         /// <param name="passwordHash">The hashed password of the user.</param>
         /// <param name="experience">The experience points of the user.</param>
-        public User(int id, string userName, string passwordHash, int experience)
+        public User(string userName, string passwordHash, int experience)
         {
-            this.id = id;
-            UserName = userName;
-            PasswordHash = passwordHash;
+            id = new Guid();
+            this.userName = userName;
+            this.passwordHash = passwordHash;
             Experience = experience;
-            tasks = new List<Task>();
-            categories = new List<TaskCategory>();
         }
     }
 }
