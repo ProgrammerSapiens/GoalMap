@@ -1,43 +1,45 @@
-﻿namespace Core.Models
+﻿using Newtonsoft.Json.Linq;
+
+namespace Core.Models
 {
+    /// <summary>
+    /// Enumeration for defining the task's time block.
+    /// </summary>
+    public enum TimeBlock { Day, Week, Month, Year }
+
+    /// <summary>
+    /// Enumeration for defining the task's difficulty level.
+    /// </summary>
+    public enum Difficulty { Easy, Middle, Hard, Nightmare }
+
+    /// <summary>
+    /// Enumeration for defining the task's repeat frequency.
+    /// </summary>
+    public enum RepeatFrequency { None, Daily, Weekly, Monthly, Yearly }
+
     /// <summary>
     /// Represents the task's model.
     /// </summary>
     public class Task
     {
-        private int id;
-        private string title;
+        private Guid id;
         private string description;
-        private string taskType;
-        private int difficulty;
+        private TimeBlock timeBlock;
+        private Difficulty difficulty;
         private DateTime? deadline;
-        private DateTime? taskDate;
+        private DateTime taskDate;
         private bool completionStatus;
-        private int? parentTaskId;
-        private string? repeatFrequency;
-        private TaskCategory? typeCategory;
-        private int userId;
-        private User user;
+        private Guid? parentTaskId;
+        private RepeatFrequency repeatFrequency;
+        private Guid taskCategoryId;
+        private Guid userId;
+        private TaskCategory? taskCategory;
+        private User? user;
 
         /// <summary>
         /// Gets the unique identifier of the task.
         /// </summary>
-        public int Id => id;
-
-        /// <summary>
-        /// Gets or sets the title of the task.
-        /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the title is null or empty.</exception>
-        public string Title
-        {
-            get => title;
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException(nameof(value), "The title of the task cannot be empty or null");
-                title = value;
-            }
-        }
+        public Guid Id => id;
 
         /// <summary>
         /// Gets or sets the description of the task.
@@ -45,7 +47,7 @@
         /// <exception cref="ArgumentException">Thrown if the description is null or empty.</exception>
         public string Description
         {
-            get => description;
+            get { return description; }
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -55,33 +57,18 @@
         }
 
         /// <summary>
-        /// Gets or sets the type of the task.
+        /// Gets the time block of the task.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the type is null or empty.</exception>
-        public string TaskType
-        {
-            get => taskType;
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException(nameof(value), "The taskType of the task cannot be empty or null");
-                taskType = value;
-            }
-        }
+        public TimeBlock TimeBlock => timeBlock;
+
 
         /// <summary>
-        /// Gets or sets the difficulty level of the task (1 to 5).
+        /// Gets or sets the difficulty level of the task.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the difficulty is less than 1 or greater than 5.</exception>
-        public int Difficulty
+        public Difficulty Difficulty
         {
-            get => difficulty;
-            set
-            {
-                if (value < 1 || value > 5)
-                    throw new ArgumentOutOfRangeException(nameof(value), "The difficulty of the task must be between 1 and 5");
-                difficulty = value;
-            }
+            get { return difficulty; }
+            set { difficulty = value; }
         }
 
         /// <summary>
@@ -90,7 +77,7 @@
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the deadline is in the past.</exception>
         public DateTime? Deadline
         {
-            get => deadline;
+            get { return deadline; }
             set
             {
                 if (value.HasValue && value.Value < DateTime.Now)
@@ -103,12 +90,12 @@
         /// Gets or sets the date associated with the task.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the date is in the past.</exception>
-        public DateTime? TaskDate
+        public DateTime TaskDate
         {
-            get => taskDate;
+            get { return taskDate; }
             set
             {
-                if (value.HasValue && value.Value < DateTime.Now)
+                if (value < DateTime.Now)
                     throw new ArgumentOutOfRangeException(nameof(value), "The taskDate of the task cannot be in the past");
                 taskDate = value;
             }
@@ -117,75 +104,162 @@
         /// <summary>
         /// Gets or sets a value indicating whether the task is completed.
         /// </summary>
-        public bool CompletionStatus { get; set; }
+        public bool CompletionStatus
+        {
+            get { return completionStatus; }
+            set { completionStatus = value; }
+        }
 
         /// <summary>
-        /// Gets or sets the ID of the parent task, if applicable.
+        /// Gets the ID of the parent task, if applicable.
         /// </summary>
-        public int? ParentTaskId { get; set; }
+        public Guid? ParentTaskId => parentTaskId;
 
         /// <summary>
         /// Gets or sets the repeat frequency of the task.
         /// </summary>
-        public string? RepeatFrequency { get; set; }
+        public RepeatFrequency RepeatFrequency
+        {
+            get { return repeatFrequency; }
+            set { repeatFrequency = value; }
+        }
 
         /// <summary>
-        /// Gets or sets the category of the task.
+        /// Gets or sets the ID of the task category assigned to the task.
         /// </summary>
-        public TaskCategory? TypeCategory { get; set; }
+        public Guid TaskCategoryId
+        {
+            get { return taskCategoryId; }
+            set { taskCategoryId = value; }
+        }
 
         /// <summary>
         /// Gets or sets the ID of the user assigned to the task.
         /// </summary>
-        public int UserId
+        public Guid UserId
         {
-            get => userId;
-            set => userId = value;
+            get { return userId; }
+            set { userId = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the task category assigned to the task.
+        /// </summary>
+        public virtual TaskCategory? TaskCategory
+        {
+            get { return taskCategory; }
+            set { taskCategory = value; }
         }
 
         /// <summary>
         /// Gets or sets the user assigned to the task.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown if the User is null.</exception>
-        public User User
+        public User? User
         {
-            get => user;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value), "The task must be linked to the user");
-                user = value;
-            }
+            get { return user; }
+            set { user = value; }
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Task"/> class with the specified parameters.
+        /// Initializeds a new instance of the <see cref="Task"/> class.
         /// </summary>
-        /// <param name="id">The unique identifier of the task.</param>
-        /// <param name="title">The title of the task.</param>
-        /// <param name="description">The description of the task.</param>
-        /// <param name="taskType">The type of the task.</param>
-        /// <param name="difficulty">The difficulty level of the task (1 to 5).</param>
-        /// <param name="userId">The ID of the user assigned to the task.</param>
-        /// <param name="typeCategory">The category of the task.</param>
-        /// <param name="user">The user assigned to the task.</param>
-        public Task(int id, string title, string description, string taskType, int difficulty, int userId, TaskCategory typeCategory, User user)
+        /// <param name="description">The task's description.</param>
+        /// <param name="timeBlock">The time block for the task.</param>
+        /// <param name="difficulty">The difficulty level of the task.</param>
+        /// <param name="taskDate">The creation date of the task.</param>
+        /// <param name="taskCategoryId">The unique identifier of the task's category</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId)
         {
-            this.id = id;
-            Title = title;
-            Description = description;
-            TaskType = taskType;
+            id = new Guid();
+            this.description = description ?? throw new ArgumentException("The description of the task cannot be empty or null");
+            this.timeBlock = timeBlock;
             Difficulty = difficulty;
-            UserId = userId;
-            TypeCategory = typeCategory;
-            User = user;
-
-            //Default values
-            CompletionStatus = false;
-            ParentTaskId = null;
-            RepeatFrequency = null;
+            TaskDate = taskDate;
             Deadline = null;
-            TaskDate = null;
+            CompletionStatus = false;
+            parentTaskId = null;
+            RepeatFrequency = RepeatFrequency.None;
+            TaskCategoryId = taskCategoryId;
+            UserId = userId;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Task"/> class with a dealine.
+        /// </summary>
+        /// <param name="description">The task's description.</param>
+        /// <param name="timeBlock">The time block for the task.</param>
+        /// <param name="difficulty">The difficulty level of the task.</param>
+        /// <param name="taskDate">The creating date of the task.</param>
+        /// <param name="taskCategoryId">The unique identifier of the task's category.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="deadline">The deadline for the task.</param>
+        public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId, DateTime deadline)
+        {
+            id = new Guid();
+            this.description = description;
+            this.timeBlock = timeBlock;
+            Difficulty = difficulty;
+            TaskDate = taskDate;
+            Deadline = deadline;
+            CompletionStatus = false;
+            parentTaskId = null;
+            RepeatFrequency = RepeatFrequency.None;
+            TaskCategoryId = taskCategoryId;
+            UserId = userId;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Task"/> class with a deadline and parent task ID.
+        /// </summary>
+        /// <param name="description">The task's description.</param>
+        /// <param name="timeBlock">The time block for the task.</param>
+        /// <param name="difficulty">The difficulty level of the task.</param>
+        /// <param name="taskDate">The creating date of the task.</param>
+        /// <param name="taskCategoryId">The unique identifier of the task's category.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="deadline">The deadline for the task.</param>
+        /// <param name="parentTaskId">The unique identifier of the parent task.</param>
+        public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId, DateTime deadline, Guid parentTaskId)
+        {
+            id = new Guid();
+            this.description = description;
+            this.timeBlock = timeBlock;
+            Difficulty = difficulty;
+            TaskDate = taskDate;
+            Deadline = deadline;
+            CompletionStatus = false;
+            this.parentTaskId = parentTaskId;
+            RepeatFrequency = RepeatFrequency.None;
+            TaskCategoryId = taskCategoryId;
+            UserId = userId;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Task"/> class with a deadline, parent task ID, and repeat frequency.
+        /// </summary>
+        /// <param name="description">The task's description.</param>
+        /// <param name="timeBlock">The time block for the task.</param>
+        /// <param name="difficulty">The difficulty level of the task.</param>
+        /// <param name="taskDate">The creating date of the task.</param>
+        /// <param name="taskCategoryId">The unique identifier of the task's category.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="deadline">The deadline for the task.</param>
+        /// <param name="parentTaskId">The unique identifier of the parent task.</param>
+        /// <param name="repeatFrequency">The repeat frequency of the task.</param>
+        public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId, DateTime deadline, Guid parentTaskId, RepeatFrequency repeatFrequency)
+        {
+            id = new Guid();
+            this.description = description;
+            this.timeBlock = timeBlock;
+            Difficulty = difficulty;
+            TaskDate = taskDate;
+            Deadline = deadline;
+            CompletionStatus = false;
+            this.parentTaskId = parentTaskId;
+            RepeatFrequency = repeatFrequency;
+            TaskCategoryId = taskCategoryId;
+            UserId = userId;
         }
     }
 }
