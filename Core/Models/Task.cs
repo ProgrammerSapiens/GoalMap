@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace Core.Models
+﻿namespace Core.Models
 {
     /// <summary>
     /// Enumeration for defining the task's time block.
@@ -60,7 +58,6 @@ namespace Core.Models
         /// Gets the time block of the task.
         /// </summary>
         public TimeBlock TimeBlock => timeBlock;
-
 
         /// <summary>
         /// Gets or sets the difficulty level of the task.
