@@ -6,7 +6,7 @@
     public class TaskCategory
     {
         private Guid id;
-        private string name;
+        private string categoryName;
         private Guid userId;
         private User? user;
 
@@ -18,15 +18,15 @@
         /// <summary>
         /// Gets or sets the name of the task category.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown if the task name is null or empty.</exception>
-        public string Name
+        /// <exception cref="ArgumentException">Thrown if the task name is null or empty.</exception>
+        public string CategoryName
         {
-            get { return name; }
+            get { return categoryName; }
             set
             {
-                if (string.IsNullOrEmpty(name))
-                    throw new ArgumentNullException(nameof(name), "The name of the task category can not be null or empty");
-                name = value;
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentException(nameof(value), "The name of the task category can not be null or empty");
+                categoryName = value;
             }
         }
 
@@ -47,12 +47,17 @@
         /// <summary>
         /// Initialize a new instance of the <see cref="TaskCategory"/> class with the specified parameters.
         /// </summary>
-        /// <param name="name">The name of the task category.</param>
+        /// <param name="categoryName">The name of the task category.</param>
         /// <param name="userId">The ID of the user assigned to the task category.</param>
-        public TaskCategory(string name, Guid userId)
+        public TaskCategory(string categoryName, Guid userId)
         {
-            id = new Guid();
-            this.name = name;
+            if (userId == Guid.Empty)
+                throw new ArgumentException(nameof(userId), "The user ID cannot be empty");
+            if (string.IsNullOrEmpty(categoryName))
+                throw new ArgumentException(nameof(categoryName), "The name of the task category can not be null or empty");
+
+            id = Guid.NewGuid();
+            this.categoryName = categoryName;
             this.userId = userId;
         }
     }
