@@ -93,7 +93,7 @@
         /// <param name="experience">The experience points of the user.</param>
         public User(string userName, string passwordHash, int experience)
         {
-            id = new Guid();
+            id = Guid.NewGuid();
             this.userName = userName;
             this.passwordHash = passwordHash;
             Experience = experience;
