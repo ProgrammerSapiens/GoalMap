@@ -87,7 +87,7 @@
             get { return deadline; }
             set
             {
-                if (value.HasValue && value.Value < DateTime.Now)
+                if (value.HasValue && value.Value < DateTime.UtcNow)
                     throw new ArgumentOutOfRangeException(nameof(value), "The deadline of the task cannot be in the past");
                 if (value.HasValue && value.Value <= TaskDate)
                     throw new ArgumentException(nameof(value), "The deadline of the task cannot be earlier than the task date");
@@ -104,7 +104,7 @@
             get { return taskDate; }
             set
             {
-                if (value < DateTime.Now)
+                if (value < DateTime.Today)
                     throw new ArgumentOutOfRangeException(nameof(value), "The taskDate of the task cannot be in the past");
                 taskDate = value;
             }
