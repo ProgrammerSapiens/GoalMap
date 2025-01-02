@@ -9,19 +9,30 @@ namespace Tests.UnitTests
         [Fact]
         public void TaskCategory_Constructor_With_ValidCategoryNameAndUserId_ShouldInitializePropertiesCorrectly()
         {
+            string categoryName = "Test category";
+            Guid userId = Guid.NewGuid();
 
+            var taskCategory = new TaskCategory(categoryName, userId);
+
+            Assert.Equal(categoryName, taskCategory.CategoryName);
+            Assert.Equal(userId, taskCategory.UserId);
+            Assert.NotEqual(Guid.Empty, taskCategory.Id);
         }
 
         [Fact]
-        public void TaskCategory_Constructor_With_EmptyCategoryName_ShouldThrowArgumentNullException()
+        public void TaskCategory_Constructor_With_EmptyCategoryName_ShouldThrowArgumentException()
         {
+            Guid userId = Guid.NewGuid();
 
+            Assert.Throws<ArgumentException>(() => new TaskCategory(string.Empty, userId));
         }
 
         [Fact]
-        public void TaskCategory_Constructor_With_NullCategoryName_ShouldThrowArgumentNullException()
+        public void TaskCategory_Constructor_With_EmptyUserId_ShouldThrowArgumentException()
         {
+            string categoryName = "Test Category";
 
+            Assert.Throws<ArgumentException>(() => new TaskCategory(categoryName, Guid.Empty));
         }
 
         #endregion
@@ -31,25 +42,28 @@ namespace Tests.UnitTests
         [Fact]
         public void TaskCategory_SetCategoryName_WithValidValue_ShouldUpdateCategoryName()
         {
+            string categoryName = "Test Category";
+            Guid userId = Guid.NewGuid();
 
+            var taskCategory = new TaskCategory(categoryName, userId);
+
+            string newCategoryName = "New test category";
+            taskCategory.CategoryName = newCategoryName;
+
+            Assert.Equal(newCategoryName, taskCategory.CategoryName);
         }
 
         [Fact]
         public void TaskCategory_SetCategoryName_WithNullOrEmpty_ShouldThrowArgumentNullException()
         {
+            string categoryName = "Test Category";
+            Guid userId = Guid.NewGuid();
 
-        }
+            var taskCategory = new TaskCategory(categoryName, userId);
 
-        [Fact]
-        public void TaskCategory_SetUserId_ShouldUpdateUserId()
-        {
+            string newCategoryName = string.Empty;
 
-        }
-
-        [Fact]
-        public void TaskCategory_CategoryName_ShouldReturnCorrectValueAfterInitialization()
-        {
-
+            Assert.Throws<ArgumentException>(() => taskCategory.CategoryName = newCategoryName);
         }
 
         #endregion
@@ -59,7 +73,13 @@ namespace Tests.UnitTests
         [Fact]
         public void TaskCategory_Id_ShouldBeUnique()
         {
+            string categoryName = "Test Category";
+            Guid userId = Guid.NewGuid();
 
+            var taskCategory1 = new TaskCategory(categoryName, userId);
+            var taskCategory2 = new TaskCategory(categoryName, userId);
+
+            Assert.NotEqual(taskCategory1.Id, taskCategory2.Id);
         }
 
         #endregion
@@ -69,17 +89,24 @@ namespace Tests.UnitTests
         [Fact]
         public void TaskCategory_SetUser_ShouldAssignUserCorrectly()
         {
+            string userName = "Test User";
+            string passwordHash = "Test Password";
+            int experience = 100;
 
-        }
+            var user = new User(userName, passwordHash, experience);
 
-        #endregion
+            string categoryName = "Test Category";
+            Guid userId = user.Id;
 
-        #region Boundary tests
+            var taskCategory = new TaskCategory(categoryName, userId);
 
-        [Fact]
-        public void TaskCategory_SetCategoryName_WithEmptyString_ShouldThrowArgumentNullException()
-        {
+            taskCategory.User = user;
 
+            Assert.NotNull(taskCategory.User);
+            Assert.Equal(userName, taskCategory.User.UserName);
+            Assert.Equal(experience, taskCategory.User.Experience);
+            Assert.Equal(passwordHash, taskCategory.User.PasswordHash);
+            Assert.Equal(userId, taskCategory.User.Id);
         }
 
         #endregion
