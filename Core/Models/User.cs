@@ -5,12 +5,18 @@
     /// </summary>
     public class User
     {
+        #region Fields
+
         private Guid id;
         private string userName;
         private string passwordHash;
         private int experience;
         private ICollection<Task>? tasks;
         private ICollection<TaskCategory>? categories;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets the unique identifier of the user.
@@ -35,14 +41,14 @@
         /// <summary>
         /// Gets or sets the hashed password of the user.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the hashed password is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the hashed password is null or empty.</exception>
         public string PasswordHash
         {
             get { return passwordHash; }
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException(nameof(value), "The passwordHash of the user cannot be null or empty");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The passwordHash of the user cannot be null or empty");
                 passwordHash = value;
             }
         }
@@ -85,6 +91,10 @@
             set { categories = value; }
         }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class with the specified parameters.
         /// </summary>
@@ -93,10 +103,17 @@
         /// <param name="experience">The experience points of the user.</param>
         public User(string userName, string passwordHash, int experience)
         {
+            if (string.IsNullOrEmpty(userName))
+                throw new ArgumentException(nameof(userName), "The userName of the user cannot be null or empty");
+            if (string.IsNullOrEmpty(passwordHash))
+                throw new ArgumentException(nameof(passwordHash), "The passwordHash of the user cannot be null or empty");
+
             id = Guid.NewGuid();
             this.userName = userName;
             this.passwordHash = passwordHash;
             Experience = experience;
         }
+
+        #endregion
     }
 }
