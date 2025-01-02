@@ -5,10 +5,16 @@
     /// </summary>
     public class TaskCategory
     {
+        #region Fields
+
         private Guid id;
         private string categoryName;
         private Guid userId;
         private User? user;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets the unique identifier of the task category.
@@ -44,6 +50,10 @@
             set { user = value; }
         }
 
+        #endregion
+
+        #region Constructors
+
         /// <summary>
         /// Initialize a new instance of the <see cref="TaskCategory"/> class with the specified parameters.
         /// </summary>
@@ -60,5 +70,7 @@
             this.categoryName = categoryName;
             this.userId = userId;
         }
+
+        #endregion
     }
 }
