@@ -1,5 +1,7 @@
 ﻿namespace Core.Models
 {
+    #region Enums
+
     /// <summary>
     /// Enumeration for defining the task's time block.
     /// </summary>
@@ -15,11 +17,15 @@
     /// </summary>
     public enum RepeatFrequency { None, Daily, Weekly, Monthly, Yearly }
 
+    #endregion
+
     /// <summary>
     /// Represents the task's model.
     /// </summary>
     public class Task
     {
+        #region Fields
+
         private Guid id;
         private string description;
         private TimeBlock timeBlock;
@@ -33,6 +39,10 @@
         private Guid userId;
         private TaskCategory? taskCategory;
         private User? user;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets the unique identifier of the task.
@@ -79,6 +89,8 @@
             {
                 if (value.HasValue && value.Value < DateTime.Now)
                     throw new ArgumentOutOfRangeException(nameof(value), "The deadline of the task cannot be in the past");
+                if (value.HasValue && value.Value <= TaskDate)
+                    throw new ArgumentException(nameof(value), "The deadline of the task cannot be earlier than the task date");
                 deadline = value;
             }
         }
@@ -124,19 +136,31 @@
         /// <summary>
         /// Gets or sets the ID of the task category assigned to the task.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the category ID is empty</exception>
         public Guid TaskCategoryId
         {
             get { return taskCategoryId; }
-            set { taskCategoryId = value; }
+            set
+            {
+                if (Guid.Empty == value)
+                    throw new ArgumentException(nameof(value), "The category id cannot be empty");
+                taskCategoryId = value;
+            }
         }
 
         /// <summary>
         /// Gets or sets the ID of the user assigned to the task.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the user ID is empty</exception>
         public Guid UserId
         {
             get { return userId; }
-            set { userId = value; }
+            set
+            {
+                if (Guid.Empty == value)
+                    throw new ArgumentException(nameof(value), "The user id cannot be empty");
+                userId = value;
+            }
         }
 
         /// <summary>
@@ -151,11 +175,15 @@
         /// <summary>
         /// Gets or sets the user assigned to the task.
         /// </summary>
-        public User? User
+        public virtual User? User
         {
             get { return user; }
             set { user = value; }
         }
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Initializeds a new instance of the <see cref="Task"/> class.
@@ -168,8 +196,11 @@
         /// <param name="userId">The unique identifier of the user.</param>
         public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId)
         {
-            id = new Guid();
-            this.description = description ?? throw new ArgumentException("The description of the task cannot be empty or null");
+            if (string.IsNullOrEmpty(description))
+                throw new ArgumentException(nameof(description), "The description of the task cannot be empty or null");
+
+            id = Guid.NewGuid();
+            this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
             TaskDate = taskDate;
@@ -193,7 +224,10 @@
         /// <param name="deadline">The deadline for the task.</param>
         public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId, DateTime deadline)
         {
-            id = new Guid();
+            if (string.IsNullOrEmpty(description))
+                throw new ArgumentException(nameof(description), "The description of the task cannot be empty or null");
+
+            id = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
@@ -219,7 +253,10 @@
         /// <param name="parentTaskId">The unique identifier of the parent task.</param>
         public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId, DateTime deadline, Guid parentTaskId)
         {
-            id = new Guid();
+            if (string.IsNullOrEmpty(description))
+                throw new ArgumentException(nameof(description), "The description of the task cannot be empty or null");
+
+            id = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
@@ -246,7 +283,10 @@
         /// <param name="repeatFrequency">The repeat frequency of the task.</param>
         public Task(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime taskDate, Guid taskCategoryId, Guid userId, DateTime deadline, Guid parentTaskId, RepeatFrequency repeatFrequency)
         {
-            id = new Guid();
+            if (string.IsNullOrEmpty(description))
+                throw new ArgumentException(nameof(description), "The description of the task cannot be empty or null");
+
+            id = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
@@ -258,5 +298,7 @@
             TaskCategoryId = taskCategoryId;
             UserId = userId;
         }
+
+        #endregion
     }
 }
