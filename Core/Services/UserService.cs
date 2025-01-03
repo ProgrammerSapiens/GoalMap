@@ -5,22 +5,22 @@ namespace Core.Services
 {
     internal class UserService : IUserService
     {
-        public void RegisterUser(User user)
+        public Task<User?> GetUserByIdAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public bool AuthenticateUser(string username, string password)
+        public System.Threading.Tasks.Task UpdateUserExperienceAsync(Guid userId, int experiencePoints)
         {
             throw new NotImplementedException();
         }
 
-        public User GetUserById(Guid userId)
+        public Task<bool> AuthenticateUserAsync(string username, string password)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateUserExperience(Guid userId, int experiencePoints)
+        public Task<Guid> RegisterUserAsync(User user)
         {
             throw new NotImplementedException();
         }

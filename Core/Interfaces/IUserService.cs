@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Core.Interfaces
 {
@@ -12,14 +13,14 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The user with the specified ID.</returns>
-        User GetUserById(Guid userId);
+        Task<User?> GetUserByIdAsync(Guid userId);
 
         /// <summary>
         /// Updates the experience points of a user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="experiencePoints">The amount of experience points to add.</param>
-        void UpdateUserExperience(Guid userId, int experiencePoints);
+        Task UpdateUserExperienceAsync(Guid userId, int experiencePoints);
 
         /// <summary>
         /// Authenticates a user with the specified credentials.
@@ -29,12 +30,12 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the credentials are valid; otherwise, <c>false</c>.
         /// </returns>
-        bool AuthenticateUser(string username, string password);
+        Task<bool> AuthenticateUserAsync(string username, string password);
 
         /// <summary>
         /// Registers a new user in the system.
         /// </summary>
         /// <param name="user">The user to register.</param>
-        void RegisterUser(User user);
+        Task<Guid> RegisterUserAsync(User user);
     }
 }
