@@ -5,7 +5,7 @@ namespace Core.Interfaces
     /// <summary>
     /// Provides methods for managing task categories, including CRUD operations.
     /// </summary>
-    internal interface ITaskCategoryService
+    public interface ITaskCategoryService
     {
         /// <summary>
         /// Retrieves a task category by its unique ID.
