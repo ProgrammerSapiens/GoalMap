@@ -5,12 +5,7 @@ namespace Core.Services
 {
     internal class TaskCategoryService : ITaskCategoryService
     {
-        public void AddCategory(TaskCategory taskCategory)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteCategory(Guid taskCategoryId)
+        public TaskCategory GetTaskCategoryById(Guid taskCategoryId)
         {
             throw new NotImplementedException();
         }
@@ -20,12 +15,17 @@ namespace Core.Services
             throw new NotImplementedException();
         }
 
-        public TaskCategory GetTaskCategoryById(Guid taskCategoryId)
+        public void AddCategory(TaskCategory taskCategory)
         {
             throw new NotImplementedException();
         }
 
         public void UpdateCategory(TaskCategory taskCategory)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteCategory(Guid taskCategoryId)
         {
             throw new NotImplementedException();
         }
