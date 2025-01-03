@@ -6,7 +6,7 @@ namespace Core.Interfaces
     /// <summary>
     /// Provides methods for managing tasks, including CRUD operations and task movement.
     /// </summary>
-    internal interface ITaskService
+    public interface ITaskService
     {
         /// <summary>
         /// Retrieves a task by its unique identifier.

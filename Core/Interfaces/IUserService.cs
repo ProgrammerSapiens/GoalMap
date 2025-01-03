@@ -5,7 +5,7 @@ namespace Core.Interfaces
     /// <summary>
     /// Defines operations related to user management.
     /// </summary>
-    internal interface IUserService
+    public interface IUserService
     {
         /// <summary>
         /// Retrieves a user by their unique identifier.
