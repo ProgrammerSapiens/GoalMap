@@ -1,6 +1,28 @@
-﻿namespace Core.Services
+﻿using Core.Interfaces;
+using Core.Models;
+
+namespace Core.Services
 {
-    internal class UserService
+    internal class UserService : IUserService
     {
+        public bool AuthenticateUser(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public User GetUserById(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterUser(User user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateUserExperience(Guid userId, int experiencePoints)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
