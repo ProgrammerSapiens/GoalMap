@@ -10,16 +10,16 @@ namespace Core.Interfaces
         /// <summary>
         /// Retrieves a user by their unique identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The user with the specified ID.</returns>
-        User GetUserById(int id);
+        User GetUserById(Guid userId);
 
         /// <summary>
         /// Updates the experience points of a user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="experiencePoints">The amount of experience points to add.</param>
-        void UpdateUserExperience(int userId, int experiencePoints);
+        void UpdateUserExperience(Guid userId, int experiencePoints);
 
         /// <summary>
         /// Authenticates a user with the specified credentials.
