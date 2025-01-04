@@ -76,7 +76,7 @@
         /// <summary>
         /// Gets or sets todos assigned to the user.
         /// </summary>
-        public ICollection<ToDo>? Tasks
+        public ICollection<ToDo>? ToDos
         {
             get { return toDos; }
             set { toDos = value; }
