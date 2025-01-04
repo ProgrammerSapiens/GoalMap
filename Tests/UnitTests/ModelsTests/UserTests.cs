@@ -1,5 +1,4 @@
 ﻿using Core.Models;
-using Task = Core.Models.Task;
 
 namespace Tests.UnitTests.ModelsTests
 {
@@ -167,7 +166,14 @@ namespace Tests.UnitTests.ModelsTests
         [Fact]
         public void User_Id_ShouldBeUnique()
         {
+            string userName = "Test user";
+            string passwordHash = "Test password";
+            int experience = 100;
 
+            var user1 = new User(userName, passwordHash, experience);
+            var user2 = new User(userName, passwordHash, experience);
+
+            Assert.NotEqual(user1, user2);
         }
 
         #endregion
@@ -185,21 +191,21 @@ namespace Tests.UnitTests.ModelsTests
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Middle;
-            DateTime taskDate = DateTime.Now;
-            Guid taskCategoryId = Guid.NewGuid();
+            DateTime toDoDate = DateTime.Now;
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
-            var tasks = new List<Task>
+            var toDos = new List<ToDo>
             {
-                new Task (description,timeBlock,difficulty,taskDate,taskCategoryId,userId),
-                new Task (description,timeBlock,difficulty,taskDate,taskCategoryId,userId)
+                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryId,userId),
+                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryId,userId)
             };
 
-            user.Tasks = tasks;
+            user.ToDos = toDos;
 
-            Assert.NotNull(user.Tasks);
-            Assert.Equal(2, user.Tasks.Count);
-            Assert.Contains(tasks[0], user.Tasks);
-            Assert.Contains(tasks[1], user.Tasks);
+            Assert.NotNull(user.ToDos);
+            Assert.Equal(2, user.ToDos.Count);
+            Assert.Contains(toDos[0], user.ToDos);
+            Assert.Contains(toDos[1], user.ToDos);
         }
 
         [Fact]
@@ -210,18 +216,18 @@ namespace Tests.UnitTests.ModelsTests
             int experience = 100;
             var user = new User(userName, passwordHash, experience);
 
-            var categories = new List<TaskCategory>
+            var toDoCategories = new List<ToDoCategory>
             {
-                new TaskCategory("Category 1", Guid.NewGuid()),
-                new TaskCategory("Category 2", Guid.NewGuid())
+                new ToDoCategory("Category 1", Guid.NewGuid()),
+                new ToDoCategory("Category 2", Guid.NewGuid())
             };
 
-            user.Categories = categories;
+            user.ToDoCategories = toDoCategories;
 
-            Assert.NotNull(user.Categories);
-            Assert.Equal(2, user.Categories.Count);
-            Assert.Contains(categories[0], user.Categories);
-            Assert.Contains(categories[1], user.Categories);
+            Assert.NotNull(user.ToDoCategories);
+            Assert.Equal(2, user.ToDoCategories.Count);
+            Assert.Contains(toDoCategories[0], user.ToDoCategories);
+            Assert.Contains(toDoCategories[1], user.ToDoCategories);
         }
 
         #endregion
