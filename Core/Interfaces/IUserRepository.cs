@@ -10,28 +10,28 @@ namespace Core.Interfaces
         /// <summary>
         /// Retrieves a user by its unique identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the user.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The user with the specified identifier.</returns>
-        User GetById(int id);
+        Task<User?> GetByIdAsync(Guid userId);
 
         /// <summary>
         /// Retrieves a user by its unique username.
         /// </summary>
         /// <param name="userName">The unique username of the user.</param>
         /// <returns>The user with the specified username.</returns>
-        User GetByUserName(string userName);
+        Task<User> GetByUserNameAsync(string userName);
 
         /// <summary>
         /// Adds a new User to the repository.
         /// </summary>
         /// <param name="user">The user to be added.</param>
-        void Add(User user);
+        Task AddUserAsync(User user);
 
         /// <summary>
         /// Updates an existing user in the repository.
         /// </summary>
         /// <param name="user">The user to be updated.</param>
-        void Update(User user);
+        Task UpdateUserAsync(User user);
 
         /// <summary>
         /// Checks if the user with such a username exists.
@@ -40,6 +40,6 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the user exists, and <c>false</c> if its not.
         /// </returns>
-        bool Exists(string username);
+        Task<bool> IfUserExistsAsync(string username);
     }
 }

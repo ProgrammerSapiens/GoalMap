@@ -1,5 +1,4 @@
 ﻿using Core.Models;
-using Task = System.Threading.Tasks.Task;
 
 namespace Core.Interfaces
 {

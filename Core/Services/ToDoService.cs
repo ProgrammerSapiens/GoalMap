@@ -3,49 +3,49 @@ using Core.Models;
 
 namespace Core.Services
 {
-    internal class TaskService : ITaskService
+    internal class ToDoService : IToDoService
     {
-        public Models.Task GetTaskById(Guid id)
+        public Task AddToDoAsync(ToDo toDo)
         {
             throw new NotImplementedException();
         }
 
-        public List<Models.Task> GetTasksByDate(Guid userId, DateTime date)
+        public Task DeleteToDoAsync(Guid toDoId)
         {
             throw new NotImplementedException();
         }
 
-        public List<Models.Task> GetTasksByTimeBlock(Guid userId, TimeBlock timeBlock)
+        public Task<ToDo> GetToDoByIdAsync(Guid toDoId)
         {
             throw new NotImplementedException();
         }
 
-        public List<Models.Task> GetTasksByUser(Guid userId)
+        public Task<List<ToDo>> GetToDosByDateAsync(Guid userId, DateTime date)
         {
             throw new NotImplementedException();
         }
 
-        public void AddTask(Models.Task task)
+        public Task<List<ToDo>> GetToDosByTimeBlockAsync(Guid userId, TimeBlock timeBlock)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateTask(Models.Task task)
+        public Task<List<ToDo>> GetToDosByUserAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteTask(Guid id)
+        public Task MoveIncompleteToDosAsync(DateTime fromDate, DateTime toDate, Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public void MoveIncompleteTasks(DateTime fromDate, DateTime toDate, Guid userId)
+        public Task MoveRepeatedToDosAsync(RepeatFrequency repeatFrequency, Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public void MoveRepeatedTasks(RepeatFrequency repeatFrequency, Guid userId)
+        public Task UpdateToDoAsync(ToDo toDo)
         {
             throw new NotImplementedException();
         }

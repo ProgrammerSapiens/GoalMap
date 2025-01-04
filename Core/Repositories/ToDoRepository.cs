@@ -1,6 +1,6 @@
 ﻿namespace Core.Repositories
 {
-    internal class TaskCategoryRepository
+    internal class ToDoRepository
     {
     }
 }

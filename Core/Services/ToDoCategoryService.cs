@@ -3,29 +3,29 @@ using Core.Models;
 
 namespace Core.Services
 {
-    internal class TaskCategoryService : ITaskCategoryService
+    internal class ToDoCategoryService : IToDoCategoryService
     {
-        public TaskCategory GetTaskCategoryById(Guid taskCategoryId)
+        public Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
             throw new NotImplementedException();
         }
 
-        public List<TaskCategory> GetCategoriesByUser(Guid userId)
+        public Task DeleteToDoCategoryAsync(Guid toDoCategoryId)
         {
             throw new NotImplementedException();
         }
 
-        public void AddCategory(TaskCategory taskCategory)
+        public Task<List<ToDoCategory>> GetToDoCategoriesByUserAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateCategory(TaskCategory taskCategory)
+        public Task<ToDoCategory> GetToDoCategoryByIdAsync(Guid toDoCategoryId)
         {
             throw new NotImplementedException();
         }
 
-        public void DeleteCategory(Guid taskCategoryId)
+        public Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
             throw new NotImplementedException();
         }

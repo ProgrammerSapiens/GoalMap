@@ -5,12 +5,19 @@ namespace Core.Services
 {
     internal class UserService : IUserService
     {
+        private readonly IUserRepository _repository;
+
+        public UserService(IUserRepository repository)
+        {
+            _repository = repository;
+        }
+
         public Task<User?> GetUserByIdAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public System.Threading.Tasks.Task UpdateUserExperienceAsync(Guid userId, int experiencePoints)
+        public Task UpdateUserExperienceAsync(Guid userId, int experiencePoints)
         {
             throw new NotImplementedException();
         }

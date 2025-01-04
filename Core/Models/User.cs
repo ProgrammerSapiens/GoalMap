@@ -7,12 +7,12 @@
     {
         #region Fields
 
-        private Guid id;
+        private Guid userId;
         private string userName;
         private string passwordHash;
         private int experience;
-        private ICollection<Task>? tasks;
-        private ICollection<TaskCategory>? categories;
+        private ICollection<ToDo>? toDos;
+        private ICollection<ToDoCategory>? toDoCategories;
 
         #endregion
 
@@ -21,7 +21,7 @@
         /// <summary>
         /// Gets the unique identifier of the user.
         /// </summary>
-        public Guid Id => id;
+        public Guid Id => userId;
 
         /// <summary>
         /// Gets or sets the name of the user.
@@ -74,21 +74,21 @@
         public int Level => (int)Math.Sqrt(Experience / 100);
 
         /// <summary>
-        /// Gets or sets tasks assigned to the user.
+        /// Gets or sets todos assigned to the user.
         /// </summary>
-        public ICollection<Task>? Tasks
+        public ICollection<ToDo>? Tasks
         {
-            get { return tasks; }
-            set { tasks = value; }
+            get { return toDos; }
+            set { toDos = value; }
         }
 
         /// <summary>
         /// Gets or sets categories created by a user.
         /// </summary>
-        public ICollection<TaskCategory>? Categories
+        public ICollection<ToDoCategory>? ToDoCategories
         {
-            get { return categories; }
-            set { categories = value; }
+            get { return toDoCategories; }
+            set { toDoCategories = value; }
         }
 
         #endregion
@@ -108,7 +108,7 @@
             if (string.IsNullOrEmpty(passwordHash))
                 throw new ArgumentException(nameof(passwordHash), "The passwordHash of the user cannot be null or empty");
 
-            id = Guid.NewGuid();
+            userId = Guid.NewGuid();
             this.userName = userName;
             this.passwordHash = passwordHash;
             Experience = experience;
