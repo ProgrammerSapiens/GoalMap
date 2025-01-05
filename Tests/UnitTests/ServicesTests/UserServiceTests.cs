@@ -143,6 +143,8 @@ namespace Tests.UnitTests.ServicesTests
             await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("username", null));
             await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("", "password"));
             await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("username", null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("username", ""));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("", "password"));
         }
 
         #endregion
