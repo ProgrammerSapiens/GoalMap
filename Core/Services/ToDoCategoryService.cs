@@ -5,19 +5,11 @@ namespace Core.Services
 {
     internal class ToDoCategoryService : IToDoCategoryService
     {
-        public Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
-        {
-            throw new NotImplementedException();
-        }
+        private readonly IToDoCategoryRepository _repository;
 
-        public Task DeleteToDoCategoryAsync(Guid toDoCategoryId)
+        public ToDoCategoryService(IToDoCategoryRepository repository)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<ToDoCategory>> GetToDoCategoriesByUserAsync(Guid userId)
-        {
-            throw new NotImplementedException();
+            _repository = repository;
         }
 
         public Task<ToDoCategory> GetToDoCategoryByIdAsync(Guid toDoCategoryId)
@@ -25,7 +17,22 @@ namespace Core.Services
             throw new NotImplementedException();
         }
 
-        public Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
+        public Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddToDoCategoryAsync(ToDoCategory? toDoCategory)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateToDoCategoryAsync(ToDoCategory? toDoCategory)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteToDoCategoryAsync(Guid toDoCategoryId)
         {
             throw new NotImplementedException();
         }

@@ -5,17 +5,19 @@ namespace Core.Services
 {
     internal class ToDoService : IToDoService
     {
-        public Task AddToDoAsync(ToDo toDo)
-        {
-            throw new NotImplementedException();
-        }
+        private readonly IToDoRepository _repository;
 
-        public Task DeleteToDoAsync(Guid toDoId)
+        public ToDoService(IToDoRepository repository)
         {
-            throw new NotImplementedException();
+            _repository = repository;
         }
 
         public Task<ToDo> GetToDoByIdAsync(Guid toDoId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ToDo>> GetToDosByUserIdAsync(Guid userId)
         {
             throw new NotImplementedException();
         }
@@ -30,22 +32,22 @@ namespace Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<ToDo>> GetToDosByUserAsync(Guid userId)
+        public Task AddToDoAsync(ToDo? toDo)
         {
             throw new NotImplementedException();
         }
 
-        public Task MoveIncompleteToDosAsync(DateTime fromDate, DateTime toDate, Guid userId)
+        public Task UpdateToDoAsync(ToDo? toDo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteToDoAsync(Guid toDoId)
         {
             throw new NotImplementedException();
         }
 
         public Task MoveRepeatedToDosAsync(RepeatFrequency repeatFrequency, Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateToDoAsync(ToDo toDo)
         {
             throw new NotImplementedException();
         }

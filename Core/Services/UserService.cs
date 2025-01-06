@@ -6,10 +6,17 @@ namespace Core.Services
     internal class UserService : IUserService
     {
         private readonly IUserRepository _repository;
+        private readonly IPasswordHasher _passwordHasher;
 
         public UserService(IUserRepository repository)
         {
             _repository = repository;
+        }
+
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
+        {
+            _repository = repository;
+            _passwordHasher = passwordHasher;
         }
 
         public Task<User?> GetUserByIdAsync(Guid userId)
@@ -27,7 +34,7 @@ namespace Core.Services
             throw new NotImplementedException();
         }
 
-        public Task<Guid> RegisterUserAsync(User user)
+        public Task<Guid> RegisterUserAsync(User? user)
         {
             throw new NotImplementedException();
         }
