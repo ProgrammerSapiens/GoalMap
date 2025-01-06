@@ -15,7 +15,7 @@ namespace Tests.UnitTests.ModelsTests
 
             var user = new User(userName, passwordHash, experience);
 
-            Assert.NotEqual(Guid.Empty, user.Id);
+            Assert.NotEqual(Guid.Empty, user.UserId);
             Assert.Equal(userName, user.UserName);
             Assert.Equal(passwordHash, user.PasswordHash);
             Assert.Equal(experience, user.Experience);

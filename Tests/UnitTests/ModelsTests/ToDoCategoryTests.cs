@@ -96,7 +96,7 @@ namespace Tests.UnitTests.ModelsTests
             var user = new User(userName, passwordHash, experience);
 
             string toDoCategoryName = "Test Category";
-            Guid userId = user.Id;
+            Guid userId = user.UserId;
 
             var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
 
@@ -106,7 +106,7 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Equal(userName, toDoCategory.User.UserName);
             Assert.Equal(experience, toDoCategory.User.Experience);
             Assert.Equal(passwordHash, toDoCategory.User.PasswordHash);
-            Assert.Equal(userId, toDoCategory.User.Id);
+            Assert.Equal(userId, toDoCategory.User.UserId);
         }
 
         #endregion

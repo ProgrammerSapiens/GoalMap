@@ -24,7 +24,7 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Equal(toDoDate, toDo.ToDoDate);
             Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
-            Assert.NotEqual(Guid.Empty, toDo.Id);
+            Assert.NotEqual(Guid.Empty, toDo.ToDoId);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Equal(toDoDate, toDo.ToDoDate);
             Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
-            Assert.NotEqual(Guid.Empty, toDo.Id);
+            Assert.NotEqual(Guid.Empty, toDo.ToDoId);
             Assert.Equal(deadline, toDo.Deadline);
         }
 
@@ -70,7 +70,7 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Equal(toDoDate, toDo.ToDoDate);
             Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
-            Assert.NotEqual(Guid.Empty, toDo.Id);
+            Assert.NotEqual(Guid.Empty, toDo.ToDoId);
             Assert.Equal(deadline, toDo.Deadline);
             Assert.Equal(parentToDoId, toDo.ParentToDoId);
         }
@@ -96,7 +96,7 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Equal(toDoDate, toDo.ToDoDate);
             Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
-            Assert.NotEqual(Guid.Empty, toDo.Id);
+            Assert.NotEqual(Guid.Empty, toDo.ToDoId);
             Assert.Equal(deadline, toDo.Deadline);
             Assert.Equal(parentToDoId, toDo.ParentToDoId);
             Assert.Equal(repeatFrequency, toDo.RepeatFrequency);
@@ -436,7 +436,7 @@ namespace Tests.UnitTests.ModelsTests
             var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
             var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
-            Assert.NotEqual(toDo1.Id, toDo2.Id);
+            Assert.NotEqual(toDo1.ToDoId, toDo2.ToDoId);
         }
 
         #endregion
@@ -478,13 +478,13 @@ namespace Tests.UnitTests.ModelsTests
             int experience = 100;
 
             var user = new User(userName, passwordHash, experience);
-            Guid userId = user.Id;
+            Guid userId = user.UserId;
 
             var toDo = new ToDo(description, timeBlock, difficulty, taskDate, toDoCategoryId, userId);
             toDo.User = user;
 
             Assert.NotNull(toDo.User);
-            Assert.Equal(userId, toDo.User.Id);
+            Assert.Equal(userId, toDo.User.UserId);
             Assert.Equal(experience, toDo.User.Experience);
             Assert.Equal(passwordHash, toDo.User.PasswordHash);
             Assert.Equal(userName, toDo.User.UserName);

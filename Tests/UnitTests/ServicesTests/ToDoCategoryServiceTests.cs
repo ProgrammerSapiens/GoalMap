@@ -202,7 +202,7 @@ namespace Tests.UnitTests.ServicesTests
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory));
 
-            Assert.Equal("Category does not exist.", exception.Message);
+            Assert.Equal("The category does not exist.", exception.Message);
         }
 
         [Fact]
@@ -213,7 +213,7 @@ namespace Tests.UnitTests.ServicesTests
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => toDoCategoryService.UpdateToDoCategoryAsync(null));
 
-            Assert.Equal("Category cannot be null. (Parameter 'toDoCategory')", exception.Message);
+            Assert.Equal("The category cannot be null. (Parameter 'toDoCategory')", exception.Message);
         }
 
         #endregion

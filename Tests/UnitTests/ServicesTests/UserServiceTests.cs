@@ -95,7 +95,6 @@ namespace Tests.UnitTests.ServicesTests
         {
             var invalidUserName = "invalidUser";
             var password = "validPassword";
-            var passwordHash = "hashedPassword";
 
             var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(invalidUserName)).ReturnsAsync((User?)null);
