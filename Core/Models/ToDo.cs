@@ -26,7 +26,7 @@
     {
         #region Fields
 
-        private Guid id;
+        private Guid toDoId;
         private string description;
         private TimeBlock timeBlock;
         private Difficulty difficulty;
@@ -47,7 +47,7 @@
         /// <summary>
         /// Gets the unique identifier of the todo.
         /// </summary>
-        public Guid Id => id;
+        public Guid ToDoId => toDoId;
 
         /// <summary>
         /// Gets or sets the description of the todo.
@@ -199,7 +199,7 @@
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
 
-            id = Guid.NewGuid();
+            toDoId = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
@@ -227,7 +227,7 @@
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
 
-            id = Guid.NewGuid();
+            toDoId = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
@@ -256,7 +256,7 @@
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
 
-            id = Guid.NewGuid();
+            toDoId = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
@@ -286,7 +286,7 @@
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
 
-            id = Guid.NewGuid();
+            toDoId = Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;

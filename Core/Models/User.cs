@@ -21,7 +21,7 @@
         /// <summary>
         /// Gets the unique identifier of the user.
         /// </summary>
-        public Guid Id => userId;
+        public Guid UserId => userId;
 
         /// <summary>
         /// Gets or sets the name of the user.
