@@ -19,7 +19,7 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>A list of categores belonging to the specified user.</returns>
-        Task<List<ToDoCategory>> GetToDoCategoriesByUserAsync(Guid userId);
+        Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId);
 
         /// <summary>
         /// Adds a new category to the system.

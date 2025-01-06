@@ -35,6 +35,6 @@ namespace Core.Interfaces
         /// Registers a new user in the system.
         /// </summary>
         /// <param name="user">The user to register.</param>
-        Task<Guid> RegisterUserAsync(User user);
+        Task<Guid> RegisterUserAsync(User? user);
     }
 }

@@ -12,14 +12,14 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="toDoId">The unique identifier of the todo.</param>
         /// <returns>The todo with the specified identifier.</returns>
-        Task<ToDo> GetToDoByIdAsync(int toDoId);
+        Task<ToDo?> GetToDoByIdAsync(Guid toDoId);
 
         /// <summary>
         /// Retrieves all todos associated with a specific user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>A list of todos associated with the user.</returns>
-        Task<List<ToDo>> GetToDoByUserIdAsync(int userId);
+        Task<List<ToDo>> GetToDosByUserIdAsync(Guid userId);
 
         /// <summary>
         /// Retrieves all todos for a specific user on a given date.
@@ -27,7 +27,15 @@ namespace Core.Interfaces
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="date">The date for which todos are retrieved.</param>
         /// <returns>A list of todos for the specified user on the given date.</returns>
-        Task<List<ToDo>> GetToDoByDateAsync(int userId, DateTime date);
+        Task<List<ToDo>> GetToDosByDateAsync(Guid userId, DateTime date);
+
+        /// <summary>
+        /// Retrieves all todos for a specific user by the given time block.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="timeBlock">The time block for which todos are retrieved.</param>
+        /// <returns>A list of todos for the specified user by the given time block</returns>
+        Task<List<ToDo>> GetToDosByTimeBlockAsync(Guid userId, TimeBlock timeBlock);
 
         /// <summary>
         /// Adds a new to to the repository.
@@ -45,14 +53,14 @@ namespace Core.Interfaces
         /// Deletes a todo from the repository by its unique identifier.
         /// </summary>
         /// <param name="toDoId">The unique identifier of the todo to delete.</param>
-        Task DeleteToDoAsync(int toDoId);
+        Task DeleteToDoAsync(Guid toDoId);
 
         /// <summary>
-        /// Moves all incomplete tasks for a specific user from one date to another.
+        /// Moves all repeated todos for a specific user to a new time period based on the specified repetition frequency.
         /// </summary>
-        /// <param name="fromDate">The date from which incomplete todos are moved.</param>
-        /// <param name="toDate">The date to which incomplete todos are moved.</param>
-        /// <param name="userId">The unique identifier of the user whose todos are moved.</param>
-        Task MoveIncompleteToDosAsync(DateTime fromDate, DateTime toDate, int userId);
+        /// <param name="repeatFrequency">The frequency with which the todos are repeated (e.g., Daily, Weekly, etc.). This determines how the todos will be moved.</param>
+        /// <param name="userId">The unique identifier of the user whose repeated todos are to be moved.</param>
+        /// <returns>A task that represets the asynchronous operation of moving the todos.</returns>
+        Task MoveRepeatedToDosAsync(RepeatFrequency repeatFrequency, Guid userId);
     }
 }

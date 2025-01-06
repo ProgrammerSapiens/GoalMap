@@ -8,18 +8,18 @@ namespace Core.Interfaces
     internal interface IToDoCategoryRepository
     {
         /// <summary>
-        /// Retrieves all categories associated with a specific user. 
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>A list of categories associated with the user.</returns>
-        Task<List<ToDoCategory>> GetToDoCategoryByUserIdAsync(int userId);
-
-        /// <summary>
         /// Retrieves a category by its unique identifier.
         /// </summary>
         /// <param name="toDoCategoryId">The unique identifier of the category</param>
         /// <returns>The category with the specifier identifier.</returns>
-        Task<ToDoCategory> GetToDoCategoryByIdAsync(int toDoCategoryId);
+        Task<ToDoCategory?> GetToDoCategoryByIdAsync(Guid toDoCategoryId);
+
+        /// <summary>
+        /// Retrieves all categories associated with a specific user. 
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>A list of categories associated with the user.</returns>
+        Task<List<ToDoCategory>?> GetToDoCategoriesByUserIdAsync(Guid userId);
 
         /// <summary>
         /// Adds a new category to the repository.
@@ -37,6 +37,6 @@ namespace Core.Interfaces
         /// Deletes a category from the repository by its unique identifier.
         /// </summary>
         /// <param name="toDoCategoryId">The unique identifier of the category</param>
-        Task DeleteToDoCategoryAsync(int toDoCategoryId);
+        Task DeleteToDoCategoryAsync(Guid toDoCategoryId);
     }
 }

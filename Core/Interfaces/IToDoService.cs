@@ -19,7 +19,7 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>A list of todos assigned to the specified user.</returns>
-        Task<List<ToDo>> GetToDosByUserAsync(Guid userId);
+        Task<List<ToDo>> GetToDosByUserIdAsync(Guid userId);
 
         /// <summary>
         /// Retrieves a list of todos for a specific user and date.
@@ -54,14 +54,6 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="toDoId">The unique identifier of the todo to be deleted.</param>
         Task DeleteToDoAsync(Guid toDoId);
-
-        /// <summary>
-        /// Moves incomplete todos from one date to another for a specified user.
-        /// </summary>
-        /// <param name="fromDate">The date from which todos will be moved.</param>
-        /// <param name="toDate">The date to which todos will be moved.</param>
-        /// <param name="userId">The unique identifier of the user whose todos are being moved.</param>
-        Task MoveIncompleteToDosAsync(DateTime fromDate, DateTime toDate, Guid userId);
 
         /// <summary>
         /// Moves incomplete todos from one date to another for a specified user.

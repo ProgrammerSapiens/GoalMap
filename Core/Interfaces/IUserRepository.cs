@@ -12,14 +12,14 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The user with the specified identifier.</returns>
-        Task<User?> GetByIdAsync(Guid userId);
+        Task<User?> GetUserByIdAsync(Guid userId);
 
         /// <summary>
         /// Retrieves a user by its unique username.
         /// </summary>
         /// <param name="userName">The unique username of the user.</param>
         /// <returns>The user with the specified username.</returns>
-        Task<User> GetByUserNameAsync(string userName);
+        Task<User?> GetUserByUserNameAsync(string userName);
 
         /// <summary>
         /// Adds a new User to the repository.
@@ -40,6 +40,6 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the user exists, and <c>false</c> if its not.
         /// </returns>
-        Task<bool> IfUserExistsAsync(string username);
+        bool IfUserExists(string username);
     }
 }
