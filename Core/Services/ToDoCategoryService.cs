@@ -84,6 +84,11 @@ namespace Core.Services
                 throw new InvalidOperationException("Category does not exist.");
             }
 
+            if (toDoCategory.ToDoCategoryName == "Habbit" || toDoCategory.ToDoCategoryName == "Other")
+            {
+                throw new ArgumentException("You cannot update this category.");
+            }
+
             await _repository.UpdateToDoCategoryAsync(toDoCategory);
         }
 
@@ -98,6 +103,11 @@ namespace Core.Services
             if (!(await _repository.IsCategoryExistsAsync(toDoCategoryName, userId)))
             {
                 throw new InvalidOperationException("Category does not exist.");
+            }
+
+            if (toDoCategoryName == "Habbit" || toDoCategoryName == "Other")
+            {
+                throw new ArgumentException("You cannot delete this category.");
             }
 
             await _repository.DeleteToDoCategoryAsync(toDoCategoryName, userId);
