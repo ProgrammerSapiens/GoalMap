@@ -8,35 +8,37 @@ namespace Core.Interfaces
     public interface IToDoCategoryService
     {
         /// <summary>
-        /// Retrieves a category by its unique ID.
+        /// Retrieves a ToDo category by its name and associated user ID.
         /// </summary>
-        /// <param name="toDoCategoryId">The unique identifier of the category.</param>
-        /// <returns></returns>
-        Task<ToDoCategory> GetToDoCategoryByIdAsync(Guid toDoCategoryId);
+        /// <param name="toDoCategoryName">The name of the ToDo category.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>The ToDo category associated with the specified name and user ID.</returns>
+        Task<ToDoCategory> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId);
 
         /// <summary>
-        /// Retrieves a list of categories associated with a specific user.
+        /// Retrieves a list of ToDo categories associated with a specific user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>A list of categores belonging to the specified user.</returns>
+        /// <returns>A list of ToDo categories belonging to the specified user.</returns>
         Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId);
 
         /// <summary>
-        /// Adds a new category to the system.
+        /// Adds a new ToDo category to the system.
         /// </summary>
-        /// <param name="toDoCategory">The category to be added.</param>
+        /// <param name="toDoCategory">The ToDo category to be added.</param>
         Task AddToDoCategoryAsync(ToDoCategory toDoCategory);
 
         /// <summary>
-        /// Updates an existing task category in the system.
+        /// Updates an existing ToDo category in the system with updated information.
         /// </summary>
-        /// <param name="taskCategory">The task category with updated information.</param>
+        /// <param name="toDoCategory">The ToDo category with updated information.</param>
         Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory);
 
         /// <summary>
-        /// Deletes a task category by its unique identifier.
+        /// Deletes a ToDo category by its name and associated user ID.
         /// </summary>
-        /// <param name="taskCategoryId">The unique identifier of the task category to be deleted.</param>
-        Task DeleteToDoCategoryAsync(Guid toDoCategoryId);
+        /// <param name="toDoCategoryName">The name of the ToDo category to be deleted.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        Task DeleteToDoCategoryAsync(string toDoCategoryName, Guid userId);
     }
 }
