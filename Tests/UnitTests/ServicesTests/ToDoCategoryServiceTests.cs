@@ -7,23 +7,25 @@ namespace Tests.UnitTests.ServicesTests
 {
     public class ToDoCategoryServiceTests
     {
-        #region GetToDoCategoryByIdAsync(Guid toDoCategoryId) tests
+        #region GetToDoCategoryByCategoryNameAsync(Guid toDoCategoryId) tests
 
         [Fact]
-        public async Task GetToDoCategoryByIdAsync_ShouldReturnCategory_WhenCategoryIdExists()
+        public async Task GetToDoCategoryByIdAsync_ShouldReturnCategory_WhenCategoryNameExists()
         {
-            var toDoCategoryId = Guid.NewGuid();
-            var expectedCategory = new ToDoCategory("Test Category", Guid.NewGuid())
+            var toDoCategoryName = "Test Category";
+            var userId = Guid.NewGuid();
+            var expectedCategory = new ToDoCategory(toDoCategoryName, userId)
             {
                 User = new User("TestUser", "hashed_password", 100)
             };
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByIdAsync(toDoCategoryId)).ReturnsAsync(expectedCategory);
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategoryName, userId)).ReturnsAsync(true);
+            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryNameAsync(toDoCategoryName, userId)).ReturnsAsync(expectedCategory);
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
-            var result = await toDoCategoryService.GetToDoCategoryByIdAsync(toDoCategoryId);
+            var result = await toDoCategoryService.GetToDoCategoryByCategoryNameAsync(toDoCategoryName, userId);
 
             Assert.NotNull(result);
             Assert.Equal(expectedCategory.ToDoCategoryName, result.ToDoCategoryName);
@@ -36,29 +38,19 @@ namespace Tests.UnitTests.ServicesTests
         }
 
         [Fact]
-        public async Task GetToDoCategoryByIdAsync_ShouldThrowException_WhenCategoryIdDoesNotExist()
+        public async Task GetToDoCategoryByIdAsync_ShouldThrowException_WhenCategoryDoesNotExist()
         {
-            var toDoCategoryId = Guid.NewGuid();
+            var toDoCategoryName = "Test Category";
+            var userId = Guid.NewGuid();
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByIdAsync(toDoCategoryId)).ReturnsAsync((ToDoCategory?)null);
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategoryName, userId)).ReturnsAsync(false);
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.GetToDoCategoryByIdAsync(toDoCategoryId));
-            Assert.Equal("The category was not found.", exception.Message);
-        }
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.GetToDoCategoryByCategoryNameAsync(toDoCategoryName, userId));
 
-        [Fact]
-        public async Task GetToDoCategoryByIdAsync_ShouldThrowException_WhenCategoryIdIsEmpty()
-        {
-            var categoryId = Guid.Empty;
-
-            var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.GetToDoCategoryByIdAsync(categoryId));
-            Assert.Equal("The category Id cannot be empty", exception.Message);
+            Assert.Equal("Category does not exist.", exception.Message);
         }
 
         #endregion
@@ -88,7 +80,7 @@ namespace Tests.UnitTests.ServicesTests
         }
 
         [Fact]
-        public async Task GetToDoCategoriesByUserIdAsync_ShouldReturnEmptyList_WhenNoCategoriesExist()
+        public async Task GetToDoCategoriesByUserIdAsync_ShouldThrowException_WhenUserIdDoesNotExistOrThereIsNoCategories()
         {
             var userId = Guid.NewGuid();
 
@@ -97,25 +89,9 @@ namespace Tests.UnitTests.ServicesTests
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
-            var result = await toDoCategoryService.GetToDoCategoriesByUserIdAsync(userId);
-
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
-
-        [Fact]
-        public async Task GetToDoCategoriesByUserIdAsync_ShouldThrowException_WhenUserIdDoesNotExist()
-        {
-            var userId = Guid.NewGuid();
-
-            var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoriesByUserIdAsync(userId)).ReturnsAsync((List<ToDoCategory>?)null);
-
-            var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.GetToDoCategoriesByUserIdAsync(userId));
 
-            Assert.Equal("The user Id does not exist.", exception.Message);
+            Assert.Equal("User Id does not exist or there is no categories.", exception.Message);
         }
 
         #endregion
@@ -140,31 +116,21 @@ namespace Tests.UnitTests.ServicesTests
         }
 
         [Fact]
-        public async Task AddToDoCategoryAsync_ShouldThrowException_WhenCategoryIsInvalid()
+        public async Task AddToDoCategoryAsync_ShouldThrowException_WhenCategoryIsAlreadyExist()
         {
-            string invalidCategoryName = string.Empty;
-            Guid userId = Guid.NewGuid();
-            var toDoCategory = new ToDoCategory(invalidCategoryName, userId);
+            var userId = Guid.NewGuid();
+            string toDoCategoryName = "Test Category";
+            var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategory.ToDoCategoryName, userId)).ReturnsAsync(true);
+
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.AddToDoCategoryAsync(toDoCategory));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.AddToDoCategoryAsync(toDoCategory));
 
-            Assert.Equal("Category name cannot be null or empty.", exception.Message);
-
-            toDoCategoryRepositoryMock.Verify(repo => repo.AddToDoCategoryAsync(It.IsAny<ToDoCategory>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task AddToDoCategoryAsync_ShouldThrowException_WhenCategoryIsNull()
-        {
-            var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => toDoCategoryService.AddToDoCategoryAsync(null));
-
-            Assert.Equal("Category cannot be null. (Parameter 'toDoCategory')", exception.Message);
+            toDoCategoryRepositoryMock.Verify(repo => repo.IsCategoryExistsAsync(toDoCategory.ToDoCategoryName, userId), Times.Once);
+            Assert.Equal("Сategory already exists.", exception.Message);
         }
 
         #endregion
@@ -179,6 +145,7 @@ namespace Tests.UnitTests.ServicesTests
             var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategoryName, userId)).ReturnsAsync(true);
             toDoCategoryRepositoryMock.Setup(repo => repo.UpdateToDoCategoryAsync(It.IsAny<ToDoCategory>())).Returns(Task.CompletedTask);
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
@@ -196,24 +163,13 @@ namespace Tests.UnitTests.ServicesTests
             var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByIdAsync(It.IsAny<Guid>())).ReturnsAsync((ToDoCategory?)null);
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategoryName, userId)).ReturnsAsync(false);
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory));
 
-            Assert.Equal("The category does not exist.", exception.Message);
-        }
-
-        [Fact]
-        public async Task UpdateToDoCategoryAsync_ShouldThrowException_WhenCategoryIsNull()
-        {
-            var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => toDoCategoryService.UpdateToDoCategoryAsync(null));
-
-            Assert.Equal("The category cannot be null. (Parameter 'toDoCategory')", exception.Message);
+            Assert.Equal("Category does not exist.", exception.Message);
         }
 
         #endregion
@@ -223,44 +179,35 @@ namespace Tests.UnitTests.ServicesTests
         [Fact]
         public async Task DeleteToDoCategoryAsync_ShouldDeleteCategory_WhenCategoryIdExists()
         {
-            var toDoCategoryId = Guid.NewGuid();
+            var toDoCategoryName = "Test Category";
+            var userId = Guid.NewGuid();
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategoryName, userId)).ReturnsAsync(true);
+            toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(toDoCategoryName, userId)).Returns(Task.CompletedTask);
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
-            await toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryId);
+            await toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryName, userId);
 
-            toDoCategoryRepositoryMock.Verify(repo => repo.DeleteToDoCategoryAsync(It.Is<Guid>(c => c == toDoCategoryId)), Times.Once);
+            toDoCategoryRepositoryMock.Verify(repo => repo.DeleteToDoCategoryAsync(toDoCategoryName, userId), Times.Once);
         }
 
         [Fact]
         public async Task DeleteToDoCategoryAsync_ShouldThrowException_WhenCategoryIdDoesNotExist()
         {
-            var toDoCategoryId = Guid.NewGuid();
+            var toDoCategoryName = "Test Category";
+            var userId = Guid.NewGuid();
 
             var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByIdAsync(It.IsAny<Guid>())).ReturnsAsync((ToDoCategory?)null);
+            toDoCategoryRepositoryMock.Setup(repo => repo.IsCategoryExistsAsync(toDoCategoryName, userId)).ReturnsAsync(false);
 
             var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryId));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryName, userId));
 
             Assert.Equal("Category does not exist.", exception.Message);
         }
-
-        [Fact]
-        public async Task DeleteToDoCategoryAsync_ShouldThrowException_WhenCategoryIdIsEmpty()
-        {
-            var toDoCategoryRepositoryMock = new Mock<IToDoCategoryRepository>();
-            var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => toDoCategoryService.DeleteToDoCategoryAsync(new Guid()));
-
-            Assert.Equal("Category id cannot be null. (Parameter 'toDoCategoryId')", exception.Message);
-        }
-
         #endregion
     }
 }
