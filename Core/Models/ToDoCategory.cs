@@ -31,7 +31,7 @@
             set
             {
                 if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException(nameof(value), "The name of the todo category can not be null or empty");
+                    throw new ArgumentException(nameof(value), "Category name cannot be null or empty.");
                 toDoCategoryName = value;
             }
         }
@@ -62,9 +62,9 @@
         public ToDoCategory(string toDoCategoryName, Guid userId)
         {
             if (userId == Guid.Empty)
-                throw new ArgumentException(nameof(userId), "The user ID cannot be empty");
+                throw new ArgumentException(nameof(userId), "User ID cannot be empty");
             if (string.IsNullOrEmpty(toDoCategoryName))
-                throw new ArgumentException(nameof(toDoCategoryName), "The name of the todo category can not be null or empty");
+                throw new ArgumentException(nameof(toDoCategoryName), "Category name cannot be null or empty.");
 
             toDoCategoryId = Guid.NewGuid();
             this.toDoCategoryName = toDoCategoryName;
