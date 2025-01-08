@@ -15,27 +15,12 @@ namespace Core.Interfaces
         Task<ToDo> GetToDoByIdAsync(Guid toDoId);
 
         /// <summary>
-        /// Retrieves a list of todos associated with a specific user.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>A list of todos assigned to the specified user.</returns>
-        Task<List<ToDo>> GetToDosByUserIdAsync(Guid userId);
-
-        /// <summary>
         /// Retrieves a list of todos for a specific user and date.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="date">The date for which todos are to be retrieved.</param>
         /// <returns>A list of todos scheduled for the specified user on the given date.</returns>
-        Task<List<ToDo>> GetToDosByDateAsync(Guid userId, DateTime date);
-
-        /// <summary>
-        /// Retrieves a list of todos for a specific user and date.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="timeBlock">The time block to which the todo belongs.</param>
-        /// <returns>A list of todos scheduled for the specified user on the given date.</returns>
-        Task<List<ToDo>> GetToDosByTimeBlockAsync(Guid userId, TimeBlock timeBlock);
+        Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock);
 
         /// <summary>
         /// Adds a new todo to the system.
@@ -58,8 +43,7 @@ namespace Core.Interfaces
         /// <summary>
         /// Moves incomplete todos from one date to another for a specified user.
         /// </summary>
-        /// <param name="repeatFrequency">The repeat frequency of the todo.</param>
         /// <param name="userId">The unique identifier of the user whose todos are being moved.</param>
-        Task MoveRepeatedToDosAsync(RepeatFrequency repeatFrequency, Guid userId);
+        Task MoveRepeatedToDosAsync(Guid userId);
     }
 }
