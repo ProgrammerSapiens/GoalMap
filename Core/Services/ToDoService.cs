@@ -3,53 +3,137 @@ using Core.Models;
 
 namespace Core.Services
 {
+    /// <summary>
+    /// Service for managing To-Do tasks, providing functionalities for adding, updating, retrieving, and deleting tasks, as well as moving repeated tasks.
+    /// </summary>
     internal class ToDoService : IToDoService
     {
         private readonly IToDoRepository _repository;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ToDoService"/> class.
+        /// </summary>
+        /// <param name="repository">The repository to interact with for data storage and retrieval.</param>
         public ToDoService(IToDoRepository repository)
         {
             _repository = repository;
         }
 
-        public Task<ToDo> GetToDoByIdAsync(Guid toDoId)
+        /// <summary>
+        /// Retrieves a To-Do task by its unique identifier.
+        /// </summary>
+        /// <param name="toDoId">The unique identifier of the To-Do task.</param>
+        /// <returns>The To-Do task corresponding to the provided identifier.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified identifier does not exist.</exception>
+        public async Task<ToDo> GetToDoByIdAsync(Guid toDoId)
         {
-            throw new NotImplementedException();
+            var result = await _repository.GetToDoByIdAsync(toDoId);
+
+            if (result == null)
+            {
+                throw new InvalidOperationException("Todo id was not found.");
+            }
+
+            return result;
         }
 
-        public Task<List<ToDo>> GetToDosByUserIdAsync(Guid userId)
+        /// <summary>
+        /// Retrieves a list of To-Do tasks for a specific user on a given date and time block.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="date">The date for which the To-Do tasks are retrieved.</param>
+        /// <param name="timeBlock">The time block for which the To-Do tasks are retrieved (e.g., morning, afternoon, evening).</param>
+        /// <returns>A list of To-Do tasks matching the given criteria.</returns>
+        public async Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
         {
-            throw new NotImplementedException();
+            var result = await _repository.GetToDosAsync(userId, date, timeBlock);
+
+            return result;
         }
 
-        public Task<List<ToDo>> GetToDosByDateAsync(Guid userId, DateTime date)
+        /// <summary>
+        /// Adds a new To-Do task to the repository.
+        /// </summary>
+        /// <param name="toDo">The To-Do task to be added.</param>
+        /// <exception cref="InvalidOperationException">Thrown when a To-Do task with the same ID already exists.</exception>
+        public async Task AddToDoAsync(ToDo toDo)
         {
-            throw new NotImplementedException();
+            if (await _repository.IsToDoExistsAsync(toDo.ToDoId))
+            {
+                throw new InvalidOperationException("ToDo id already exists.");
+            }
+
+            await _repository.AddToDoAsync(toDo);
         }
 
-        public Task<List<ToDo>> GetToDosByTimeBlockAsync(Guid userId, TimeBlock timeBlock)
+        /// <summary>
+        /// Updates an existing To-Do task in the repository.
+        /// </summary>
+        /// <param name="toDo">The To-Do task to be updated.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified ID does not exist.</exception>
+        public async Task UpdateToDoAsync(ToDo toDo)
         {
-            throw new NotImplementedException();
+            if (!(await _repository.IsToDoExistsAsync(toDo.ToDoId)))
+            {
+                throw new InvalidOperationException("Todo id does not exist.");
+            }
+
+            await _repository.UpdateToDoAsync(toDo);
         }
 
-        public Task AddToDoAsync(ToDo? toDo)
+        /// <summary>
+        /// Deletes a To-Do task from the repository by its unique identifier.
+        /// </summary>
+        /// <param name="toDoId">The unique identifier of the To-Do task to be deleted.</param>
+        /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified ID does not exist.</exception>
+        public async Task DeleteToDoAsync(Guid toDoId)
         {
-            throw new NotImplementedException();
+            if (!(await _repository.IsToDoExistsAsync(toDoId)))
+            {
+                throw new InvalidOperationException("Todo id does not exist.");
+            }
+
+            await _repository.DeleteToDoAsync(toDoId);
         }
 
-        public Task UpdateToDoAsync(ToDo? toDo)
+        /// <summary>
+        /// Moves repeated To-Do tasks to the next appropriate date based on their repeat frequency.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user whose repeated To-Do tasks are to be moved.</param>
+        /// <remarks>
+        /// This method checks for To-Do tasks that are set to repeat (daily, weekly, monthly, yearly) and moves them to the next date based on their frequency.
+        /// If no tasks are found for today, no action is taken.
+        /// </remarks>
+        public async Task MoveRepeatedToDosAsync(Guid userId)
         {
-            throw new NotImplementedException();
-        }
+            var todayToDos = await _repository.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day);
 
-        public Task DeleteToDoAsync(Guid toDoId)
-        {
-            throw new NotImplementedException();
-        }
+            if (!todayToDos.Any())
+            {
+                return;
+            }
 
-        public Task MoveRepeatedToDosAsync(RepeatFrequency repeatFrequency, Guid userId)
-        {
-            throw new NotImplementedException();
+            var updatedToDos = new List<ToDo>();
+
+            foreach (var todo in todayToDos)
+            {
+                var newToDo = new ToDo(todo.Description, todo.TimeBlock, todo.Difficulty, todo.ToDoDate, todo.ToDoCategoryId, todo.UserId)
+                {
+                    ToDoDate = todo.RepeatFrequency switch
+                    {
+                        RepeatFrequency.Daily => todo.ToDoDate.AddDays(1),
+                        RepeatFrequency.Weekly => todo.ToDoDate.AddDays(7),
+                        RepeatFrequency.Monthly => todo.ToDoDate.AddMonths(1),
+                        RepeatFrequency.Yearly => todo.ToDoDate.AddYears(1),
+                        _ => todo.ToDoDate
+                    },
+                    RepeatFrequency = todo.RepeatFrequency
+                };
+
+                updatedToDos.Add(newToDo);
+            }
+
+            await _repository.UpdateToDosAsync(updatedToDos);
         }
     }
 }
