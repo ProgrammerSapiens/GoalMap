@@ -190,7 +190,7 @@ namespace Tests.UnitTests.ModelsTests
 
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();

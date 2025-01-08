@@ -11,7 +11,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -32,7 +32,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -55,7 +55,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -80,7 +80,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -107,7 +107,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string description = string.Empty;
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -126,7 +126,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string description = "Test description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now.AddDays(2);
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -146,7 +146,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -164,7 +164,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -181,7 +181,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -200,7 +200,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -218,7 +218,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now.AddDays(2);
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -236,7 +236,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -254,7 +254,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -271,7 +271,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -288,7 +288,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -305,7 +305,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -323,7 +323,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -340,7 +340,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -358,7 +358,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string initialDescription = "Initial description";
             TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Middle;
+            Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
             Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
@@ -573,7 +573,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid userId = Guid.NewGuid();
 
             var difficulty1 = Difficulty.Easy;
-            var difficulty2 = Difficulty.Middle;
+            var difficulty2 = Difficulty.Medium;
             var difficulty3 = Difficulty.Hard;
             var difficulty4 = Difficulty.Nightmare;
 
