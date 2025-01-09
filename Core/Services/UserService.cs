@@ -3,10 +3,10 @@ using Core.Models;
 
 namespace Core.Services
 {
-    internal class UserService : IUserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IPasswordHasher? _passwordHasher;
 
         public UserService(IUserRepository repository)
         {
@@ -19,24 +19,77 @@ namespace Core.Services
             _passwordHasher = passwordHasher;
         }
 
-        public Task<User?> GetUserByIdAsync(Guid userId)
+        public async Task<User> GetUserByUserNameAsync(string userName)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                throw new ArgumentException("User name cannot be null or empty.");
+            }
+
+            var result = await _repository.GetUserByUserNameAsync(userName);
+
+            if (result == null)
+            {
+                throw new InvalidOperationException("User does not exist.");
+            }
+
+            return result;
         }
 
-        public Task UpdateUserExperienceAsync(Guid userId, int experiencePoints)
+        public async Task UpdateUserExperienceAsync(string userName, Difficulty taskDifficulty)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(userName))
+            {
+                throw new ArgumentException("User name cannot be null or empty.");
+            }
+
+            var user = await _repository.GetUserByUserNameAsync(userName);
+
+            if (user == null)
+            {
+                throw new InvalidOperationException("User does not exist.");
+            }
+
+            int newUserExperience = user.Experience + (int)taskDifficulty;
+            user.Experience = newUserExperience;
+
+            await _repository.UpdateUserAsync(user);
         }
 
-        public Task<bool> AuthenticateUserAsync(string username, string password)
+        public async Task<bool> AuthenticateUserAsync(string userName, string password)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentNullException();
+            }
+
+            var user = await _repository.GetUserByUserNameAsync(userName);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            if (!await _passwordHasher.VerifyPassword(password, user.PasswordHash))
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        public Task<Guid> RegisterUserAsync(User? user)
+        public async Task RegisterUserAsync(User user, string password)
         {
-            throw new NotImplementedException();
+            if (await _repository.IsUserExists(user.UserName))
+            {
+                throw new InvalidOperationException("User name is already exists.");
+            }
+
+            string hashedPassword = await _passwordHasher.HashPassword(password);
+
+            user.PasswordHash = hashedPassword;
+
+            await _repository.AddUserAsync(user);
         }
     }
 }
