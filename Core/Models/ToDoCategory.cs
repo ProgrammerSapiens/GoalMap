@@ -59,7 +59,7 @@
         /// </summary>
         /// <param name="toDoCategoryName">The name of the todo category.</param>
         /// <param name="userId">The ID of the user assigned to the todo category.</param>
-        public ToDoCategory(string toDoCategoryName, Guid userId)
+        public ToDoCategory(Guid userId, string toDoCategoryName)
         {
             if (userId == Guid.Empty)
                 throw new ArgumentException(nameof(userId), "User ID cannot be empty");
