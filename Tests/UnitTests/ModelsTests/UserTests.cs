@@ -218,8 +218,8 @@ namespace Tests.UnitTests.ModelsTests
 
             var toDoCategories = new List<ToDoCategory>
             {
-                new ToDoCategory("Category 1", Guid.NewGuid()),
-                new ToDoCategory("Category 2", Guid.NewGuid())
+                new ToDoCategory(Guid.NewGuid(),"Category 1"),
+                new ToDoCategory(Guid.NewGuid(), "Category 2")
             };
 
             user.ToDoCategories = toDoCategories;

@@ -453,7 +453,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid userId = Guid.NewGuid();
             string toDoCategoryName = "Category name";
 
-            var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
             Guid toDoCategoryId = toDoCategory.ToDoCategoryId;
 
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);

@@ -12,7 +12,7 @@ namespace Tests.UnitTests.ModelsTests
             string toDoCategoryName = "Test category";
             Guid userId = Guid.NewGuid();
 
-            var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
             Assert.Equal(toDoCategoryName, toDoCategory.ToDoCategoryName);
             Assert.Equal(userId, toDoCategory.UserId);
@@ -24,7 +24,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             Guid userId = Guid.NewGuid();
 
-            Assert.Throws<ArgumentException>(() => new ToDoCategory(string.Empty, userId));
+            Assert.Throws<ArgumentException>(() => new ToDoCategory(userId, string.Empty));
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Tests.UnitTests.ModelsTests
         {
             string toDoCategoryName = "Test Category";
 
-            Assert.Throws<ArgumentException>(() => new ToDoCategory(toDoCategoryName, Guid.Empty));
+            Assert.Throws<ArgumentException>(() => new ToDoCategory(Guid.Empty, toDoCategoryName));
         }
 
         #endregion
@@ -45,7 +45,7 @@ namespace Tests.UnitTests.ModelsTests
             string toDoCategoryName = "Test Category";
             Guid userId = Guid.NewGuid();
 
-            var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
             string newToDoCategoryName = "New test category";
             toDoCategory.ToDoCategoryName = newToDoCategoryName;
@@ -59,7 +59,7 @@ namespace Tests.UnitTests.ModelsTests
             string toDoCategoryName = "Test Category";
             Guid userId = Guid.NewGuid();
 
-            var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
             string newToDoCategoryName = string.Empty;
 
@@ -76,8 +76,8 @@ namespace Tests.UnitTests.ModelsTests
             string toDoCategoryName = "Test Category";
             Guid userId = Guid.NewGuid();
 
-            var toDoCategory1 = new ToDoCategory(toDoCategoryName, userId);
-            var toDoCategory2 = new ToDoCategory(toDoCategoryName, userId);
+            var toDoCategory1 = new ToDoCategory(userId, toDoCategoryName);
+            var toDoCategory2 = new ToDoCategory(userId, toDoCategoryName);
 
             Assert.NotEqual(toDoCategory1.ToDoCategoryId, toDoCategory2.ToDoCategoryId);
         }
@@ -98,7 +98,7 @@ namespace Tests.UnitTests.ModelsTests
             string toDoCategoryName = "Test Category";
             Guid userId = user.UserId;
 
-            var toDoCategory = new ToDoCategory(toDoCategoryName, userId);
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
             toDoCategory.User = user;
 

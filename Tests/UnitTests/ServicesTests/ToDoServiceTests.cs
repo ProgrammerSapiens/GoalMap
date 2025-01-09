@@ -43,9 +43,22 @@ namespace Tests.UnitTests.ServicesTests
             Assert.Equal("Todo id was not found.", exception.Message);
         }
 
+        [Fact]
+        public async Task GetToDoByIdAsync_ShouldThrowException_WhenToDoIdIsEmpty()
+        {
+            var toDoId = new Guid();
+
+            var toDoReposotoryMock = new Mock<IToDoRepository>();
+            var toDoService = new ToDoService(toDoReposotoryMock.Object);
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.GetToDoByIdAsync(toDoId));
+
+            Assert.Equal("ToDo id cannot be empty.", exception.Message);
+        }
+
         #endregion
 
-        #region GetToDosAsync(Guid userId, DateTime date) tests
+        #region GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock) tests
 
         [Fact]
         public async Task GetToDosAsync_ShouldReturnToDosForGivenDate_WhenToDosExist()
@@ -86,6 +99,19 @@ namespace Tests.UnitTests.ServicesTests
 
             Assert.NotNull(result);
             Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetToDosAsync_ShouldThrowException_WhenToDoIdIsEmpty()
+        {
+            var userId = new Guid();
+
+            var toDoReposotoryMock = new Mock<IToDoRepository>();
+            var toDoService = new ToDoService(toDoReposotoryMock.Object);
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day));
+
+            Assert.Equal("User id cannot be empty.", exception.Message);
         }
 
         #endregion
@@ -255,9 +281,22 @@ namespace Tests.UnitTests.ServicesTests
             toDoRepositoryMock.Verify(repo => repo.DeleteToDoAsync(toDoId), Times.Never);
         }
 
+        [Fact]
+        public async Task DeleteToDoAsync_ShouldThrowException_WhenToDoIdIsEmpty()
+        {
+            var toDoId = new Guid();
+
+            var toDoReposotoryMock = new Mock<IToDoRepository>();
+            var toDoService = new ToDoService(toDoReposotoryMock.Object);
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.DeleteToDoAsync(toDoId));
+
+            Assert.Equal("ToDo id cannot be empty.", exception.Message);
+        }
+
         #endregion
 
-        #region MoveRepeatedToDosAsync(RepeatFrequency repeatFrequency, Guid userId) tests
+        #region MoveRepeatedToDosAsync(Guid userId) tests
 
         [Fact]
         public async Task MoveRepeatedToDosAsync_ShouldMoveToDosWithCorrectDates()
@@ -290,6 +329,19 @@ namespace Tests.UnitTests.ServicesTests
                 todos.Any(t => t.RepeatFrequency == RepeatFrequency.Monthly && t.ToDoDate == originalDate.AddMonths(1)) &&
                 todos.Any(t => t.RepeatFrequency == RepeatFrequency.Yearly && t.ToDoDate == originalDate.AddYears(1)) &&
                 todos.Any(t => t.RepeatFrequency == RepeatFrequency.None && t.ToDoDate == originalDate))), Times.Once);
+        }
+
+        [Fact]
+        public async Task MoveRepeatedToDosAsync_ShouldThrowException_WhenToDoIdIsEmpty()
+        {
+            var userId = new Guid();
+
+            var toDoReposotoryMock = new Mock<IToDoRepository>();
+            var toDoService = new ToDoService(toDoReposotoryMock.Object);
+
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.MoveRepeatedToDosAsync(userId));
+
+            Assert.Equal("User id cannot be empty.", exception.Message);
         }
 
         #endregion
