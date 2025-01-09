@@ -76,7 +76,7 @@
         /// <summary>
         /// Gets or sets todos assigned to the user.
         /// </summary>
-        public ICollection<ToDo>? ToDos
+        public ICollection<ToDo> ToDos
         {
             get { return toDos; }
             set { toDos = value; }
@@ -85,7 +85,7 @@
         /// <summary>
         /// Gets or sets categories created by a user.
         /// </summary>
-        public ICollection<ToDoCategory>? ToDoCategories
+        public ICollection<ToDoCategory> ToDoCategories
         {
             get { return toDoCategories; }
             set { toDoCategories = value; }
@@ -112,6 +112,8 @@
             this.userName = userName;
             this.passwordHash = passwordHash;
             Experience = experience;
+            ToDos = new List<ToDo>();
+            ToDoCategories = new List<ToDoCategory>();
         }
 
         #endregion
