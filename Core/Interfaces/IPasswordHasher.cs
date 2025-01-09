@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="password">The plain text password.</param>
         /// <returns>The hashed password.</returns>
-        string HashPassword(string password);
+        Task<string> HashPassword(string password);
 
         /// <summary>
         /// Verifies if the provided password matches the stored hashed password.
@@ -20,6 +20,6 @@
         /// <returns>
         /// <c>true</c> if the password matches; otherwise, <c>false</c>
         /// </returns>
-        bool VerifyPassword(string password, string hashedPassword);
+        Task<bool> VerifyPassword(string password, string hashedPassword);
     }
 }
