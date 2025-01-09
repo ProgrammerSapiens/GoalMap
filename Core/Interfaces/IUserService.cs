@@ -12,14 +12,14 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The user with the specified ID.</returns>
-        Task<User?> GetUserByIdAsync(Guid userId);
+        Task<User> GetUserByUserNameAsync(string userName);
 
         /// <summary>
         /// Updates the experience points of a user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="experiencePoints">The amount of experience points to add.</param>
-        Task UpdateUserExperienceAsync(Guid userId, int experiencePoints);
+        Task UpdateUserExperienceAsync(string userName, Difficulty difficulty);
 
         /// <summary>
         /// Authenticates a user with the specified credentials.
@@ -35,6 +35,6 @@ namespace Core.Interfaces
         /// Registers a new user in the system.
         /// </summary>
         /// <param name="user">The user to register.</param>
-        Task<Guid> RegisterUserAsync(User? user);
+        Task RegisterUserAsync(User user, string password);
     }
 }

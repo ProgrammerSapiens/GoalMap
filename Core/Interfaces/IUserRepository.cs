@@ -5,15 +5,8 @@ namespace Core.Interfaces
     /// <summary>
     /// Provides methods for managing users, including CRUD operations. 
     /// </summary>
-    internal interface IUserRepository
+    public interface IUserRepository
     {
-        /// <summary>
-        /// Retrieves a user by its unique identifier.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>The user with the specified identifier.</returns>
-        Task<User?> GetUserByIdAsync(Guid userId);
-
         /// <summary>
         /// Retrieves a user by its unique username.
         /// </summary>
@@ -40,6 +33,6 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the user exists, and <c>false</c> if its not.
         /// </returns>
-        bool IfUserExists(string username);
+        Task<bool> IsUserExists(string username);
     }
 }
