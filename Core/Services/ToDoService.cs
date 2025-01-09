@@ -27,6 +27,11 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified identifier does not exist.</exception>
         public async Task<ToDo> GetToDoByIdAsync(Guid toDoId)
         {
+            if (toDoId == Guid.Empty)
+            {
+                throw new ArgumentException("ToDo id cannot be empty.");
+            }
+
             var result = await _repository.GetToDoByIdAsync(toDoId);
 
             if (result == null)
@@ -46,6 +51,11 @@ namespace Core.Services
         /// <returns>A list of To-Do tasks matching the given criteria.</returns>
         public async Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
         {
+            if (userId == Guid.Empty)
+            {
+                throw new ArgumentException("User id cannot be empty.");
+            }
+
             var result = await _repository.GetToDosAsync(userId, date, timeBlock);
 
             return result;
@@ -88,6 +98,11 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified ID does not exist.</exception>
         public async Task DeleteToDoAsync(Guid toDoId)
         {
+            if (toDoId == Guid.Empty)
+            {
+                throw new ArgumentException("ToDo id cannot be empty.");
+            }
+
             if (!(await _repository.IsToDoExistsAsync(toDoId)))
             {
                 throw new InvalidOperationException("Todo id does not exist.");
@@ -106,6 +121,11 @@ namespace Core.Services
         /// </remarks>
         public async Task MoveRepeatedToDosAsync(Guid userId)
         {
+            if (userId == Guid.Empty)
+            {
+                throw new ArgumentException("User id cannot be empty.");
+            }
+
             var todayToDos = await _repository.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day);
 
             if (!todayToDos.Any())

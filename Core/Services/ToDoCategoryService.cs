@@ -27,14 +27,19 @@ namespace Core.Services
         /// <param name="userId">The user Id.</param>
         /// <returns>The ToDo category object.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
-        public async Task<ToDoCategory> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId)
+        public async Task<ToDoCategory> GetToDoCategoryByCategoryNameAsync(Guid userId, string toDoCategoryName)
         {
-            if (!(await _repository.IsCategoryExistsAsync(toDoCategoryName, userId)))
+            if (userId == Guid.Empty)
             {
-                throw new InvalidOperationException("Category does not exist.");
+                throw new ArgumentException("User id cannot be empty.");
             }
 
             var result = await _repository.GetToDoCategoryByCategoryNameAsync(toDoCategoryName, userId);
+
+            if (result == null)
+            {
+                throw new InvalidOperationException("Category does not exist.");
+            }
 
             return result;
         }
@@ -47,6 +52,11 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if the user is not found or has no categories.</exception>
         public async Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId)
         {
+            if (userId == Guid.Empty)
+            {
+                throw new ArgumentException("User id cannot be empty.");
+            }
+
             var resultListOfToDoCategories = await _repository.GetToDoCategoriesByUserIdAsync(userId);
 
             if (resultListOfToDoCategories.Count == 0)
@@ -98,8 +108,13 @@ namespace Core.Services
         /// <param name="toDoCategoryName">The name of the ToDo category.</param>
         /// <param name="userId">The user Id.</param>
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
-        public async Task DeleteToDoCategoryAsync(string toDoCategoryName, Guid userId)
+        public async Task DeleteToDoCategoryAsync(Guid userId, string toDoCategoryName)
         {
+            if (userId == Guid.Empty)
+            {
+                throw new ArgumentException("User id cannot be empty.");
+            }
+
             if (!(await _repository.IsCategoryExistsAsync(toDoCategoryName, userId)))
             {
                 throw new InvalidOperationException("Category does not exist.");
