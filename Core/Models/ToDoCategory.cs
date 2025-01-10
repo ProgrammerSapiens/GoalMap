@@ -44,7 +44,7 @@
         /// <summary>
         /// Gets or sets the User assigned to the todo category.
         /// </summary>
-        public User? User
+        public virtual User? User
         {
             get { return user; }
             set { user = value; }
