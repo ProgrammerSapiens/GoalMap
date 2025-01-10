@@ -33,6 +33,6 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the user exists, and <c>false</c> if its not.
         /// </returns>
-        Task<bool> IsUserExists(string username);
+        Task<bool> IsUserExistsAsync(string userName);
     }
 }
