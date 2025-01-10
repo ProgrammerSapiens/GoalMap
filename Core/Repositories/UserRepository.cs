@@ -3,24 +3,24 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    internal class UserRepository : IUserRepository
+    public class UserRepository : IUserRepository
     {
-        public Task AddUserAsync(User user)
+        public async Task AddUserAsync(User user)
         {
             throw new NotImplementedException();
         }
 
-        public Task<User?> GetUserByUserNameAsync(string userName)
+        public async Task<User?> GetUserByUserNameAsync(string userName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsUserExists(string username)
+        public async Task<bool> IsUserExistsAsync(string username)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(User user)
         {
             throw new NotImplementedException();
         }

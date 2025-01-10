@@ -3,39 +3,39 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    internal class ToDoRepository : IToDoRepository
+   public class ToDoRepository : IToDoRepository
     {
-        public Task AddToDoAsync(ToDo toDo)
+        public async Task AddToDoAsync(ToDo toDo)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteToDoAsync(Guid toDoId)
+        public async Task DeleteToDoAsync(Guid toDoId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ToDo?> GetToDoByIdAsync(Guid toDoId)
+        public async Task<ToDo?> GetToDoByIdAsync(Guid toDoId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
+        public async Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsToDoExistsAsync(Guid toDoId)
+        public async Task<bool> IsToDoExistsAsync(Guid toDoId)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateToDoAsync(ToDo toDo)
+        public async Task UpdateToDoAsync(ToDo toDo)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateToDosAsync(IEnumerable<ToDo> toDos)
+        public async Task UpdateToDosAsync(IEnumerable<ToDo> toDos)
         {
             throw new NotImplementedException();
         }
