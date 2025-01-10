@@ -70,7 +70,7 @@ namespace Core.Services
                 return false;
             }
 
-            if (!await _passwordHasher.VerifyPassword(password, user.PasswordHash))
+            if (!await _passwordHasher.VerifyPasswordAsync(password, user.PasswordHash))
             {
                 return false;
             }
@@ -80,12 +80,12 @@ namespace Core.Services
 
         public async Task RegisterUserAsync(User user, string password)
         {
-            if (await _repository.IsUserExists(user.UserName))
+            if (await _repository.IsUserExistsAsync(user.UserName))
             {
                 throw new InvalidOperationException("User name is already exists.");
             }
 
-            string hashedPassword = await _passwordHasher.HashPassword(password);
+            string hashedPassword = await _passwordHasher.HashPasswordAsync(password);
 
             user.PasswordHash = hashedPassword;
 
