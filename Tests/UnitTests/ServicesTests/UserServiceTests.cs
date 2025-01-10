@@ -141,7 +141,7 @@ namespace Tests.UnitTests.ServicesTests
 
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(user);
 
-            passwordHasherMock.Setup(repo => repo.VerifyPassword(password, hashedPassword)).ReturnsAsync(true);
+            passwordHasherMock.Setup(repo => repo.VerifyPasswordAsync(password, hashedPassword)).ReturnsAsync(true);
 
             var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object);
 
@@ -149,7 +149,7 @@ namespace Tests.UnitTests.ServicesTests
 
             Assert.True(result);
             userRepositoryMock.Verify(repo => repo.GetUserByUserNameAsync(userName), Times.Once());
-            passwordHasherMock.Verify(hasher => hasher.VerifyPassword(password, hashedPassword), Times.Once);
+            passwordHasherMock.Verify(hasher => hasher.VerifyPasswordAsync(password, hashedPassword), Times.Once);
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Tests.UnitTests.ServicesTests
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(user);
 
             var passwordHasherMock = new Mock<IPasswordHasher>();
-            passwordHasherMock.Setup(hasher => hasher.VerifyPassword(invalidPassword, passwordHash)).ReturnsAsync(false);
+            passwordHasherMock.Setup(hasher => hasher.VerifyPasswordAsync(invalidPassword, passwordHash)).ReturnsAsync(false);
 
             var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object);
 
@@ -224,7 +224,7 @@ namespace Tests.UnitTests.ServicesTests
             userRepositoryMock.Setup(repo => repo.AddUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
             var passwordHasherMock = new Mock<IPasswordHasher>();
-            passwordHasherMock.Setup(hasher => hasher.HashPassword(password)).ReturnsAsync(hashedPassword);
+            passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
             var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object);
 
