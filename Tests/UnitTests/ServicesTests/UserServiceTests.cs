@@ -20,7 +20,7 @@ namespace Tests.UnitTests.ServicesTests
             };
 
             var userRepositoryMock = new Mock<IUserRepository>();
-            userRepositoryMock.Setup(repo => repo.IsUserExists(userName)).ReturnsAsync(true);
+            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(true);
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(expectedUser);
 
             var userService = new UserService(userRepositoryMock.Object);
@@ -103,7 +103,7 @@ namespace Tests.UnitTests.ServicesTests
             var userRepositoryMock = new Mock<IUserRepository>();
             var userService = new UserService(userRepositoryMock.Object);
 
-            userRepositoryMock.Setup(repo => repo.IsUserExists(userName)).ReturnsAsync(false);
+            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(false);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Easy));
 
@@ -220,7 +220,7 @@ namespace Tests.UnitTests.ServicesTests
             var newUser = new User(userName, password, 100);
 
             var userRepositoryMock = new Mock<IUserRepository>();
-            userRepositoryMock.Setup(repo => repo.IsUserExists(userName)).ReturnsAsync(false);
+            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(false);
             userRepositoryMock.Setup(repo => repo.AddUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
             var passwordHasherMock = new Mock<IPasswordHasher>();
@@ -242,7 +242,7 @@ namespace Tests.UnitTests.ServicesTests
             var existingUser = new User(userName, password, 100);
 
             var userRepositoryMock = new Mock<IUserRepository>();
-            userRepositoryMock.Setup(repo => repo.IsUserExists(userName)).ReturnsAsync(true);
+            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(true);
 
             var userService = new UserService(userRepositoryMock.Object);
 
