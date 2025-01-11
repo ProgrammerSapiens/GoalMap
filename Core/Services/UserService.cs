@@ -3,23 +3,42 @@ using Core.Models;
 
 namespace Core.Services
 {
+    /// <summary>
+    /// Service for managing user operations such as authentication, registration, and experience updates.
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
         private readonly IPasswordHasher? _passwordHasher;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository.
+        /// </summary>
+        /// <param name="repository">The repository for user data access.</param>
         public UserService(IUserRepository repository)
         {
             _repository = repository;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository and password hasher.
+        /// </summary>
+        /// <param name="repository">The repository for user data access.</param>
+        /// <param name="passwordHasher">The password hasher for secure password operations.</param>
         public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
         {
             _repository = repository;
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<User> GetUserByUserNameAsync(string userName)
+        /// <summary>
+        /// Retrieves a user by their username.
+        /// </summary>
+        /// <param name="userName">The username of the user to retrieve.</param>
+        /// <returns>The user with the specified username.</returns>
+        /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
+        public async Task<User> GetUserByUserNameAsync(string? userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
             {
@@ -36,7 +55,15 @@ namespace Core.Services
             return result;
         }
 
-        public async Task UpdateUserExperienceAsync(string userName, Difficulty taskDifficulty)
+        /// <summary>
+        /// Updates the experience of a user based on the difficulty of a completed task.
+        /// </summary>
+        /// <param name="userName">The username of the user to update.</param>
+        /// <param name="taskDifficulty">The difficulty of the task that was completed.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
+        public async Task UpdateUserExperienceAsync(string? userName, Difficulty taskDifficulty)
         {
             if (string.IsNullOrEmpty(userName))
             {
@@ -56,7 +83,14 @@ namespace Core.Services
             await _repository.UpdateUserAsync(user);
         }
 
-        public async Task<bool> AuthenticateUserAsync(string userName, string password)
+        /// <summary>
+        /// Authenticates a user by verifying their username and password.
+        /// </summary>
+        /// <param name="userName">The username of the user.</param>
+        /// <param name="password">The password of the user.</param>
+        /// <returns><c>true</c> if authentication is successful; otherwise, <c>false</c>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the username or password is null or empty.</exception>
+        public async Task<bool> AuthenticateUserAsync(string? userName, string? password)
         {
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
             {
@@ -78,7 +112,14 @@ namespace Core.Services
             return true;
         }
 
-        public async Task RegisterUserAsync(User user, string password)
+        /// <summary>
+        /// Registers a new user in the system.
+        /// </summary>
+        /// <param name="user">The user to register.</param>
+        /// <param name="password">The password for the user.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
+        public async Task RegisterUserAsync(User user, string? password)
         {
             if (await _repository.IsUserExistsAsync(user.UserName))
             {
