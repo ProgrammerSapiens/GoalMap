@@ -7,6 +7,15 @@ namespace Tests.UnitTests.ServicesTests
 {
     public class UserServiceTests
     {
+        private readonly Mock<IUserRepository> userRepositoryMock;
+        private readonly Mock<IPasswordHasher> passwordHasherMock;
+
+        public UserServiceTests()
+        {
+            userRepositoryMock = new Mock<IUserRepository>();
+            passwordHasherMock = new Mock<IPasswordHasher>();
+        }
+
         #region GetUserByIdAsync(string userName) tests
 
         [Fact]
@@ -19,7 +28,6 @@ namespace Tests.UnitTests.ServicesTests
                 ToDoCategories = new List<ToDoCategory>()
             };
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(true);
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(expectedUser);
 
@@ -41,7 +49,6 @@ namespace Tests.UnitTests.ServicesTests
         {
             var userName = "Test user";
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync((User?)null);
 
             var userService = new UserService(userRepositoryMock.Object);
@@ -55,7 +62,6 @@ namespace Tests.UnitTests.ServicesTests
         {
             var userName = "";
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             var userService = new UserService(userRepositoryMock.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => userService.GetUserByUserNameAsync(userName));
@@ -82,7 +88,6 @@ namespace Tests.UnitTests.ServicesTests
 
             var user = new User(userName, password, initialExperience);
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(user);
             userRepositoryMock.Setup(repo => repo.UpdateUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
@@ -100,7 +105,6 @@ namespace Tests.UnitTests.ServicesTests
         {
             var userName = "Non-exsistent test User";
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             var userService = new UserService(userRepositoryMock.Object);
 
             userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(false);
@@ -115,7 +119,6 @@ namespace Tests.UnitTests.ServicesTests
         {
             var userName = "";
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             var userService = new UserService(userRepositoryMock.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Easy));
@@ -134,13 +137,9 @@ namespace Tests.UnitTests.ServicesTests
             string password = "testPassword";
             string hashedPassword = "hashedTestPassword";
 
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var passwordHasherMock = new Mock<IPasswordHasher>();
-
             var user = new User(userName, hashedPassword, 100);
 
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(user);
-
             passwordHasherMock.Setup(repo => repo.VerifyPasswordAsync(password, hashedPassword)).ReturnsAsync(true);
 
             var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object);
@@ -158,7 +157,6 @@ namespace Tests.UnitTests.ServicesTests
             var invalidUserName = "invalidUser";
             var password = "validPassword";
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(invalidUserName)).ReturnsAsync((User?)null);
 
             var userService = new UserService(userRepositoryMock.Object);
@@ -177,7 +175,6 @@ namespace Tests.UnitTests.ServicesTests
 
             var user = new User(userName, passwordHash, 100);
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(user);
 
             var passwordHasherMock = new Mock<IPasswordHasher>();
@@ -193,9 +190,6 @@ namespace Tests.UnitTests.ServicesTests
         [Fact]
         public async Task AuthenticateUserAsync_ShouldThrowException_WhenInputsAreNullOrEmpty()
         {
-            var userRepositoryMock = new Mock<IUserRepository>();
-            var passwordHasherMock = new Mock<IPasswordHasher>();
-
             var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object);
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync(null, "password"));
@@ -219,7 +213,6 @@ namespace Tests.UnitTests.ServicesTests
 
             var newUser = new User(userName, password, 100);
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(false);
             userRepositoryMock.Setup(repo => repo.AddUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
@@ -241,7 +234,6 @@ namespace Tests.UnitTests.ServicesTests
 
             var existingUser = new User(userName, password, 100);
 
-            var userRepositoryMock = new Mock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(true);
 
             var userService = new UserService(userRepositoryMock.Object);
