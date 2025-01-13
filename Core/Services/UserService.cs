@@ -121,7 +121,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
         public async Task RegisterUserAsync(User user, string? password)
         {
-            if (await _repository.IsUserExistsAsync(user.UserName))
+            if (await _repository.UserExistsAsync(user.UserName))
             {
                 throw new InvalidOperationException("User name is already exists.");
             }

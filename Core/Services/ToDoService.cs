@@ -68,7 +68,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when a To-Do task with the same ID already exists.</exception>
         public async Task AddToDoAsync(ToDo toDo)
         {
-            if (await _repository.IsToDoExistsAsync(toDo.ToDoId))
+            if (await _repository.ToDoExistsAsync(toDo.ToDoId))
             {
                 throw new InvalidOperationException("ToDo id already exists.");
             }
@@ -83,7 +83,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified ID does not exist.</exception>
         public async Task UpdateToDoAsync(ToDo toDo)
         {
-            if (!(await _repository.IsToDoExistsAsync(toDo.ToDoId)))
+            if (!(await _repository.ToDoExistsAsync(toDo.ToDoId)))
             {
                 throw new InvalidOperationException("Todo id does not exist.");
             }
@@ -103,7 +103,7 @@ namespace Core.Services
                 throw new ArgumentException("ToDo id cannot be empty.");
             }
 
-            if (!(await _repository.IsToDoExistsAsync(toDoId)))
+            if (!(await _repository.ToDoExistsAsync(toDoId)))
             {
                 throw new InvalidOperationException("Todo id does not exist.");
             }
@@ -133,27 +133,20 @@ namespace Core.Services
                 return;
             }
 
-            var updatedToDos = new List<ToDo>();
-
             foreach (var todo in todayToDos)
             {
-                var newToDo = new ToDo(todo.Description, todo.TimeBlock, todo.Difficulty, todo.ToDoDate, todo.ToDoCategoryId, todo.UserId)
+                todo.ToDoDate = todo.RepeatFrequency switch
                 {
-                    ToDoDate = todo.RepeatFrequency switch
-                    {
-                        RepeatFrequency.Daily => todo.ToDoDate.AddDays(1),
-                        RepeatFrequency.Weekly => todo.ToDoDate.AddDays(7),
-                        RepeatFrequency.Monthly => todo.ToDoDate.AddMonths(1),
-                        RepeatFrequency.Yearly => todo.ToDoDate.AddYears(1),
-                        _ => todo.ToDoDate
-                    },
-                    RepeatFrequency = todo.RepeatFrequency
+                    RepeatFrequency.Daily => todo.ToDoDate.AddDays(1),
+                    RepeatFrequency.Weekly => todo.ToDoDate.AddDays(7),
+                    RepeatFrequency.Monthly => todo.ToDoDate.AddMonths(1),
+                    RepeatFrequency.Yearly => todo.ToDoDate.AddYears(1),
+                    _ => todo.ToDoDate
                 };
 
-                updatedToDos.Add(newToDo);
+                await _repository.UpdateToDoAsync(todo);
             }
 
-            await _repository.UpdateToDosAsync(updatedToDos);
         }
     }
 }

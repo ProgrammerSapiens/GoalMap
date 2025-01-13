@@ -74,7 +74,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if a category with the same name already exists.</exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            if (await _repository.IsCategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId))
+            if (await _repository.CategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId))
             {
                 throw new InvalidOperationException("Сategory already exists.");
             }
@@ -89,7 +89,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
         public async Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            if (!(await _repository.IsCategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId)))
+            if (!(await _repository.CategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId)))
             {
                 throw new InvalidOperationException("Category does not exist.");
             }
@@ -115,7 +115,7 @@ namespace Core.Services
                 throw new ArgumentException("User id cannot be empty.");
             }
 
-            if (!(await _repository.IsCategoryExistsAsync(toDoCategoryName, userId)))
+            if (!(await _repository.CategoryExistsAsync(toDoCategoryName, userId)))
             {
                 throw new InvalidOperationException("Category does not exist.");
             }
