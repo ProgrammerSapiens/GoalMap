@@ -135,10 +135,10 @@ namespace Tests.IntegrationTests.RepositoriesTests
 
         #endregion
 
-        #region IsUserExistsAsync(string username) tests
+        #region UserExistsAsync(string username) tests
 
         [Fact]
-        public async Task IsUserExists_ShouldReturnTrue_WhenUserExists()
+        public async Task UserExists_ShouldReturnTrue_WhenUserExists()
         {
             using (var context = new AppDbContext(dbContextOptions))
             {
@@ -148,7 +148,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
                 context.Users.Add(existingUser);
                 await context.SaveChangesAsync();
 
-                var result = await repository.IsUserExistsAsync(existingUser.UserName);
+                var result = await repository.UserExistsAsync(existingUser.UserName);
                 Assert.True(result);
 
                 var userInDb = await context.Users.FirstOrDefaultAsync(u => u.UserName == existingUser.UserName);
@@ -157,13 +157,13 @@ namespace Tests.IntegrationTests.RepositoriesTests
         }
 
         [Fact]
-        public async Task IsUserExists_ShouldReturnFalse_WhenUserDoesNotExist()
+        public async Task UserExists_ShouldReturnFalse_WhenUserDoesNotExist()
         {
             using (var context = new AppDbContext(dbContextOptions))
             {
                 var repository = new UserRepository(context);
 
-                var result = await repository.IsUserExistsAsync("SomeUser");
+                var result = await repository.UserExistsAsync("SomeUser");
                 Assert.False(result);
 
                 var userInDb = await context.Users.FirstOrDefaultAsync(u => u.UserName == "SomeUser");
