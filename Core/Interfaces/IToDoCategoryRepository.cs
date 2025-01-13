@@ -47,6 +47,6 @@ namespace Core.Interfaces
         /// <param name="toDoCategoryName">The name of the ToDo category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>True if the category exists, otherwise false.</returns>
-        Task<bool> IsCategoryExistsAsync(string toDoCategoryName, Guid userId);
+        Task<bool> CategoryExistsAsync(string toDoCategoryName, Guid userId);
     }
 }

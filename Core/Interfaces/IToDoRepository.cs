@@ -36,17 +36,6 @@ namespace Core.Interfaces
         Task UpdateToDoAsync(ToDo toDo);
 
         /// <summary>
-        /// Updates multiple To-Do tasks in the repository.
-        /// </summary>
-        /// <param name="toDos">The collection of To-Do tasks to be updated.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        /// <remarks>
-        /// This method is used for batch updates of To-Do tasks. 
-        /// Ensure that each task in the collection has a valid identifier and necessary updates before calling this method.
-        /// </remarks>
-        Task UpdateToDosAsync(IEnumerable<ToDo> toDos);
-
-        /// <summary>
         /// Deletes a To-Do task by its unique identifier.
         /// </summary>
         /// <param name="toDoId">The unique identifier of the To-Do task to be deleted.</param>
@@ -60,6 +49,6 @@ namespace Core.Interfaces
         /// A task that represents the asynchronous operation. 
         /// The task result contains a boolean value indicating whether the To-Do task exists (`true`) or not (`false`).
         /// </returns>
-        Task<bool> IsToDoExistsAsync(Guid toDoId);
+        Task<bool> ToDoExistsAsync(Guid toDoId);
     }
 }
