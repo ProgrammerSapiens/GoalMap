@@ -1,10 +1,18 @@
 ﻿using Core.Interfaces;
 using Core.Models;
+using Data.DBContext;
 
 namespace Data.Repositories
 {
     public class ToDoCategoryRepository : IToDoCategoryRepository
     {
+        private readonly AppDbContext _context;
+
+        public ToDoCategoryRepository(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task<ToDoCategory> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId)
         {
             throw new NotImplementedException();
@@ -30,7 +38,7 @@ namespace Data.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<bool> IsCategoryExistsAsync(string toDoCategoryName, Guid userId)
+        public async Task<bool> CategoryExistsAsync(string toDoCategoryName, Guid userId)
         {
             throw new NotImplementedException();
         }

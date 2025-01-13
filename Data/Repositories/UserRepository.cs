@@ -28,7 +28,7 @@ namespace Data.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<bool> IsUserExistsAsync(string username)
+        public async Task<bool> UserExistsAsync(string username)
         {
             throw new NotImplementedException();
         }
