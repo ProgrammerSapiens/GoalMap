@@ -13,7 +13,7 @@ namespace Core.Interfaces
         /// <param name="toDoCategoryName">The name of the ToDo category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The category associated with the specified name and user ID.</returns>
-        Task<ToDoCategory> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId);
+        Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId);
 
         /// <summary>
         /// Retrieves all categories associated with a specific user.
