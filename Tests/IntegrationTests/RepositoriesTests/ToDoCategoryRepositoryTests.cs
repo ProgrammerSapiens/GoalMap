@@ -6,13 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Tests.IntegrationTests.RepositoriesTests
 {
-    public class ToDoCategoryRepositoryTests
+    public class ToDoCategoryRepositoryTests 
     {
         private readonly DbContextOptions<AppDbContext> dbContextOptions;
+        private readonly AppDbContext context;
 
         public ToDoCategoryRepositoryTests()
         {
             dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: "TestDatabase").Options;
+
+            context = new AppDbContext(dbContextOptions);
         }
 
         #region GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId) tests
@@ -20,42 +23,36 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task GetToDoCategoryByCategoryNameAsync_ShouldReturnCategory_WhenCategoryExistsForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                string categoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, categoryName);
+            var userId = Guid.NewGuid();
+            string categoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, categoryName);
 
-                context.ToDoCategories.Add(toDoCategory);
-                await context.SaveChangesAsync();
+            context.ToDoCategories.Add(toDoCategory);
+            await context.SaveChangesAsync();
 
-                var repository = new ToDoCategoryRepository(context);
-                var result = await repository.GetToDoCategoryByCategoryNameAsync(categoryName, userId);
+            var repository = new ToDoCategoryRepository(context);
+            var result = await repository.GetToDoCategoryByCategoryNameAsync(categoryName, userId);
 
-                Assert.NotNull(result);
-                Assert.Equal(userId, result.UserId);
-                Assert.Equal(categoryName, result.ToDoCategoryName);
-                Assert.Equal(toDoCategory.ToDoCategoryId, result.ToDoCategoryId);
-            }
+            Assert.NotNull(result);
+            Assert.Equal(userId, result.UserId);
+            Assert.Equal(categoryName, result.ToDoCategoryName);
+            Assert.Equal(toDoCategory.ToDoCategoryId, result.ToDoCategoryId);
         }
 
         [Fact]
         public async Task GetToDoCategoryByCategoryNameAsync_ShouldReturnNull_WhenCategoryDoesNotExistForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                string categoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, categoryName);
+            var userId = Guid.NewGuid();
+            string categoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, categoryName);
 
-                var repository = new ToDoCategoryRepository(context);
-                var result = await repository.GetToDoCategoryByCategoryNameAsync(categoryName, userId);
+            var repository = new ToDoCategoryRepository(context);
+            var result = await repository.GetToDoCategoryByCategoryNameAsync(categoryName, userId);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == categoryName);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == categoryName);
 
-                Assert.Null(result);
-                Assert.Null(toDoCategoryInDb);
-            }
+            Assert.Null(result);
+            Assert.Null(toDoCategoryInDb);
         }
 
         #endregion
@@ -65,44 +62,38 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task GetToDoCategoriesByUserIdAsync_ShouldReturnCategories_WhenCategoriesExistForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
 
-                var toDoCategories = new List<ToDoCategory>()
+            var toDoCategories = new List<ToDoCategory>()
                 {
                     new ToDoCategory(userId, "TestCategory"),
                     new ToDoCategory(userId, "TestCategory2"),
                     new ToDoCategory(Guid.NewGuid(),"TestCategory3")
                 };
 
-                context.ToDoCategories.AddRange(toDoCategories);
-                await context.SaveChangesAsync();
+            context.ToDoCategories.AddRange(toDoCategories);
+            await context.SaveChangesAsync();
 
-                var repository = new ToDoCategoryRepository(context);
-                var result = await repository.GetToDoCategoriesByUserIdAsync(userId);
+            var repository = new ToDoCategoryRepository(context);
+            var result = await repository.GetToDoCategoriesByUserIdAsync(userId);
 
-                Assert.NotNull(result);
-                Assert.Equal(2, result.Count);
-                Assert.All(result, r => Assert.Equal(userId, r.UserId));
-            }
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+            Assert.All(result, r => Assert.Equal(userId, r.UserId));
         }
 
         [Fact]
         public async Task GetToDoCategoriesByUserIdInRepositoryAsync_ShouldReturnEmptyList_WhenNoCategoriesExistForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
 
-                var repository = new ToDoCategoryRepository(context);
-                var result = await repository.GetToDoCategoriesByUserIdAsync(userId);
+            var repository = new ToDoCategoryRepository(context);
+            var result = await repository.GetToDoCategoriesByUserIdAsync(userId);
 
-                var toDoCategoriesInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId);
+            var toDoCategoriesInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId);
 
-                Assert.Empty(result);
-                Assert.Null(toDoCategoriesInDb);
-            }
+            Assert.Empty(result);
+            Assert.Null(toDoCategoriesInDb);
         }
 
         #endregion
@@ -112,46 +103,35 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task AddToDoCategoryAsync_ShouldAddCategory_WhenDataIsValid()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategoryName";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategoryName";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                var repository = new ToDoCategoryRepository(context);
-                await repository.AddToDoCategoryAsync(toDoCategory);
+            var repository = new ToDoCategoryRepository(context);
+            await repository.AddToDoCategoryAsync(toDoCategory);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
 
-                Assert.NotNull(toDoCategoryInDb);
-                Assert.Equal(userId, toDoCategoryInDb.ToDoCategoryId);
-                Assert.Equal(toDoCategoryName, toDoCategoryInDb.ToDoCategoryName);
-
-                Assert.Single(context.ToDoCategories);
-            }
+            Assert.NotNull(toDoCategoryInDb);
+            Assert.Equal(userId, toDoCategoryInDb.UserId);
+            Assert.Equal(toDoCategoryName, toDoCategoryInDb.ToDoCategoryName);
         }
 
         [Fact]
         public async Task AddToDoCategoryAsync_ShouldThrowException_WhenCategoryNameAlreadyExistsForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategoryName";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategoryName";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                context.ToDoCategories.Add(toDoCategory);
-                await context.SaveChangesAsync();
+            context.ToDoCategories.Add(toDoCategory);
+            await context.SaveChangesAsync();
 
-                var repository = new ToDoCategoryRepository(context);
+            var repository = new ToDoCategoryRepository(context);
 
-                var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.AddToDoCategoryAsync(toDoCategory));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.AddToDoCategoryAsync(toDoCategory));
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
-
-                Assert.Equal("Category with such a name already exists.", exception.Message);
-                Assert.Null(toDoCategoryInDb);
-            }
+            Assert.Equal("Category with such name already exists.", exception.Message);
         }
 
         #endregion
@@ -161,44 +141,68 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task UpdateToDoCategoryAsync_ShouldUpdateCategory_WhenCategoryExists()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                context.ToDoCategories.Add(toDoCategory);
-                await context.SaveChangesAsync();
+            context.ToDoCategories.Add(toDoCategory);
+            await context.SaveChangesAsync();
 
-                var newCategoryName = "NewTestCategory";
-                toDoCategory.ToDoCategoryName = newCategoryName;
+            var newCategoryName = "NewTestCategory";
+            toDoCategory.ToDoCategoryName = newCategoryName;
 
-                var repository = new ToDoCategoryRepository(context);
-                await repository.UpdateToDoCategoryAsync(toDoCategory);
+            var repository = new ToDoCategoryRepository(context);
+            await repository.UpdateToDoCategoryAsync(toDoCategory);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == newCategoryName && c.UserId == userId);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == newCategoryName && c.UserId == userId);
 
-                Assert.NotNull(toDoCategoryInDb);
-                Assert.Equal(userId, toDoCategoryInDb.UserId);
-                Assert.Equal(toDoCategoryName, toDoCategoryInDb.ToDoCategoryName);
-            }
+            Assert.NotNull(toDoCategoryInDb);
+            Assert.Equal(userId, toDoCategoryInDb.UserId);
+            Assert.Equal(newCategoryName, toDoCategoryInDb.ToDoCategoryName);
         }
 
         [Fact]
         public async Task UpdateToDoCategoryAsync_ShouldThrowException_WhenCategoryDoesNotExist()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                var repository = new ToDoCategoryRepository(context);
+            var repository = new ToDoCategoryRepository(context);
 
-                var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.UpdateToDoCategoryAsync(toDoCategory));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.UpdateToDoCategoryAsync(toDoCategory));
 
-                Assert.Equal("Category with such a name does not exist.", exception.Message);
-            }
+            Assert.Equal("Category does not exist.", exception.Message);
+        }
+
+        [Fact]
+        public async Task UpdateToDoCategoryAsync_ShouldThrowException_WhenNewCategoryNameAlreadyExists()
+        {
+            var existingUserId = Guid.NewGuid();
+            var existingToDoCategoryName = "ExistingCategory";
+            var existingToDoCategory = new ToDoCategory(existingUserId, existingToDoCategoryName);
+
+            context.ToDoCategories.Add(existingToDoCategory);
+            await context.SaveChangesAsync();
+
+            var userId = existingUserId;
+            var toDoCategoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+
+            context.ToDoCategories.Add(toDoCategory);
+            await context.SaveChangesAsync();
+
+            var newToDoCategoryName = existingToDoCategoryName;
+            toDoCategory.ToDoCategoryName = newToDoCategoryName;
+
+            var repository = new ToDoCategoryRepository(context);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.UpdateToDoCategoryAsync(toDoCategory));
+
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == newToDoCategoryName && c.UserId == userId);
+
+            Assert.Equal("Such todo name already exists.", exception.Message);
+            Assert.NotNull(toDoCategoryInDb);
         }
 
         #endregion
@@ -208,40 +212,34 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task DeleteToDoCategoryAsync_ShouldDeleteCategory_WhenCategoryExistsForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                context.ToDoCategories.Add(toDoCategory);
-                await context.SaveChangesAsync();
+            context.ToDoCategories.Add(toDoCategory);
+            await context.SaveChangesAsync();
 
-                var repository = new ToDoCategoryRepository(context);
-                await repository.DeleteToDoCategoryAsync(toDoCategoryName, userId);
+            var repository = new ToDoCategoryRepository(context);
+            await repository.DeleteToDoCategoryAsync(toDoCategoryName, userId);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
 
-                Assert.Null(toDoCategoryInDb);
-            }
+            Assert.Null(toDoCategoryInDb);
         }
 
         [Fact]
         public async Task DeleteToDoCategoryAsync_ShouldDoNothing_WhenCategoryDoesNotExistForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                var repository = new ToDoCategoryRepository(context);
-                await repository.DeleteToDoCategoryAsync(toDoCategoryName, userId);
+            var repository = new ToDoCategoryRepository(context);
+            await repository.DeleteToDoCategoryAsync(toDoCategoryName, userId);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
 
-                Assert.Null(toDoCategoryInDb);
-            }
+            Assert.Null(toDoCategoryInDb);
         }
 
         #endregion
@@ -251,42 +249,35 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task CategoryExistsAsync_ShouldReturnTrue_WhenCategoryExistsForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategory";
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-                context.ToDoCategories.Add(toDoCategory);
-                await context.SaveChangesAsync();
+            context.ToDoCategories.Add(toDoCategory);
+            await context.SaveChangesAsync();
 
-                var repository = new ToDoCategoryRepository(context);
-                var result = await repository.CategoryExistsAsync(toDoCategoryName, userId);
+            var repository = new ToDoCategoryRepository(context);
+            var result = await repository.CategoryExistsAsync(toDoCategoryName, userId);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
 
-                Assert.True(result);
-                Assert.NotNull(toDoCategoryInDb);
-            }
+            Assert.True(result);
+            Assert.NotNull(toDoCategoryInDb);
         }
 
         [Fact]
         public async Task CategoryExistsAsync_ShouldReturnFalse_WhenCategoryDoesNotExistForUser()
         {
-            using (var context = new AppDbContext(dbContextOptions))
-            {
-                var userId = Guid.NewGuid();
-                var toDoCategoryName = "TestCategory";
-                var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var userId = Guid.NewGuid();
+            var toDoCategoryName = "TestCategory";
 
-                var repository = new ToDoCategoryRepository(context);
-                var result = await repository.CategoryExistsAsync(toDoCategoryName, userId);
+            var repository = new ToDoCategoryRepository(context);
+            var result = await repository.CategoryExistsAsync(toDoCategoryName, userId);
 
-                var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            var toDoCategoryInDb = await context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
 
-                Assert.False(result);
-                Assert.Null(toDoCategoryInDb);
-            }
+            Assert.False(result);
+            Assert.Null(toDoCategoryInDb);
         }
 
         #endregion
