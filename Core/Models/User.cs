@@ -11,6 +11,7 @@
         private string userName;
         private string passwordHash;
         private int experience;
+        private double level;
         private ICollection<ToDo>? toDos;
         private ICollection<ToDoCategory>? toDoCategories;
 
@@ -21,7 +22,11 @@
         /// <summary>
         /// Gets the unique identifier of the user.
         /// </summary>
-        public Guid UserId => userId;
+        public Guid UserId
+        {
+            get { return userId; }
+            private set { userId = value; }
+        }
 
         /// <summary>
         /// Gets or sets the name of the user.
@@ -71,7 +76,11 @@
         /// <summary>
         /// Gets the current level of the user.
         /// </summary>
-        public int Level => (int)Math.Sqrt(Experience / 100);
+        public int Level
+        {
+            get { return (int)Math.Sqrt(Experience / 100); }
+            private set { level = value; }
+        }
 
         /// <summary>
         /// Gets or sets todos assigned to the user.
@@ -96,6 +105,11 @@
         #region Constructors
 
         /// <summary>
+        /// Parameterless constructor required by Entity Framework.
+        /// </summary>
+        protected User() { }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class with the specified parameters.
         /// </summary>
         /// <param name="userName">The name of the user.</param>
@@ -112,6 +126,7 @@
             this.userName = userName;
             this.passwordHash = passwordHash;
             Experience = experience;
+            Level = 0;
             ToDos = new List<ToDo>();
             ToDoCategories = new List<ToDoCategory>();
         }

@@ -19,7 +19,11 @@
         /// <summary>
         /// Gets the unique identifier of the todo category.
         /// </summary>
-        public Guid ToDoCategoryId => toDoCategoryId;
+        public Guid ToDoCategoryId
+        {
+            get { return toDoCategoryId; }
+            private set { toDoCategoryId = value; }
+        }
 
         /// <summary>
         /// Gets or sets the name of the todo category.
@@ -39,7 +43,11 @@
         /// <summary>
         /// Gets the ID of the user assigned to the todo category.
         /// </summary>
-        public Guid UserId => userId;
+        public Guid UserId
+        {
+            get { return userId; }
+            private set { userId = value; }
+        }
 
         /// <summary>
         /// Gets or sets the User assigned to the todo category.
@@ -53,6 +61,11 @@
         #endregion
 
         #region Constructors
+
+        /// <summary>
+        /// Parameterless constructor required by Entity Framework.
+        /// </summary>
+        protected ToDoCategory() { }
 
         /// <summary>
         /// Initialize a new instance of the <see cref="ToDoCategory"/> class with the specified parameters.

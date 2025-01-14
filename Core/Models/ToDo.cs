@@ -47,7 +47,11 @@
         /// <summary>
         /// Gets the unique identifier of the todo.
         /// </summary>
-        public Guid ToDoId => toDoId;
+        public Guid ToDoId
+        {
+            get { return toDoId; }
+            private set { toDoId = value; }
+        }
 
         /// <summary>
         /// Gets or sets the description of the todo.
@@ -67,7 +71,11 @@
         /// <summary>
         /// Gets the time block of the todo.
         /// </summary>
-        public TimeBlock TimeBlock => timeBlock;
+        public TimeBlock TimeBlock
+        {
+            get { return timeBlock; }
+            private set { timeBlock = value; }
+        }
 
         /// <summary>
         /// Gets or sets the difficulty level of the todo.
@@ -122,7 +130,11 @@
         /// <summary>
         /// Gets the ID of the parent todo, if applicable.
         /// </summary>
-        public Guid? ParentToDoId => parentToDoId;
+        public Guid? ParentToDoId
+        {
+            get { return parentToDoId; }
+            private set { parentToDoId = value; }
+        }
 
         /// <summary>
         /// Gets or sets the repeat frequency of the todo.
@@ -184,6 +196,11 @@
         #endregion
 
         #region Constructors
+
+        /// <summary>
+        /// Parameterless constructor required by Entity Framework.
+        /// </summary>
+        protected ToDo() { }
 
         /// <summary>
         /// Initializeds a new instance of the <see cref="ToDo"/> class.
