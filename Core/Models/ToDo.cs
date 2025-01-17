@@ -35,7 +35,7 @@
         private bool completionStatus;
         private Guid? parentToDoId;
         private RepeatFrequency repeatFrequency;
-        private Guid toDoCategoryId;
+        private string toDoCategoryName;
         private Guid userId;
         private ToDoCategory? toDoCategory;
         private User? user;
@@ -149,14 +149,14 @@
         /// Gets or sets the ID of the todo category assigned to the todo.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown if the category ID is empty</exception>
-        public Guid ToDoCategoryId
+        public string ToDoCategoryName
         {
-            get { return toDoCategoryId; }
+            get { return toDoCategoryName; }
             set
             {
-                if (Guid.Empty == value)
+                if (string.IsNullOrEmpty(value))
                     throw new ArgumentException(nameof(value), "The category id cannot be empty");
-                toDoCategoryId = value;
+                toDoCategoryName = value;
             }
         }
 
@@ -211,7 +211,7 @@
         /// <param name="toDoDate">The creation date of the todo.</param>
         /// <param name="toDoCategoryId">The unique identifier of the todo's category</param>
         /// <param name="userId">The unique identifier of the user.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
@@ -225,7 +225,7 @@
             CompletionStatus = false;
             parentToDoId = null;
             RepeatFrequency = RepeatFrequency.None;
-            ToDoCategoryId = toDoCategoryId;
+            this.toDoCategoryName = toDoCategoryName;
             UserId = userId;
         }
 
@@ -236,10 +236,10 @@
         /// <param name="timeBlock">The time block for the todo.</param>
         /// <param name="difficulty">The difficulty level of the todo.</param>
         /// <param name="toDoDate">The creating date of the todo.</param>
-        /// <param name="toDoCategoryId">The unique identifier of the todo's category.</param>
+        /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="deadline">The deadline for the todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId, DateTime deadline)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime deadline)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
@@ -253,7 +253,7 @@
             CompletionStatus = false;
             parentToDoId = null;
             RepeatFrequency = RepeatFrequency.None;
-            ToDoCategoryId = toDoCategoryId;
+            this.toDoCategoryName = toDoCategoryName;
             UserId = userId;
         }
 
@@ -264,11 +264,11 @@
         /// <param name="timeBlock">The time block for the todo.</param>
         /// <param name="difficulty">The difficulty level of the todo.</param>
         /// <param name="toDoDate">The creating date of the todo.</param>
-        /// <param name="toDoCategoryId">The unique identifier of the todo's category.</param>
+        /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="deadline">The deadline for the todo.</param>
         /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId, DateTime deadline, Guid parentToDoId)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime deadline, Guid parentToDoId)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
@@ -282,7 +282,7 @@
             CompletionStatus = false;
             this.parentToDoId = parentToDoId;
             RepeatFrequency = RepeatFrequency.None;
-            ToDoCategoryId = toDoCategoryId;
+            this.toDoCategoryName = toDoCategoryName;
             UserId = userId;
         }
 
@@ -293,12 +293,12 @@
         /// <param name="timeBlock">The time block for the todo.</param>
         /// <param name="difficulty">The difficulty level of the todo.</param>
         /// <param name="toDoDate">The creating date of the todo.</param>
-        /// <param name="toDoCategoryId">The unique identifier of the todo's category.</param>
+        /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="deadline">The deadline for the todo.</param>
         /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
         /// <param name="repeatFrequency">The repeat frequency of the todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId, DateTime deadline, Guid parentToDoId, RepeatFrequency repeatFrequency)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime deadline, Guid parentToDoId, RepeatFrequency repeatFrequency)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
@@ -312,7 +312,7 @@
             CompletionStatus = false;
             this.parentToDoId = parentToDoId;
             RepeatFrequency = repeatFrequency;
-            ToDoCategoryId = toDoCategoryId;
+            this.toDoCategoryName = toDoCategoryName;
             UserId = userId;
         }
 
