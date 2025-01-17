@@ -1,5 +1,6 @@
 ﻿using Core.Interfaces;
 using Core.Models;
+using Core.Services;
 
 namespace Core.Services
 {
@@ -10,14 +11,16 @@ namespace Core.Services
     {
         private readonly IUserRepository _repository;
         private readonly IPasswordHasher? _passwordHasher;
+        private readonly ToDoCategoryService _toDoCategoryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class with a user repository.
         /// </summary>
         /// <param name="repository">The repository for user data access.</param>
-        public UserService(IUserRepository repository)
+        public UserService(IUserRepository repository, ToDoCategoryService toDoCategoryService)
         {
             _repository = repository;
+            _toDoCategoryService = toDoCategoryService;
         }
 
         /// <summary>
@@ -25,10 +28,11 @@ namespace Core.Services
         /// </summary>
         /// <param name="repository">The repository for user data access.</param>
         /// <param name="passwordHasher">The password hasher for secure password operations.</param>
-        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, ToDoCategoryService toDoCategoryService)
         {
             _repository = repository;
             _passwordHasher = passwordHasher;
+            _toDoCategoryService = toDoCategoryService;
         }
 
         /// <summary>
@@ -131,6 +135,14 @@ namespace Core.Services
             user.PasswordHash = hashedPassword;
 
             await _repository.AddUserAsync(user);
+
+            var defaultToDoCategories = new List<ToDoCategory>()
+            {
+                new ToDoCategory(user.UserId, "Habbit"),
+                new ToDoCategory(user.UserId, "Other")
+            };
+            await _toDoCategoryService.AddToDoCategoryAsync(defaultToDoCategories[0]);
+            await _toDoCategoryService.AddToDoCategoryAsync(defaultToDoCategories[1]);
         }
     }
 }
