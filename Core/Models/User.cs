@@ -85,7 +85,7 @@
         /// <summary>
         /// Gets or sets todos assigned to the user.
         /// </summary>
-        public ICollection<ToDo> ToDos
+        public virtual ICollection<ToDo> ToDos
         {
             get { return toDos; }
             set { toDos = value; }
@@ -94,7 +94,7 @@
         /// <summary>
         /// Gets or sets categories created by a user.
         /// </summary>
-        public ICollection<ToDoCategory> ToDoCategories
+        public virtual ICollection<ToDoCategory> ToDoCategories
         {
             get { return toDoCategories; }
             set { toDoCategories = value; }
