@@ -80,7 +80,7 @@ namespace Data.Repositories
             existingToDo.ToDoDate = toDo.ToDoDate;
             existingToDo.CompletionStatus = toDo.CompletionStatus;
             existingToDo.RepeatFrequency = toDo.RepeatFrequency;
-            existingToDo.ToDoCategoryId = toDo.ToDoCategoryId;
+            existingToDo.ToDoCategoryName = toDo.ToDoCategoryName;
             existingToDo.UserId = toDo.UserId;
 
             await _context.SaveChangesAsync();

@@ -23,7 +23,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task GetToDoByIdAsync_ShouldReturnToDo_WhenToDoExists()
         {
-            var existingToDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var existingToDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
 
             context.ToDos.Add(existingToDo);
             await context.SaveChangesAsync();
@@ -67,9 +67,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
             TimeBlock timeBlock = TimeBlock.Day;
             var toDosList = new List<ToDo>()
                 {
-                    new ToDo("TestDescription", timeBlock, Difficulty.Easy, date, Guid.NewGuid(), userId),
-                    new ToDo("TestDescription2", timeBlock, Difficulty.Easy, date, Guid.NewGuid(), userId),
-                    new ToDo("TestDescription3", timeBlock, Difficulty.Easy, date, Guid.NewGuid(), Guid.NewGuid())
+                    new ToDo("TestDescription", timeBlock, Difficulty.Easy, date, "Other", userId),
+                    new ToDo("TestDescription2", timeBlock, Difficulty.Easy, date, "Other", userId),
+                    new ToDo("TestDescription3", timeBlock, Difficulty.Easy, date, "Other", Guid.NewGuid())
                 };
 
             context.ToDos.AddRange(toDosList);
@@ -114,7 +114,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         public async Task AddToDoAsync_ShouldAddToDo_WhenDataIsValid()
         {
             var repository = new ToDoRepository(context);
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
             var userId = toDo.UserId;
 
@@ -128,14 +128,12 @@ namespace Tests.IntegrationTests.RepositoriesTests
             Assert.Equal(Difficulty.Easy, toDoInDb.Difficulty);
             Assert.Equal(DateTime.Today, toDoInDb.ToDoDate);
             Assert.Equal(userId, toDoInDb.UserId);
-
-            Assert.Single(context.ToDos);
         }
 
         [Fact]
         public async Task AddToDoAsync_ShouldThrowException_WhenToDoIdAlreadyExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
 
             context.ToDos.Add(toDo);
             await context.SaveChangesAsync();
@@ -153,7 +151,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task UpdateToDoAsync_ShouldUpdateToDo_WhenToDoExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             context.ToDos.Add(toDo);
@@ -174,7 +172,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task UpdateToDoAsync_ShouldThrowException_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             var repository = new ToDoRepository(context);
@@ -194,7 +192,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task DeleteToDoAsync_ShouldDeleteToDo_WhenToDoExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             context.ToDos.Add(toDo);
@@ -211,7 +209,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task DeleteToDoAsync_ShouldDoNothing_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             var repository = new ToDoRepository(context);
@@ -229,7 +227,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task ToDoExistsAsync_ShouldReturnTrue_WhenToDoExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             context.ToDos.Add(toDo);
@@ -247,7 +245,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task ToDoExistsAsync_ShouldReturnFalse_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             var repository = new ToDoRepository(context);

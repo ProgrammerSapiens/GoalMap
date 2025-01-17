@@ -192,12 +192,12 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            Guid toDoCategoryId = Guid.NewGuid();
+            string toDoCategoryName = "Other";
             Guid userId = Guid.NewGuid();
             var toDos = new List<ToDo>
             {
-                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryId,userId),
-                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryId,userId)
+                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryName,userId),
+                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryName,userId)
             };
 
             user.ToDos = toDos;

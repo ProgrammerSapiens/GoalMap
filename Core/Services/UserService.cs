@@ -1,6 +1,5 @@
 ﻿using Core.Interfaces;
 using Core.Models;
-using Core.Services;
 
 namespace Core.Services
 {
@@ -11,7 +10,16 @@ namespace Core.Services
     {
         private readonly IUserRepository _repository;
         private readonly IPasswordHasher? _passwordHasher;
-        private readonly ToDoCategoryService _toDoCategoryService;
+        private readonly IToDoCategoryService? _toDoCategoryService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository.
+        /// </summary>
+        /// <param name="repository">The repository for user data access.</param>
+        public UserService(IUserRepository repository)
+        {
+            _repository = repository;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class with a user repository.
@@ -28,7 +36,18 @@ namespace Core.Services
         /// </summary>
         /// <param name="repository">The repository for user data access.</param>
         /// <param name="passwordHasher">The password hasher for secure password operations.</param>
-        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, ToDoCategoryService toDoCategoryService)
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
+        {
+            _repository = repository;
+            _passwordHasher = passwordHasher;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository and password hasher.
+        /// </summary>
+        /// <param name="repository">The repository for user data access.</param>
+        /// <param name="passwordHasher">The password hasher for secure password operations.</param>
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, IToDoCategoryService toDoCategoryService)
         {
             _repository = repository;
             _passwordHasher = passwordHasher;

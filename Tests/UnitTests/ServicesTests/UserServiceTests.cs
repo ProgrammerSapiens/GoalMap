@@ -28,7 +28,7 @@ namespace Tests.UnitTests.ServicesTests
                 ToDoCategories = new List<ToDoCategory>()
             };
 
-            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(true);
+            userRepositoryMock.Setup(repo => repo.UserExistsAsync(userName)).ReturnsAsync(true);
             userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync(expectedUser);
 
             var userService = new UserService(userRepositoryMock.Object);
@@ -107,7 +107,7 @@ namespace Tests.UnitTests.ServicesTests
 
             var userService = new UserService(userRepositoryMock.Object);
 
-            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(false);
+            userRepositoryMock.Setup(repo => repo.UserExistsAsync(userName)).ReturnsAsync(false);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Easy));
 
@@ -213,13 +213,16 @@ namespace Tests.UnitTests.ServicesTests
 
             var newUser = new User(userName, password, 100);
 
-            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(false);
+            userRepositoryMock.Setup(repo => repo.UserExistsAsync(userName)).ReturnsAsync(false);
             userRepositoryMock.Setup(repo => repo.AddUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
 
             var passwordHasherMock = new Mock<IPasswordHasher>();
             passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
-            var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object);
+            var toDoCategoryServiceMock = new Mock<IToDoCategoryService>();
+            toDoCategoryServiceMock.Setup(service => service.AddToDoCategoryAsync(It.IsAny<ToDoCategory>())).Returns(Task.CompletedTask);
+
+            var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object, toDoCategoryServiceMock.Object);
 
             await userService.RegisterUserAsync(newUser, password);
 
@@ -234,7 +237,7 @@ namespace Tests.UnitTests.ServicesTests
 
             var existingUser = new User(userName, password, 100);
 
-            userRepositoryMock.Setup(repo => repo.IsUserExistsAsync(userName)).ReturnsAsync(true);
+            userRepositoryMock.Setup(repo => repo.UserExistsAsync(userName)).ReturnsAsync(true);
 
             var userService = new UserService(userRepositoryMock.Object);
 
