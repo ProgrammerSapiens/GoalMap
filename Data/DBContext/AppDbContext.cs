@@ -10,5 +10,10 @@ namespace Data.DBContext
         public DbSet<User> Users { get; set; }
         public DbSet<ToDo> ToDos { get; set; }
         public DbSet<ToDoCategory> ToDoCategories { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+        }
     }
 }
