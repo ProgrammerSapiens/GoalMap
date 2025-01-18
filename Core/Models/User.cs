@@ -114,6 +114,27 @@
         /// </summary>
         /// <param name="userName">The name of the user.</param>
         /// <param name="passwordHash">The hashed password of the user.</param>
+        public User(string userName, string passwordHash)
+        {
+            if (string.IsNullOrEmpty(userName))
+                throw new ArgumentException(nameof(userName), "The userName of the user cannot be null or empty");
+            if (string.IsNullOrEmpty(passwordHash))
+                throw new ArgumentException(nameof(passwordHash), "The passwordHash of the user cannot be null or empty");
+
+            userId = Guid.NewGuid();
+            this.userName = userName;
+            this.passwordHash = passwordHash;
+            Experience = 0;
+            Level = 0;
+            ToDos = new List<ToDo>();
+            ToDoCategories = new List<ToDoCategory>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="User"/> class with the specified parameters.
+        /// </summary>
+        /// <param name="userName">The name of the user.</param>
+        /// <param name="passwordHash">The hashed password of the user.</param>
         /// <param name="experience">The experience points of the user.</param>
         public User(string userName, string passwordHash, int experience)
         {
