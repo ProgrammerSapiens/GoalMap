@@ -1,6 +1,6 @@
 ﻿namespace Tests.IntegrationTests.APITests
 {
-    public class ToDoCategoryControllerTests
+    public class ToDoCategoryControllerTests : IClassFixture<CustomWebApplicationFactory<TestProgram>>
     {
         private readonly HttpClient _httpClient;
 
