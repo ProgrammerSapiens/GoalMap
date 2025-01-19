@@ -9,46 +9,21 @@ namespace Core.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
-        private readonly IPasswordHasher? _passwordHasher;
-        private readonly IToDoCategoryService? _toDoCategoryService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository.
-        /// </summary>
-        /// <param name="repository">The repository for user data access.</param>
-        public UserService(IUserRepository repository)
-        {
-            _repository = repository;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository.
-        /// </summary>
-        /// <param name="repository">The repository for user data access.</param>
-        public UserService(IUserRepository repository, ToDoCategoryService toDoCategoryService)
-        {
-            _repository = repository;
-            _toDoCategoryService = toDoCategoryService;
-        }
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IToDoCategoryService _toDoCategoryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class with a user repository and password hasher.
         /// </summary>
         /// <param name="repository">The repository for user data access.</param>
         /// <param name="passwordHasher">The password hasher for secure password operations.</param>
-        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
+        public UserService(IUserRepository? repository, IPasswordHasher? passwordHasher, IToDoCategoryService? toDoCategoryService)
         {
-            _repository = repository;
-            _passwordHasher = passwordHasher;
-        }
+            if (repository == null || passwordHasher == null || toDoCategoryService == null)
+            {
+                throw new ArgumentNullException("You cannot initialize sources with null.");
+            }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository and password hasher.
-        /// </summary>
-        /// <param name="repository">The repository for user data access.</param>
-        /// <param name="passwordHasher">The password hasher for secure password operations.</param>
-        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, IToDoCategoryService toDoCategoryService)
-        {
             _repository = repository;
             _passwordHasher = passwordHasher;
             _toDoCategoryService = toDoCategoryService;
@@ -149,17 +124,38 @@ namespace Core.Services
                 throw new InvalidOperationException("User name is already exists.");
             }
 
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("Password cannot be null or empty");
+            }
+
             string hashedPassword = await _passwordHasher.HashPasswordAsync(password);
 
             user.PasswordHash = hashedPassword;
 
             await _repository.AddUserAsync(user);
 
+            await CreateDefaultCategoriesAsync(user.UserId);
+        }
+
+        /// <summary>
+        /// Creates and adds two default to-do categories for the specified user.
+        /// </summary>
+        /// <param name="userId">The ID of the user for whom the categories will be created.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the to-do category service was not provided in the constructor.</exception>
+        /// <remarks>
+        /// The method creates two categories named "Habbit" and "Other" and adds them via the <c>_toDoCategoryService</c>.
+        /// Each category is associated with the specified <paramref name="userId"/>. If the to-do category service was not injected into the constructor,
+        /// the method will throw an <see cref="InvalidOperationException"/>.
+        /// </remarks>
+        private async Task CreateDefaultCategoriesAsync(Guid userId)
+        {
             var defaultToDoCategories = new List<ToDoCategory>()
             {
-                new ToDoCategory(user.UserId, "Habbit"),
-                new ToDoCategory(user.UserId, "Other")
+                new ToDoCategory(userId, "Habbit"),
+                new ToDoCategory(userId, "Other")
             };
+
             await _toDoCategoryService.AddToDoCategoryAsync(defaultToDoCategories[0]);
             await _toDoCategoryService.AddToDoCategoryAsync(defaultToDoCategories[1]);
         }
