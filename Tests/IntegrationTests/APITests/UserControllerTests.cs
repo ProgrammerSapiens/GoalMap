@@ -12,7 +12,7 @@ namespace Tests.IntegrationTests.APITests
     public class UserControllerTests : IClassFixture<CustomWebApplicationFactory<TestProgram>>
     {
         private readonly HttpClient _client;
-        private readonly WebApplicationFactory<TestProgram> _factory;
+        private readonly CustomWebApplicationFactory<TestProgram> _factory;
 
         public UserControllerTests(CustomWebApplicationFactory<TestProgram> factory)
         {
