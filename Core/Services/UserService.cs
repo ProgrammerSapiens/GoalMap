@@ -17,7 +17,7 @@ namespace Core.Services
         /// </summary>
         /// <param name="repository">The repository for user data access.</param>
         /// <param name="passwordHasher">The password hasher for secure password operations.</param>
-        public UserService(IUserRepository? repository, IPasswordHasher? passwordHasher, IToDoCategoryService? toDoCategoryService)
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, IToDoCategoryService toDoCategoryService)
         {
             if (repository == null || passwordHasher == null || toDoCategoryService == null)
             {
@@ -45,6 +45,7 @@ namespace Core.Services
 
             var result = await _repository.GetUserByUserNameAsync(userName);
 
+            //TODO: Move all the empty checks to the controllers
             if (result == null)
             {
                 throw new InvalidOperationException("User does not exist.");
@@ -53,6 +54,7 @@ namespace Core.Services
             return result;
         }
 
+        //TODO: Add method that updates all user data
         /// <summary>
         /// Updates the experience of a user based on the difficulty of a completed task.
         /// </summary>
