@@ -2,7 +2,6 @@
 using Core.Interfaces;
 using Core.Services;
 using Core.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Tests.UnitTests.ServicesTests
 {
