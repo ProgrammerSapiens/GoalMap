@@ -6,7 +6,7 @@ namespace Core.Services
     /// <summary>
     /// Service for managing To-Do tasks, providing functionalities for adding, updating, retrieving, and deleting tasks, as well as moving repeated tasks.
     /// </summary>
-    internal class ToDoService : IToDoService
+    public class ToDoService : IToDoService
     {
         private readonly IToDoRepository _repository;
 
