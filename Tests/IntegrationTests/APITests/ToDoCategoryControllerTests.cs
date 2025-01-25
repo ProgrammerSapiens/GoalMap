@@ -6,15 +6,16 @@ using System.Net;
 using Newtonsoft.Json;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using API;
 
 namespace Tests.IntegrationTests.APITests
 {
-    public class ToDoCategoryControllerTests : IClassFixture<CustomWebApplicationFactory<TestProgram>>
+    public class ToDoCategoryControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<TestProgram> _factory;
+        private readonly CustomWebApplicationFactory<Program> _factory;
 
-        public ToDoCategoryControllerTests(CustomWebApplicationFactory<TestProgram> factory)
+        public ToDoCategoryControllerTests(CustomWebApplicationFactory<Program> factory)
         {
             _client = factory.CreateClient();
             _factory = factory;

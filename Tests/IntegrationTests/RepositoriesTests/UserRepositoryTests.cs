@@ -23,7 +23,8 @@ namespace Tests.IntegrationTests.RepositoriesTests
         public async Task GetUserByUserNameAsync_ShouldReturnUser_WhenUserExists()
         {
             var userName = "TestUser";
-            var existingUser = new User(userName, "hashedPassword", 100);
+            var password = "hashedPassword";
+            var existingUser = new User(userName, password, 100);
 
             context.Users.Add(existingUser);
             await context.SaveChangesAsync();
@@ -33,8 +34,8 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var result = await repository.GetUserByUserNameAsync(userName);
 
             Assert.NotNull(result);
-            Assert.Equal("TestUser", result.UserName);
-            Assert.Equal("hashedPassword", result.PasswordHash);
+            Assert.Equal(userName, result.UserName);
+            Assert.Equal(password, result.PasswordHash);
             Assert.Equal(100, result.Experience);
         }
 
