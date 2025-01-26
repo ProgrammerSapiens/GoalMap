@@ -30,9 +30,9 @@ namespace Data.Repositories
         /// <returns>
         /// A ToDoCategory object if found, otherwise <c>null</c>.
         /// </returns>
-        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId)
+        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(Guid userId, string toDoCategoryName)
         {
-            return await _context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            return await _context.ToDoCategories.SingleOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Data.Repositories
         /// </exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            if (await CategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId))
+            if (await CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
                 throw new InvalidOperationException("Category with such name already exists.");
             }
@@ -81,7 +81,7 @@ namespace Data.Repositories
                 throw new InvalidOperationException("Category does not exist.");
             }
 
-            if (await CategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId))
+            if (await CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
                 throw new InvalidOperationException("Such todo name already exists.");
             }
@@ -96,7 +96,7 @@ namespace Data.Repositories
         /// </summary>
         /// <param name="toDoCategoryName">The name of the ToDoCategory to delete.</param>
         /// <param name="userId">The ID of the user who owns the category.</param>
-        public async Task DeleteToDoCategoryAsync(string toDoCategoryName, Guid userId)
+        public async Task DeleteToDoCategoryAsync(Guid userId, string toDoCategoryName)
         {
             var toDoCategory = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
 
@@ -115,9 +115,19 @@ namespace Data.Repositories
         /// <returns>
         /// <c>true</c> if the category exists, otherwise <c>false</c>.
         /// </returns>
-        public async Task<bool> CategoryExistsAsync(string toDoCategoryName, Guid userId)
+        public async Task<bool> CategoryExistsByNameAsync(Guid userId, string toDoCategoryName)
         {
             return await _context.ToDoCategories.AnyAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
+        }
+
+        /// <summary>
+        /// Checks if a ToDoCategory with the specified id already exists for the given user.
+        /// </summary>
+        /// <param name="toDoCategoryId">The ID of the category</param>
+        /// <returns>True if the category exists, otherwise false</returns>
+        public async Task<bool> CategoryExistsByCategoryIdAsync(Guid toDoCategoryId)
+        {
+            return await _context.ToDoCategories.AnyAsync(c => c.ToDoCategoryId == toDoCategoryId);
         }
     }
 }
