@@ -46,7 +46,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var userName = "TestUser";
             var hashedPassword = "hashedPassword";
 
-            var user = new User(userName, hashedPassword, 0);
+            var user = new User(userName, hashedPassword);
             var userId = user.UserId;
 
             _context.Users.Add(user);
@@ -68,7 +68,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var userName = "TestUser";
             var hashedPassword = "hashedPassword";
 
-            var user = new User(userName, hashedPassword, 0);
+            var user = new User(userName, hashedPassword);
 
             var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
 
@@ -110,11 +110,18 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         [Fact]
         public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserDoesNotExist()
         {
+            var userName = "TestUser";
 
+            var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Nightmare));
+
+            Assert.Equal("User does not exist.", exception.Message);
         }
 
         #endregion
 
+        //TODO: Write AuthenticateUserAsync after the implementation of the authentication project
         #region AuthenticateUserAsync(string? userName, string? password)
 
         [Fact]
@@ -136,19 +143,72 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         [Fact]
         public async Task RegisterUserAsync_ShouldSucceed_WhenUserIsValid()
         {
+            var userName = "TestUser";
+            var password = "password";
+            var hashedPassword = "hashedPassword";
 
+            var user = new User(userName, password);
+            var userId = user.UserId;
+
+            _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
+
+            var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+
+            await userService.RegisterUserAsync(user, password);
+
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+
+            Assert.NotNull(userInDb);
+            Assert.Equal(hashedPassword, userInDb.PasswordHash);
+            Assert.Equal(userId, userInDb.UserId);
         }
 
         [Fact]
         public async Task RegisterUserAsync_ShouldCreateDefaultCategories_WhenUserIsValid()
         {
+            var userName = "TestUser";
+            var password = "password";
+            var hashedPassword = "hashedPassword";
 
+            var user = new User(userName, password);
+            var userId = user.UserId;
+
+            _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
+
+            var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+
+            await userService.RegisterUserAsync(user, password);
+
+            var defaultToDoCategoriesInDb = await _context.ToDoCategories.Where(c => c.ToDoCategoryName == "Habbit" || c.ToDoCategoryName == "Other").ToListAsync();
+
+            Assert.NotEmpty(defaultToDoCategoriesInDb);
+            Assert.Equal(2, defaultToDoCategoriesInDb.Count);
+            Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Habbit");
+            Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Other");
+            Assert.All(defaultToDoCategoriesInDb, category =>
+            {
+                Assert.Equal(userName, category.User.UserName);
+                Assert.Equal(userId, category.User.UserId);
+            });
         }
 
         [Fact]
         public async Task RegisterUserAsync_ShouldThrowException_WhenUserAlreadyExists()
         {
+            var userName = "TestUser";
+            var password = "password";
 
+            var user = new User(userName, password);
+            var userId = user.UserId;
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.RegisterUserAsync(user, password));
+
+            Assert.Equal("User name is already exists.", exception.Message);
         }
 
         #endregion
