@@ -239,7 +239,7 @@
         /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="deadline">The deadline for the todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime deadline)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
@@ -268,7 +268,7 @@
         /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="deadline">The deadline for the todo.</param>
         /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime deadline, Guid parentToDoId)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline, Guid parentToDoId)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
@@ -298,7 +298,7 @@
         /// <param name="deadline">The deadline for the todo.</param>
         /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
         /// <param name="repeatFrequency">The repeat frequency of the todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime deadline, Guid parentToDoId, RepeatFrequency repeatFrequency)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline, Guid parentToDoId, RepeatFrequency repeatFrequency)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
