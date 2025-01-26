@@ -6,16 +6,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Tests.IntegrationTests.RepositoriesTests
 {
-    public class ToDoCategoryRepositoryTests 
+    public class ToDoCategoryRepositoryTests : IAsyncLifetime
     {
         private readonly DbContextOptions<AppDbContext> dbContextOptions;
         private readonly AppDbContext context;
 
         public ToDoCategoryRepositoryTests()
         {
-            dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: "TestDatabase").Options;
+            dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
 
             context = new AppDbContext(dbContextOptions);
+        }
+
+        public Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task DisposeAsync()
+        {
+            await context.Database.EnsureDeletedAsync();
+            await context.DisposeAsync();
         }
 
         #region GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId) tests

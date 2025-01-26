@@ -8,7 +8,7 @@ using Core.Services;
 
 namespace Tests.IntegrationTests.Service_RepositoriyTests
 {
-    public class UserServiceRepositoryTests
+    public class UserServiceRepositoryTests : IAsyncLifetime
     {
         private readonly IUserRepository _userRepository;
         private readonly IToDoCategoryRepository _toDoCategoryRepository;
@@ -18,7 +18,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
         public UserServiceRepositoryTests()
         {
-            var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: "TestDb").Options;
+            var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(dbContextOptions);
 
             _userRepository = new UserRepository(_context);
@@ -27,9 +27,19 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _passwordHasherMock = new Mock<IPasswordHasher>();
         }
 
+        public Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task DisposeAsync()
+        {
+            await _context.Database.EnsureDeletedAsync();
+            await _context.DisposeAsync();
+        }
+
         #region GetUserByUserNameAsync(string? userName)
 
-        //TODO: Add the cleaner of the memory database after every test
         [Fact]
         public async Task GetUserByUserNameAsync_ShouldReturnUser_WhenUserExists()
         {
