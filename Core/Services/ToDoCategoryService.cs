@@ -34,7 +34,7 @@ namespace Core.Services
                 throw new ArgumentException("User id cannot be empty.");
             }
 
-            var result = await _repository.GetToDoCategoryByCategoryNameAsync(toDoCategoryName, userId);
+            var result = await _repository.GetToDoCategoryByCategoryNameAsync(userId, toDoCategoryName);
 
             if (result == null)
             {
@@ -67,6 +67,7 @@ namespace Core.Services
             return resultListOfToDoCategories;
         }
 
+        //TODO: Add a string case check
         /// <summary>
         /// Adds a new ToDo category.
         /// </summary>
@@ -74,7 +75,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if a category with the same name already exists.</exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            if (await _repository.CategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId))
+            if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
                 throw new InvalidOperationException("Сategory already exists.");
             }
@@ -89,7 +90,7 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
         public async Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            if (!(await _repository.CategoryExistsAsync(toDoCategory.ToDoCategoryName, toDoCategory.UserId)))
+            if (!(await _repository.CategoryExistsByCategoryIdAsync(toDoCategory.ToDoCategoryId)))
             {
                 throw new InvalidOperationException("Category does not exist.");
             }
@@ -115,7 +116,7 @@ namespace Core.Services
                 throw new ArgumentException("User id cannot be empty.");
             }
 
-            if (!(await _repository.CategoryExistsAsync(toDoCategoryName, userId)))
+            if (!(await _repository.CategoryExistsByNameAsync(userId, toDoCategoryName)))
             {
                 throw new InvalidOperationException("Category does not exist.");
             }
@@ -125,7 +126,7 @@ namespace Core.Services
                 throw new ArgumentException("You cannot delete this category.");
             }
 
-            await _repository.DeleteToDoCategoryAsync(toDoCategoryName, userId);
+            await _repository.DeleteToDoCategoryAsync(userId, toDoCategoryName);
         }
     }
 }
