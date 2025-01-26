@@ -300,11 +300,11 @@ namespace Tests.UnitTests.ServicesTests
 
             var repeatedToDos = new List<ToDo>
             {
-                new ToDo("Daily Task", TimeBlock.Day, Difficulty.Easy, originalDate, "Other", Guid.NewGuid(), originalDate.AddDays(2), userId, RepeatFrequency.Daily),
-                new ToDo("Weekly Task", TimeBlock.Day, Difficulty.Medium, originalDate, "Other", Guid.NewGuid(), originalDate.AddDays(3), userId, RepeatFrequency.Weekly),
-                new ToDo("Monthly Task", TimeBlock.Day, Difficulty.Hard, originalDate, "Other", Guid.NewGuid(), originalDate.AddMonths(1), userId, RepeatFrequency.Monthly),
-                new ToDo("Yearly Task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", Guid.NewGuid(), originalDate.AddYears(1), userId, RepeatFrequency.Yearly),
-                new ToDo("Not repeated task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", Guid.NewGuid(), originalDate.AddYears(1), userId, RepeatFrequency.None)
+                new ToDo("Daily Task", TimeBlock.Day, Difficulty.Easy, originalDate, "Other", Guid.NewGuid(), null, userId, RepeatFrequency.Daily),
+                new ToDo("Weekly Task", TimeBlock.Day, Difficulty.Medium, originalDate, "Other", Guid.NewGuid(), null, userId, RepeatFrequency.Weekly),
+                new ToDo("Monthly Task", TimeBlock.Day, Difficulty.Hard, originalDate, "Other", Guid.NewGuid(), null, userId, RepeatFrequency.Monthly),
+                new ToDo("Yearly Task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", Guid.NewGuid(), null, userId, RepeatFrequency.Yearly),
+                new ToDo("Not repeated task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", Guid.NewGuid(), null, userId, RepeatFrequency.None)
             };
 
             toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day)).ReturnsAsync(repeatedToDos);
