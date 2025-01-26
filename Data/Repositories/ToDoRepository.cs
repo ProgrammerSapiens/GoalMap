@@ -41,7 +41,7 @@ namespace Data.Repositories
         /// <returns>A list of ToDo items matching the specified criteria.</returns>
         public async Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
         {
-            return await _context.ToDos.Where(t => t.UserId == userId && t.ToDoDate == date && t.TimeBlock == timeBlock).ToListAsync();
+            return await _context.ToDos.Where(t => t.UserId == userId && t.ToDoDate.Date == date.Date && t.TimeBlock == timeBlock).ToListAsync();
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Data.Repositories
         /// <exception cref="InvalidOperationException">Thrown if the ToDo item does not exist.</exception>
         public async Task UpdateToDoAsync(ToDo toDo)
         {
-            var existingToDo = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            var existingToDo = await _context.ToDos.SingleOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
 
             if (existingToDo == null)
             {
