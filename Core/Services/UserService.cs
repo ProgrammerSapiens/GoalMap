@@ -83,6 +83,7 @@ namespace Core.Services
             await _repository.UpdateUserAsync(user);
         }
 
+        //TODO: Replace all non-exclusive errors with the return of the ActionResult object
         /// <summary>
         /// Authenticates a user by verifying their username and password.
         /// </summary>
