@@ -17,7 +17,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{userName}")]
-        public async Task<IActionResult> GetUserByUserName(string userName)
+        public async Task<ActionResult<User>> GetUserByUserName(string userName)
         {
             var user = await _userService.GetUserByUserNameAsync(userName);
 
@@ -26,7 +26,7 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            return Ok(user);
+            return user;
         }
 
         //TODO: Add returning user if registration is success
