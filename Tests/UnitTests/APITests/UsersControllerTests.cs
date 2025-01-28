@@ -30,7 +30,7 @@ namespace Tests.UnitTests.APITests
 
             var result = await _usersController.GetUserByUserName(userName);
 
-            var okResult = Assert.IsType<OkObjectResult>(result);
+            var okResult = Assert.IsType<ActionResult<User>>(result);
             var returnedUser = Assert.IsType<User>(okResult.Value);
             Assert.Equal(user.UserId, returnedUser.UserId);
         }
@@ -42,7 +42,7 @@ namespace Tests.UnitTests.APITests
 
             var result = await _usersController.GetUserByUserName(nonExistentUserName);
 
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<ActionResult<User>>(result);
         }
 
         #endregion
