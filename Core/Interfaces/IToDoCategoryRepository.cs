@@ -34,6 +34,8 @@ namespace Core.Interfaces
         /// <param name="toDoCategory">The category to be updated with new information.</param>
         Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory);
 
+        Task UpdateToDosCategoryAsync(Guid userId, string oldCategoryName, string newCategoryName);
+
         /// <summary>
         /// Deletes a category from the repository by its name and associated user ID.
         /// </summary>
