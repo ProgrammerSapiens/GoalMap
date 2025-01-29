@@ -32,7 +32,7 @@ namespace Data.Repositories
         /// </returns>
         public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(Guid userId, string toDoCategoryName)
         {
-            return await _context.ToDoCategories.SingleOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Data.Repositories
         /// </returns>
         public async Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId)
         {
-            return await _context.ToDoCategories.Where(c => c.UserId == userId).ToListAsync();
+            return await _context.ToDoCategories.AsNoTracking().Where(c => c.UserId == userId).ToListAsync();
         }
 
         /// <summary>
@@ -56,11 +56,6 @@ namespace Data.Repositories
         /// </exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            if (await CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
-            {
-                throw new InvalidOperationException("Category with such name already exists.");
-            }
-
             await _context.ToDoCategories.AddAsync(toDoCategory);
             await _context.SaveChangesAsync();
         }
@@ -81,12 +76,19 @@ namespace Data.Repositories
                 throw new InvalidOperationException("Category does not exist.");
             }
 
-            if (await CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
-            {
-                throw new InvalidOperationException("Such todo name already exists.");
-            }
-
             existingToDoCategory.ToDoCategoryName = toDoCategory.ToDoCategoryName;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateToDosCategoryAsync(Guid userId, string oldCategoryName, string newCategoryName)
+        {
+            var toDosToUpdate = await _context.ToDos.Where(t => t.UserId == userId && t.ToDoCategoryName == oldCategoryName).ToListAsync();
+
+            foreach (var toDo in toDosToUpdate)
+            {
+                toDo.ToDoCategoryName = newCategoryName;
+            }
 
             await _context.SaveChangesAsync();
         }
@@ -100,11 +102,13 @@ namespace Data.Repositories
         {
             var toDoCategory = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
 
-            if (toDoCategory != null)
+            if (toDoCategory == null)
             {
-                _context.ToDoCategories.Remove(toDoCategory);
-                await _context.SaveChangesAsync();
+                throw new InvalidOperationException("Category does not exist.");
             }
+
+            _context.ToDoCategories.Remove(toDoCategory);
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -117,7 +121,7 @@ namespace Data.Repositories
         /// </returns>
         public async Task<bool> CategoryExistsByNameAsync(Guid userId, string toDoCategoryName)
         {
-            return await _context.ToDoCategories.AnyAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
+            return await _context.ToDoCategories.AsNoTracking().AnyAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
         }
 
         /// <summary>
@@ -127,7 +131,7 @@ namespace Data.Repositories
         /// <returns>True if the category exists, otherwise false</returns>
         public async Task<bool> CategoryExistsByCategoryIdAsync(Guid toDoCategoryId)
         {
-            return await _context.ToDoCategories.AnyAsync(c => c.ToDoCategoryId == toDoCategoryId);
+            return await _context.ToDoCategories.AsNoTracking().AnyAsync(c => c.ToDoCategoryId == toDoCategoryId);
         }
     }
 }

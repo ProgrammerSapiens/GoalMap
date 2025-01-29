@@ -29,7 +29,7 @@ namespace Data.Repositories
         /// <returns>The ToDo item if found; otherwise, <c>null</c>.</returns>
         public async Task<ToDo?> GetToDoByIdAsync(Guid toDoId)
         {
-            return await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            return await _context.ToDos.AsNoTracking().SingleOrDefaultAsync(t => t.ToDoId == toDoId);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Data.Repositories
         /// <returns>A list of ToDo items matching the specified criteria.</returns>
         public async Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
         {
-            return await _context.ToDos.Where(t => t.UserId == userId && t.ToDoDate.Date == date.Date && t.TimeBlock == timeBlock).ToListAsync();
+            return await _context.ToDos.AsNoTracking().Where(t => t.UserId == userId && t.ToDoDate.Date == date.Date && t.TimeBlock == timeBlock).ToListAsync();
         }
 
         /// <summary>
@@ -51,11 +51,6 @@ namespace Data.Repositories
         /// <exception cref="InvalidOperationException">Thrown if a ToDo item with the same Id already exists.</exception>
         public async Task AddToDoAsync(ToDo toDo)
         {
-            if (await ToDoExistsAsync(toDo.ToDoId))
-            {
-                throw new InvalidOperationException("ToDo with such an Id already exists.");
-            }
-
             await _context.ToDos.AddAsync(toDo);
             await _context.SaveChangesAsync();
         }
@@ -74,14 +69,7 @@ namespace Data.Repositories
                 throw new InvalidOperationException("ToDo with such an Id does not exists.");
             }
 
-            existingToDo.Description = toDo.Description;
-            existingToDo.Difficulty = toDo.Difficulty;
-            existingToDo.Deadline = toDo.Deadline;
-            existingToDo.ToDoDate = toDo.ToDoDate;
-            existingToDo.CompletionStatus = toDo.CompletionStatus;
-            existingToDo.RepeatFrequency = toDo.RepeatFrequency;
-            existingToDo.ToDoCategoryName = toDo.ToDoCategoryName;
-            existingToDo.UserId = toDo.UserId;
+            _context.Entry(existingToDo).CurrentValues.SetValues(toDo);
 
             await _context.SaveChangesAsync();
         }
@@ -94,11 +82,13 @@ namespace Data.Repositories
         {
             var existingToDo = _context.ToDos.FirstOrDefault(t => t.ToDoId == toDoId);
 
-            if (existingToDo != null)
+            if (existingToDo == null)
             {
-                _context.ToDos.Remove(existingToDo);
-                await _context.SaveChangesAsync();
+                throw new InvalidOperationException("Todo id does not exist.");
             }
+
+            _context.ToDos.Remove(existingToDo);
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -108,7 +98,7 @@ namespace Data.Repositories
         /// <returns><c>true</c> if the ToDo item exists; otherwise, <c>false</c>.</returns>
         public async Task<bool> ToDoExistsAsync(Guid toDoId)
         {
-            return await _context.ToDos.AnyAsync(t => t.ToDoId == toDoId);
+            return await _context.ToDos.AsNoTracking().AnyAsync(t => t.ToDoId == toDoId);
         }
     }
 }

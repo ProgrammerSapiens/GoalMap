@@ -29,7 +29,7 @@ namespace Data.Repositories
         /// <returns>A task that represents the asynchronous operation. The task result contains the user if found, or null otherwise.</returns>
         public async Task<User?> GetUserByUserNameAsync(string userName)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            return await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == userName);
         }
 
         /// <summary>
@@ -40,11 +40,6 @@ namespace Data.Repositories
         /// <exception cref="InvalidOperationException">Thrown if a user with the same username already exists.</exception>
         public async Task AddUserAsync(User user)
         {
-            if (await UserExistsAsync(user.UserName))
-            {
-                throw new InvalidOperationException("User with the same userName already exists.");
-            }
-
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
@@ -61,14 +56,10 @@ namespace Data.Repositories
 
             if (existingUser == null)
             {
-                throw new InvalidOperationException("User with such a userName does not exist.");
+                throw new InvalidOperationException("User not found.");
             }
 
-            existingUser.UserName = user.UserName;
-            existingUser.PasswordHash = user.PasswordHash;
             existingUser.Experience = user.Experience;
-            existingUser.ToDos = user.ToDos;
-            existingUser.ToDoCategories = user.ToDoCategories;
 
             await _context.SaveChangesAsync();
         }
@@ -80,7 +71,7 @@ namespace Data.Repositories
         /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the user exists.</returns>
         public async Task<bool> UserExistsAsync(string userName)
         {
-            return await _context.Users.AnyAsync(u => u.UserName == userName);
+            return await _context.Users.AsNoTracking().AnyAsync(u => u.UserName == userName);
         }
     }
 }
