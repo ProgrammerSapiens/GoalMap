@@ -15,35 +15,85 @@ namespace API.Controllers
             _service = toDoCategoryService;
         }
 
-        [HttpGet("{categoryName}")]
-        public async Task<ActionResult<ToDoCategory>> GetToDoCategoryByCategoryName(Guid userId, string categoryName)
+        [HttpGet("{toDoCategoryName}")]
+        public async Task<ActionResult<ToDoCategory>> GetToDoCategoryByCategoryName(string toDoCategoryName)
         {
-            var toDoCategory = await _service.GetToDoCategoryByCategoryNameAsync(userId, categoryName);
+            var userId = User.Identity?.Name;
 
-            //TODO: Add returning Not Found
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User id not authenticated.");
+            }
+            if (string.IsNullOrEmpty(toDoCategoryName))
+            {
+                return BadRequest("User id or category name cannot be empty");
+            }
 
-            return toDoCategory;
+            try
+            {
+                var toDoCategory = await _service.GetToDoCategoryByCategoryNameAsync(Guid.Parse(userId), toDoCategoryName);
+
+                if (toDoCategory == null)
+                {
+                    return NotFound("Category not found.");
+                }
+                return toDoCategory;
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<List<ToDoCategory>>> GetToDoCategoriesByUserId(Guid userId)
+        [HttpGet("user")]
+        public async Task<ActionResult<List<ToDoCategory>>> GetToDoCategoriesByUserId()
         {
-            var categories = await _service.GetToDoCategoriesByUserIdAsync(userId);
+            var userId = User.Identity?.Name;
 
-            return categories;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            try
+            {
+                var categories = await _service.GetToDoCategoriesByUserIdAsync(Guid.Parse(userId));
+
+                if (categories.Count == 0)
+                {
+                    return new List<ToDoCategory>();
+                }
+
+                return categories;
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<ToDoCategory>> AddToDoCategory([FromBody] ToDoCategory toDoCategory)
+        public async Task<IActionResult> AddToDoCategory([FromBody] ToDoCategory toDoCategory)
         {
             if (toDoCategory == null)
             {
                 return BadRequest("Category data cannot be null.");
             }
 
-            await _service.AddToDoCategoryAsync(toDoCategory);
+            try
+            {
+                await _service.AddToDoCategoryAsync(toDoCategory);
 
-            return CreatedAtAction(nameof(GetToDoCategoryByCategoryName), new { categoryName = toDoCategory.ToDoCategoryName }, toDoCategory);
+                return CreatedAtAction(nameof(GetToDoCategoryByCategoryName), new { categoryId = toDoCategory.ToDoCategoryId }, toDoCategory);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpPut]
@@ -54,17 +104,52 @@ namespace API.Controllers
                 return BadRequest("Category data cannot be null.");
             }
 
-            await _service.UpdateToDoCategoryAsync(toDoCategory);
-
-            return NoContent();
+            try
+            {
+                await _service.UpdateToDoCategoryAsync(toDoCategory);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal Server error.");
+            }
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteToDoCategory(Guid userId, string categoryName)
+        public async Task<IActionResult> DeleteToDoCategory(string categoryName)
         {
-            await _service.DeleteToDoCategoryAsync(userId, categoryName);
+            var userId = User.Identity?.Name;
 
-            return NoContent();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            try
+            {
+                await _service.DeleteToDoCategoryAsync(Guid.Parse(userId), categoryName);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
         }
     }
 }

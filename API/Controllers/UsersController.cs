@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Core.Interfaces;
 using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -16,67 +17,109 @@ namespace API.Controllers
             _userService = userService;
         }
 
-        [HttpGet("{userName}")]
-        public async Task<ActionResult<User>> GetUserByUserName(string userName)
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<User>> GetCurrentUser()
         {
-            var user = await _userService.GetUserByUserNameAsync(userName);
+            var userName = User.Identity?.Name;
 
-            if (user == null)
+            if (string.IsNullOrEmpty(userName))
             {
-                return NotFound();
+                return Unauthorized("User is not authenticated.");
             }
 
-            return user;
+            try
+            {
+                var user = await _userService.GetUserByUserNameAsync(userName);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return user;
+            }
+            //Add logger through DI
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching user: {ex.Message}");
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         //TODO: Add returning user if registration is success
         [HttpPost]
-        public async Task<IActionResult> RegisterUser([FromBody] User user, [FromBody] string? password)
+        public async Task<ActionResult<User>> RegisterUser([FromBody] User user, [FromQuery] string? password)
         {
-            if (user == null)
+            if (user == null || string.IsNullOrEmpty(password))
             {
-                return BadRequest("User data cannot be null");
+                return BadRequest("User data or password cannot be null");
             }
 
             try
             {
                 await _userService.RegisterUserAsync(user, password);
+                return CreatedAtAction(nameof(GetCurrentUser), new { userName = user.UserName }, user);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            return CreatedAtAction(nameof(GetUserByUserName), new { userName = user.UserName }, user);
         }
 
         //TODO: Add returning Token from service
         [HttpPost("authenticate")]
-        public async Task<IActionResult> AuthenticateUser([FromBody] User user)
+        public async Task<IActionResult> AuthenticateUser([FromBody] User user, [FromQuery] string? password)
         {
-            var authentication = await _userService.AuthenticateUserAsync(user.UserName, user.PasswordHash);
-
-            if (!authentication)
+            if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(password))
             {
-                return Unauthorized("Invalid username or password");
+                return BadRequest("Username or password cannot be empty.");
             }
 
-            return Ok();
-        }
-
-        [HttpPut("experience/{userName}")]
-        public async Task<IActionResult> UpdateUserExperience(string userName, [FromBody] Difficulty difficulty)
-        {
             try
             {
-                await _userService.UpdateUserExperienceAsync(userName, difficulty);
+                var authentication = await _userService.AuthenticateUserAsync(user.UserName, user.PasswordHash);
+
+                if (!authentication)
+                {
+                    return Unauthorized("Invalid username or password");
+                }
+
+                return Ok();
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
             {
                 return BadRequest(ex.Message);
             }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
+        }
 
-            return NoContent();
+        [HttpPut("experience")]
+        public async Task<IActionResult> UpdateUserExperience([FromBody] Difficulty difficulty)
+        {
+            var userName = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
+
+            try
+            {
+                await _userService.UpdateUserExperienceAsync(userName, difficulty);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
         }
     }
 }
