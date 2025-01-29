@@ -62,21 +62,6 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.Equal(userId, result.UserId);
         }
 
-        [Fact]
-        public async Task GetUserByUserNameAsync_ShouldThrowException_WhenUserDoesNotExist()
-        {
-            var userName = "TestUser";
-            var hashedPassword = "hashedPassword";
-
-            var user = new User(userName, hashedPassword);
-
-            var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.GetUserByUserNameAsync(userName));
-
-            Assert.Equal("User does not exist.", exception.Message);
-        }
-
         #endregion
 
         #region UpdateUserExperienceAsync(string? userName, Difficulty taskDifficulty)

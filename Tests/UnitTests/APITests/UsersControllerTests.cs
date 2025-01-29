@@ -28,7 +28,7 @@ namespace Tests.UnitTests.APITests
 
             _userServiceMock.Setup(user => user.GetUserByUserNameAsync(userName)).ReturnsAsync(user);
 
-            var result = await _usersController.GetUserByUserName(userName);
+            var result = await _usersController.GetCurrentUser();
 
             var okResult = Assert.IsType<ActionResult<User>>(result);
             var returnedUser = Assert.IsType<User>(okResult.Value);
@@ -38,9 +38,7 @@ namespace Tests.UnitTests.APITests
         [Fact]
         public async Task GetUserByUserName_ShouldReturnNotFound_WhenUserDoesNotFound()
         {
-            string nonExistentUserName = "Some user";
-
-            var result = await _usersController.GetUserByUserName(nonExistentUserName);
+            var result = await _usersController.GetCurrentUser();
 
             Assert.IsType<ActionResult<User>>(result);
         }
@@ -99,7 +97,7 @@ namespace Tests.UnitTests.APITests
 
             _userServiceMock.Setup(service => service.AuthenticateUserAsync(userName, password)).ReturnsAsync(true);
 
-            var result = await _usersController.AuthenticateUser(user);
+            var result = await _usersController.AuthenticateUser(user, password);
             var okResult = Assert.IsType<OkResult>(result);
         }
 
@@ -113,7 +111,7 @@ namespace Tests.UnitTests.APITests
 
             _userServiceMock.Setup(service => service.AuthenticateUserAsync(userName, password)).ReturnsAsync(false);
 
-            var result = await _usersController.AuthenticateUser(user);
+            var result = await _usersController.AuthenticateUser(user, password);
             var unauthorisedResult = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal("Invalid username or password", unauthorisedResult.Value);
         }
@@ -133,7 +131,7 @@ namespace Tests.UnitTests.APITests
 
             _userServiceMock.Setup(service => service.UpdateUserExperienceAsync(userName, difficulty)).Returns(Task.CompletedTask);
 
-            await _usersController.UpdateUserExperience(userName, difficulty);
+            await _usersController.UpdateUserExperience(difficulty);
 
             _userServiceMock.Verify(service => service.UpdateUserExperienceAsync(userName, difficulty), Times.Once);
         }
@@ -149,7 +147,7 @@ namespace Tests.UnitTests.APITests
 
             _userServiceMock.Setup(service => service.UpdateUserExperienceAsync(userName, difficulty)).ThrowsAsync(new InvalidOperationException("User does not exist."));
 
-            var result = await _usersController.UpdateUserExperience(userName, difficulty);
+            var result = await _usersController.UpdateUserExperience(difficulty);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("User does not exist.", badRequestResult.Value);
         }

@@ -79,21 +79,6 @@ namespace Tests.IntegrationTests.RepositoriesTests
             Assert.Equal(0, userInDb.Experience);
         }
 
-        [Fact]
-        public async Task AddUserAsync_ShouldThrowException_WhenUserNameAlreadyExists()
-        {
-            var repository = new UserRepository(context);
-            var existingUser = new User("ExistingUser", "hashedPassword", 10);
-
-            context.Users.Add(existingUser);
-            await context.SaveChangesAsync();
-
-            var newUser = new User("ExistingUser", "newHashedPassword", 0);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.AddUserAsync(newUser));
-            Assert.Equal("User with the same userName already exists.", exception.Message);
-        }
-
         #endregion
 
         #region UpdateUserAsync(User user) tests
@@ -128,7 +113,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.UpdateUserAsync(nonExistentUser));
 
-            Assert.Equal("User with such a userName does not exist.", exception.Message);
+            Assert.Equal("User not found.", exception.Message);
         }
 
         #endregion

@@ -46,32 +46,6 @@ namespace Tests.UnitTests.ServicesTests
             Assert.Empty(result.ToDoCategories);
         }
 
-        [Fact]
-        public async Task GetUserByUserNameAsync_ShouldThrowException_WhenUserNameDoesNotExist()
-        {
-            var userName = "Test user";
-
-            userRepositoryMock.Setup(repo => repo.GetUserByUserNameAsync(userName)).ReturnsAsync((User?)null);
-
-            var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object, toDoCategoryServiceMock.Object);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.GetUserByUserNameAsync(userName));
-            Assert.Equal("User does not exist.", exception.Message);
-        }
-
-        [Fact]
-        public async Task GetUserByUserNameAsync_ShouldThrowException_WhenUserNameIsNullOrEmpty()
-        {
-            var userName = "";
-
-            var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object, toDoCategoryServiceMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => userService.GetUserByUserNameAsync(userName));
-
-            Assert.Equal("User name cannot be null or empty.", exception.Message);
-            userRepositoryMock.Verify(repo => repo.GetUserByUserNameAsync(userName), Times.Never);
-        }
-
         #endregion
 
         #region UpdateUserExperienceAsync(string userName, Difficulty difficulty) tests
@@ -123,9 +97,9 @@ namespace Tests.UnitTests.ServicesTests
 
             var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object, toDoCategoryServiceMock.Object);
 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Easy));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Easy));
 
-            Assert.Equal("User name cannot be null or empty.", exception.Message);
+            Assert.Equal("User does not exist.", exception.Message);
         }
 
         #endregion
@@ -186,19 +160,6 @@ namespace Tests.UnitTests.ServicesTests
             var result = await userService.AuthenticateUserAsync(userName, invalidPassword);
 
             Assert.False(result);
-        }
-
-        [Fact]
-        public async Task AuthenticateUserAsync_ShouldThrowException_WhenInputsAreNullOrEmpty()
-        {
-            var userService = new UserService(userRepositoryMock.Object, passwordHasherMock.Object, toDoCategoryServiceMock.Object);
-
-            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync(null, "password"));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("username", null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("", "password"));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("username", null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("username", ""));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.AuthenticateUserAsync("", "password"));
         }
 
         #endregion

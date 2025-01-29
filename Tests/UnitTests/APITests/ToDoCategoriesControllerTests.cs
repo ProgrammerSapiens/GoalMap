@@ -28,7 +28,7 @@ namespace Tests.UnitTests.APITests
 
             _mockService.Setup(service => service.GetToDoCategoryByCategoryNameAsync(userId, toDoCategoryName)).ReturnsAsync(expectedCategory);
 
-            var result = await _controller.GetToDoCategoryByCategoryName(userId, toDoCategoryName);
+            var result = await _controller.GetToDoCategoryByCategoryName(toDoCategoryName);
 
             var actionResult = Assert.IsType<ActionResult<ToDoCategory>>(result);
             Assert.Equal(expectedCategory, actionResult.Value);
@@ -50,7 +50,7 @@ namespace Tests.UnitTests.APITests
 
             _mockService.Setup(service => service.GetToDoCategoriesByUserIdAsync(userId)).ReturnsAsync(expectedCategories);
 
-            var result = await _controller.GetToDoCategoriesByUserId(userId);
+            var result = await _controller.GetToDoCategoriesByUserId();
 
             var actionResult = Assert.IsType<ActionResult<List<ToDoCategory>>>(result);
             Assert.Equal(expectedCategories, actionResult.Value);
@@ -69,7 +69,7 @@ namespace Tests.UnitTests.APITests
 
             var result = await _controller.AddToDoCategory(newCategory);
 
-            var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+            var actionResult = Assert.IsType<CreatedAtActionResult>(result);
             Assert.Equal(nameof(ToDoCategoriesController.GetToDoCategoryByCategoryName), actionResult.ActionName);
             Assert.Equal(newCategory, actionResult.Value);
         }
@@ -102,7 +102,7 @@ namespace Tests.UnitTests.APITests
 
             _mockService.Setup(service => service.DeleteToDoCategoryAsync(userId, categoryName)).Returns(Task.CompletedTask);
 
-            var result = await _controller.DeleteToDoCategory(userId, categoryName);
+            var result = await _controller.DeleteToDoCategory(categoryName);
 
             Assert.IsType<NoContentResult>(result);
         }

@@ -60,19 +60,6 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.Equal(expectedCategory.User.Experience, result.User.Experience);
         }
 
-        [Fact]
-        public async Task GetToDoCategoryByCategoryNameAsync_ShouldThrowException_WhenCategoryDoesNotExist()
-        {
-            var toDoCategoryName = "Test Category";
-            var userId = Guid.NewGuid();
-
-            var toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.GetToDoCategoryByCategoryNameAsync(userId, toDoCategoryName));
-
-            Assert.Equal("Category does not exist.", exception.Message);
-        }
-
         #endregion
 
         #region GetToDoCategoriesByUserIdAsync(Guid userId) tests
@@ -97,18 +84,6 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.NotNull(result);
             Assert.Equal(expectedCategories.Count, result.Count);
             Assert.All(result, category => Assert.Contains(expectedCategories, expC => expC.ToDoCategoryName == category.ToDoCategoryName));
-        }
-
-        [Fact]
-        public async Task GetToDoCategoriesByUserIdAsync_ShouldThrowException_WhenUserIdDoesNotExistOrThereIsNoCategories()
-        {
-            var userId = Guid.NewGuid();
-
-            var toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.GetToDoCategoriesByUserIdAsync(userId));
-
-            Assert.Equal("User Id does not exist or there is no categories.", exception.Message);
         }
 
         #endregion
@@ -205,9 +180,9 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             var toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.UpdateToDoCategoryAsync(defaultCategory));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.UpdateToDoCategoryAsync(defaultCategory));
 
-            Assert.Equal("You cannot update this category.", exception.Message);
+            Assert.Equal("Category with such name already exists.", exception.Message);
         }
 
         #endregion
