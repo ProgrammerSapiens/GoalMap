@@ -12,14 +12,13 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The user with the specified ID.</returns>
-        Task<User> GetUserByUserNameAsync(string? userName);
+        Task<User?> GetUserByUserNameAsync(string userName);
 
         /// <summary>
-        /// Updates the experience points of a user.
+        /// Registers a new user in the system.
         /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="experiencePoints">The amount of experience points to add.</param>
-        Task UpdateUserExperienceAsync(string? userName, Difficulty difficulty);
+        /// <param name="user">The user to register.</param>
+        Task RegisterUserAsync(User user, string password);
 
         /// <summary>
         /// Authenticates a user with the specified credentials.
@@ -29,12 +28,13 @@ namespace Core.Interfaces
         /// <returns>
         /// <c>true</c> if the credentials are valid; otherwise, <c>false</c>.
         /// </returns>
-        Task<bool> AuthenticateUserAsync(string? username, string? password);
+        Task<bool> AuthenticateUserAsync(string username, string password);
 
         /// <summary>
-        /// Registers a new user in the system.
+        /// Updates the experience points of a user.
         /// </summary>
-        /// <param name="user">The user to register.</param>
-        Task RegisterUserAsync(User user, string? password);
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="experiencePoints">The amount of experience points to add.</param>
+        Task UpdateUserExperienceAsync(string userName, Difficulty difficulty);
     }
 }

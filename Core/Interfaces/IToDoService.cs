@@ -12,7 +12,7 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="toDoId">The unique identifier of the todo.</param>
         /// <returns>The todo with the specified identifier.</returns>
-        Task<ToDo> GetToDoByIdAsync(Guid toDoId);
+        Task<ToDo?> GetToDoByIdAsync(Guid toDoId);
 
         /// <summary>
         /// Retrieves a list of todos for a specific user and date.
