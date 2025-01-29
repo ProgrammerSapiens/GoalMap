@@ -36,54 +36,34 @@ namespace Core.Services
         /// <returns>The user with the specified username.</returns>
         /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
-        public async Task<User> GetUserByUserNameAsync(string? userName)
+        public async Task<User?> GetUserByUserNameAsync(string userName)
         {
-            if (string.IsNullOrWhiteSpace(userName))
-            {
-                throw new ArgumentException("User name cannot be null or empty.");
-            }
-
-            var result = await _repository.GetUserByUserNameAsync(userName);
-
-            //TODO: Move all the empty checks to the controllers
-            if (result == null)
-            {
-                throw new InvalidOperationException("User does not exist.");
-            }
-
-            return result;
+            return await _repository.GetUserByUserNameAsync(userName);
         }
 
-        //TODO: Add method that updates all user data
         /// <summary>
-        /// Updates the experience of a user based on the difficulty of a completed task.
+        /// Registers a new user in the system.
         /// </summary>
-        /// <param name="userName">The username of the user to update.</param>
-        /// <param name="taskDifficulty">The difficulty of the task that was completed.</param>
+        /// <param name="user">The user to register.</param>
+        /// <param name="password">The password for the user.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
-        public async Task UpdateUserExperienceAsync(string? userName, Difficulty taskDifficulty)
+        /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
+        public async Task RegisterUserAsync(User user, string password)
         {
-            if (string.IsNullOrEmpty(userName))
+            if (await _repository.UserExistsAsync(user.UserName))
             {
-                throw new ArgumentException("User name cannot be null or empty.");
+                throw new InvalidOperationException("User name is already exists.");
             }
 
-            var user = await _repository.GetUserByUserNameAsync(userName);
+            string hashedPassword = await _passwordHasher.HashPasswordAsync(password);
 
-            if (user == null)
-            {
-                throw new InvalidOperationException("User does not exist.");
-            }
+            user.PasswordHash = hashedPassword;
 
-            int newUserExperience = user.Experience + (int)taskDifficulty;
-            user.Experience = newUserExperience;
+            await _repository.AddUserAsync(user);
 
-            await _repository.UpdateUserAsync(user);
+            await CreateDefaultCategoriesAsync(user.UserId);
         }
 
-        //TODO: Replace all non-exclusive errors with the return of the ActionResult object
         /// <summary>
         /// Authenticates a user by verifying their username and password.
         /// </summary>
@@ -91,13 +71,8 @@ namespace Core.Services
         /// <param name="password">The password of the user.</param>
         /// <returns><c>true</c> if authentication is successful; otherwise, <c>false</c>.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the username or password is null or empty.</exception>
-        public async Task<bool> AuthenticateUserAsync(string? userName, string? password)
+        public async Task<bool> AuthenticateUserAsync(string userName, string password)
         {
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
-            {
-                throw new ArgumentNullException();
-            }
-
             var user = await _repository.GetUserByUserNameAsync(userName);
 
             if (user == null)
@@ -113,32 +88,27 @@ namespace Core.Services
             return true;
         }
 
+        //TODO: Add method that updates all user data
         /// <summary>
-        /// Registers a new user in the system.
+        /// Updates the experience of a user based on the difficulty of a completed task.
         /// </summary>
-        /// <param name="user">The user to register.</param>
-        /// <param name="password">The password for the user.</param>
+        /// <param name="userName">The username of the user to update.</param>
+        /// <param name="taskDifficulty">The difficulty of the task that was completed.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
-        public async Task RegisterUserAsync(User user, string? password)
+        /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
+        public async Task UpdateUserExperienceAsync(string userName, Difficulty taskDifficulty)
         {
-            if (await _repository.UserExistsAsync(user.UserName))
+            var user = await _repository.GetUserByUserNameAsync(userName);
+
+            if (user == null)
             {
-                throw new InvalidOperationException("User name is already exists.");
+                throw new InvalidOperationException("User does not exist.");
             }
 
-            if (string.IsNullOrEmpty(password))
-            {
-                throw new ArgumentException("Password cannot be null or empty");
-            }
+            user.Experience += (int)taskDifficulty;
 
-            string hashedPassword = await _passwordHasher.HashPasswordAsync(password);
-
-            user.PasswordHash = hashedPassword;
-
-            await _repository.AddUserAsync(user);
-
-            await CreateDefaultCategoriesAsync(user.UserId);
+            await _repository.UpdateUserAsync(user);
         }
 
         /// <summary>
