@@ -25,21 +25,9 @@ namespace Core.Services
         /// <param name="toDoId">The unique identifier of the To-Do task.</param>
         /// <returns>The To-Do task corresponding to the provided identifier.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified identifier does not exist.</exception>
-        public async Task<ToDo> GetToDoByIdAsync(Guid toDoId)
+        public async Task<ToDo?> GetToDoByIdAsync(Guid toDoId)
         {
-            if (toDoId == Guid.Empty)
-            {
-                throw new ArgumentException("ToDo id cannot be empty.");
-            }
-
-            var result = await _repository.GetToDoByIdAsync(toDoId);
-
-            if (result == null)
-            {
-                throw new InvalidOperationException("Todo id was not found.");
-            }
-
-            return result;
+            return await _repository.GetToDoByIdAsync(toDoId);
         }
 
         /// <summary>
@@ -51,14 +39,7 @@ namespace Core.Services
         /// <returns>A list of To-Do tasks matching the given criteria.</returns>
         public async Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock)
         {
-            if (userId == Guid.Empty)
-            {
-                throw new ArgumentException("User id cannot be empty.");
-            }
-
-            var result = await _repository.GetToDosAsync(userId, date, timeBlock);
-
-            return result;
+            return await _repository.GetToDosAsync(userId, date, timeBlock);
         }
 
         /// <summary>
@@ -98,16 +79,6 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when the To-Do task with the specified ID does not exist.</exception>
         public async Task DeleteToDoAsync(Guid toDoId)
         {
-            if (toDoId == Guid.Empty)
-            {
-                throw new ArgumentException("ToDo id cannot be empty.");
-            }
-
-            if (!(await _repository.ToDoExistsAsync(toDoId)))
-            {
-                throw new InvalidOperationException("Todo id does not exist.");
-            }
-
             await _repository.DeleteToDoAsync(toDoId);
         }
 
