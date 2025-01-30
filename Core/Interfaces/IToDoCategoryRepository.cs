@@ -13,7 +13,7 @@ namespace Core.Interfaces
         /// <param name="toDoCategoryName">The name of the ToDo category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>The category associated with the specified name and user ID.</returns>
-        Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(Guid userId, string categoryName);
+        Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid userId, Guid toDoCategoryId);
 
         /// <summary>
         /// Retrieves all categories associated with a specific user.
@@ -34,14 +34,14 @@ namespace Core.Interfaces
         /// <param name="toDoCategory">The category to be updated with new information.</param>
         Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory);
 
-        Task UpdateToDosCategoryAsync(Guid userId, string oldCategoryName, string newCategoryName);
+        Task UpdateCategoryInToDosAsync(Guid userId, string oldCategoryName, string newCategoryName);
 
         /// <summary>
         /// Deletes a category from the repository by its name and associated user ID.
         /// </summary>
         /// <param name="toDoCategoryName">The name of the ToDo category to be deleted.</param>
         /// <param name="userId">The unique identifier of the user.</param>
-        Task DeleteToDoCategoryAsync(Guid userId, string categoryName);
+        Task DeleteToDoCategoryAsync(Guid userId, Guid toDoCategoryId);
 
         /// <summary>
         /// Checks if a category exists in the repository by its name and associated user ID.
@@ -50,12 +50,5 @@ namespace Core.Interfaces
         /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>True if the category exists, otherwise false.</returns>
         Task<bool> CategoryExistsByNameAsync(Guid userId, string toDoCategoryName);
-
-        /// <summary>
-        /// Checks if a category exists in the repository by its ID.
-        /// </summary>
-        /// <param name="toDoCategoryId">The unique identifier of the category.</param>
-        /// <returns>True if the category exists, otherwise false.</returns>
-        Task<bool> CategoryExistsByCategoryIdAsync(Guid toDoCategoryId);
     }
 }
