@@ -15,8 +15,8 @@ namespace API.Controllers
             _service = toDoCategoryService;
         }
 
-        [HttpGet("{toDoCategoryName}")]
-        public async Task<ActionResult<ToDoCategory>> GetToDoCategoryByCategoryName(string toDoCategoryName)
+        [HttpGet("{toDoCategoryId}")]
+        public async Task<ActionResult<ToDoCategory>> GetToDoCategoryByCategoryId(Guid toDoCategoryId)
         {
             var userId = User.Identity?.Name;
 
@@ -24,14 +24,14 @@ namespace API.Controllers
             {
                 return Unauthorized("User id not authenticated.");
             }
-            if (string.IsNullOrEmpty(toDoCategoryName))
+            if (Guid.Empty == toDoCategoryId)
             {
                 return BadRequest("User id or category name cannot be empty");
             }
 
             try
             {
-                var toDoCategory = await _service.GetToDoCategoryByCategoryNameAsync(Guid.Parse(userId), toDoCategoryName);
+                var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(Guid.Parse(userId), toDoCategoryId);
 
                 if (toDoCategory == null)
                 {
@@ -84,7 +84,7 @@ namespace API.Controllers
             {
                 await _service.AddToDoCategoryAsync(toDoCategory);
 
-                return CreatedAtAction(nameof(GetToDoCategoryByCategoryName), new { categoryId = toDoCategory.ToDoCategoryId }, toDoCategory);
+                return CreatedAtAction(nameof(GetToDoCategoryByCategoryId), new { categoryId = toDoCategory.ToDoCategoryId }, toDoCategory);
             }
             catch (InvalidOperationException ex)
             {
@@ -124,7 +124,7 @@ namespace API.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteToDoCategory(string categoryName)
+        public async Task<IActionResult> DeleteToDoCategory(Guid toDoCategoryId)
         {
             var userId = User.Identity?.Name;
 
@@ -132,10 +132,14 @@ namespace API.Controllers
             {
                 return Unauthorized("User is not authenticated.");
             }
+            if (Guid.Empty == toDoCategoryId)
+            {
+                return BadRequest("ToDo category id cannot be empty.");
+            }
 
             try
             {
-                await _service.DeleteToDoCategoryAsync(Guid.Parse(userId), categoryName);
+                await _service.DeleteToDoCategoryAsync(Guid.Parse(userId), toDoCategoryId);
                 return NoContent();
             }
             catch (InvalidOperationException ex)

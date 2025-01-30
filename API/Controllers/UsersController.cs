@@ -21,33 +21,31 @@ namespace API.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<User>> GetCurrentUser()
         {
-            var userName = User.Identity?.Name;
+            var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userName))
+            if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User is not authenticated.");
             }
 
             try
             {
-                var user = await _userService.GetUserByUserNameAsync(userName);
+                var user = await _userService.GetUserByUserIdAsync(Guid.Parse(userId));
 
                 if (user == null)
                 {
-                    return NotFound();
+                    return NotFound("User was not found.");
                 }
 
                 return user;
             }
             //Add logger through DI
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Error fetching user: {ex.Message}");
                 return StatusCode(500, "Internal server error.");
             }
         }
 
-        //TODO: Add returning user if registration is success
         [HttpPost]
         public async Task<ActionResult<User>> RegisterUser([FromBody] User user, [FromQuery] string? password)
         {
@@ -69,16 +67,16 @@ namespace API.Controllers
 
         //TODO: Add returning Token from service
         [HttpPost("authenticate")]
-        public async Task<IActionResult> AuthenticateUser([FromBody] User user, [FromQuery] string? password)
+        public async Task<IActionResult> AuthenticateUser([FromQuery] string? userName, [FromQuery] string? password)
         {
-            if (string.IsNullOrWhiteSpace(user.UserName) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
             {
                 return BadRequest("Username or password cannot be empty.");
             }
 
             try
             {
-                var authentication = await _userService.AuthenticateUserAsync(user.UserName, user.PasswordHash);
+                var authentication = await _userService.AuthenticateUserAsync(userName, password);
 
                 if (!authentication)
                 {
@@ -98,18 +96,18 @@ namespace API.Controllers
         }
 
         [HttpPut("experience")]
-        public async Task<IActionResult> UpdateUserExperience([FromBody] Difficulty difficulty)
+        public async Task<IActionResult> UpdateUser([FromBody] User user)
         {
-            var userName = User.Identity?.Name;
+            var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userName))
+            if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User is not authenticated.");
             }
 
             try
             {
-                await _userService.UpdateUserExperienceAsync(userName, difficulty);
+                await _userService.UpdateUserAsync(user);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
