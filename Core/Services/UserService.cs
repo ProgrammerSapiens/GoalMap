@@ -10,23 +10,21 @@ namespace Core.Services
     {
         private readonly IUserRepository _repository;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IToDoCategoryService _toDoCategoryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class with a user repository and password hasher.
         /// </summary>
         /// <param name="repository">The repository for user data access.</param>
         /// <param name="passwordHasher">The password hasher for secure password operations.</param>
-        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, IToDoCategoryService toDoCategoryService)
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
         {
-            if (repository == null || passwordHasher == null || toDoCategoryService == null)
+            if (repository == null || passwordHasher == null)
             {
                 throw new ArgumentNullException("You cannot initialize sources with null.");
             }
 
             _repository = repository;
             _passwordHasher = passwordHasher;
-            _toDoCategoryService = toDoCategoryService;
         }
 
         /// <summary>
@@ -36,9 +34,9 @@ namespace Core.Services
         /// <returns>The user with the specified username.</returns>
         /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
-        public async Task<User?> GetUserByUserNameAsync(string userName)
+        public async Task<User?> GetUserByUserIdAsync(Guid userId)
         {
-            return await _repository.GetUserByUserNameAsync(userName);
+            return await _repository.GetUserByUserIdAsync(userId);
         }
 
         /// <summary>
@@ -50,7 +48,9 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
         public async Task RegisterUserAsync(User user, string password)
         {
-            if (await _repository.UserExistsAsync(user.UserName))
+            var existingUser = await _repository.GetUserByUserNameAsync(user.UserName);
+
+            if (existingUser != null)
             {
                 throw new InvalidOperationException("User name is already exists.");
             }
@@ -60,7 +60,6 @@ namespace Core.Services
             user.PasswordHash = hashedPassword;
 
             await _repository.AddUserAsync(user);
-
             await CreateDefaultCategoriesAsync(user.UserId);
         }
 
@@ -80,7 +79,9 @@ namespace Core.Services
                 return false;
             }
 
-            if (!await _passwordHasher.VerifyPasswordAsync(password, user.PasswordHash))
+            var passwordIsRight = await _passwordHasher.VerifyPasswordAsync(password, user.PasswordHash);
+
+            if (!passwordIsRight)
             {
                 return false;
             }
@@ -88,7 +89,11 @@ namespace Core.Services
             return true;
         }
 
-        //TODO: Add method that updates all user data
+        public async Task UpdateUserAsync(User user)
+        {
+            await _repository.UpdateUserAsync(user);
+        }
+
         /// <summary>
         /// Updates the experience of a user based on the difficulty of a completed task.
         /// </summary>
@@ -97,13 +102,13 @@ namespace Core.Services
         /// <returns>A task representing the asynchronous operation.</returns>
         /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
-        public async Task UpdateUserExperienceAsync(string userName, Difficulty taskDifficulty)
+        public async Task UpdateUserExperienceAsync(Guid userId, Difficulty taskDifficulty)
         {
-            var user = await _repository.GetUserByUserNameAsync(userName);
+            var user = await _repository.GetUserByUserIdAsync(userId);
 
             if (user == null)
             {
-                throw new InvalidOperationException("User does not exist.");
+                throw new InvalidOperationException("User was not found.");
             }
 
             user.Experience += (int)taskDifficulty;
@@ -129,8 +134,7 @@ namespace Core.Services
                 new ToDoCategory(userId, "Other")
             };
 
-            await _toDoCategoryService.AddToDoCategoryAsync(defaultToDoCategories[0]);
-            await _toDoCategoryService.AddToDoCategoryAsync(defaultToDoCategories[1]);
+            await _repository.AddDefaultCategoriesAsync(defaultToDoCategories);
         }
     }
 }
