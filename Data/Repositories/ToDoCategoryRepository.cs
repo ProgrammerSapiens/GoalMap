@@ -30,9 +30,9 @@ namespace Data.Repositories
         /// <returns>
         /// A ToDoCategory object if found, otherwise <c>null</c>.
         /// </returns>
-        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(Guid userId, string toDoCategoryName)
+        public async Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid userId, Guid toDoCategoryId)
         {
-            return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryId == toDoCategoryId);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateToDosCategoryAsync(Guid userId, string oldCategoryName, string newCategoryName)
+        public async Task UpdateCategoryInToDosAsync(Guid userId, string oldCategoryName, string newCategoryName)
         {
             var toDosToUpdate = await _context.ToDos.Where(t => t.UserId == userId && t.ToDoCategoryName == oldCategoryName).ToListAsync();
 
@@ -98,9 +98,9 @@ namespace Data.Repositories
         /// </summary>
         /// <param name="toDoCategoryName">The name of the ToDoCategory to delete.</param>
         /// <param name="userId">The ID of the user who owns the category.</param>
-        public async Task DeleteToDoCategoryAsync(Guid userId, string toDoCategoryName)
+        public async Task DeleteToDoCategoryAsync(Guid userId, Guid toDoCategoryId)
         {
-            var toDoCategory = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == toDoCategoryName);
+            var toDoCategory = await _context.ToDoCategories.SingleOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryId == toDoCategoryId);
 
             if (toDoCategory == null)
             {
@@ -122,16 +122,6 @@ namespace Data.Repositories
         public async Task<bool> CategoryExistsByNameAsync(Guid userId, string toDoCategoryName)
         {
             return await _context.ToDoCategories.AsNoTracking().AnyAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
-        }
-
-        /// <summary>
-        /// Checks if a ToDoCategory with the specified id already exists for the given user.
-        /// </summary>
-        /// <param name="toDoCategoryId">The ID of the category</param>
-        /// <returns>True if the category exists, otherwise false</returns>
-        public async Task<bool> CategoryExistsByCategoryIdAsync(Guid toDoCategoryId)
-        {
-            return await _context.ToDoCategories.AsNoTracking().AnyAsync(c => c.ToDoCategoryId == toDoCategoryId);
         }
     }
 }

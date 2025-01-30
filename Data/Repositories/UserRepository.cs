@@ -27,6 +27,11 @@ namespace Data.Repositories
         /// </summary>
         /// <param name="userName">The username of the user to retrieve.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the user if found, or null otherwise.</returns>
+        public async Task<User?> GetUserByUserIdAsync(Guid userId)
+        {
+            return await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserId == userId);
+        }
+
         public async Task<User?> GetUserByUserNameAsync(string userName)
         {
             return await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == userName);
@@ -59,19 +64,14 @@ namespace Data.Repositories
                 throw new InvalidOperationException("User not found.");
             }
 
-            existingUser.Experience = user.Experience;
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
 
             await _context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Checks if a user with the given username exists in the database.
-        /// </summary>
-        /// <param name="userName">The username to check.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the user exists.</returns>
-        public async Task<bool> UserExistsAsync(string userName)
+        public async Task AddDefaultCategoriesAsync(List<ToDoCategory> defaultCategories)
         {
-            return await _context.Users.AsNoTracking().AnyAsync(u => u.UserName == userName);
+            await _context.ToDoCategories.AddRangeAsync(defaultCategories);
         }
     }
 }
