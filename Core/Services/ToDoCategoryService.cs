@@ -27,9 +27,9 @@ namespace Core.Services
         /// <param name="userId">The user Id.</param>
         /// <returns>The ToDo category object.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
-        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(Guid userId, string toDoCategoryName)
+        public async Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid userId, Guid toDoCategoryId)
         {
-            return await _repository.GetToDoCategoryByCategoryNameAsync(userId, toDoCategoryName);
+            return await _repository.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Core.Services
             return await _repository.GetToDoCategoriesByUserIdAsync(userId);
         }
 
-        //TODO: Write test to check if the filters are working correctly.
+        //TODO: Write integration test to check if the filters are working correctly.
         /// <summary>
         /// Adds a new ToDo category.
         /// </summary>
@@ -51,12 +51,11 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if a category with the same name already exists.</exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            var nameWithACapitalLetter = toDoCategory.ToDoCategoryName;
-            toDoCategory.ToDoCategoryName = char.ToUpper(nameWithACapitalLetter[0]) + nameWithACapitalLetter.Substring(1).ToLower();
+            toDoCategory.ToDoCategoryName = GetNameWithACapitalLetter(toDoCategory.ToDoCategoryName);
 
             if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
-                throw new InvalidOperationException("Сategory already exists.");
+                throw new InvalidOperationException("Category with such name already exists.");
             }
 
             if (toDoCategory.ToDoCategoryName.Any(char.IsDigit))
@@ -74,26 +73,29 @@ namespace Core.Services
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
         public async Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            var nameWithACapitalLetter = toDoCategory.ToDoCategoryName;
-            toDoCategory.ToDoCategoryName = char.ToUpper(nameWithACapitalLetter[0]) + nameWithACapitalLetter.Substring(1).ToLower();
+            var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryId);
 
-            if (!(await _repository.CategoryExistsByCategoryIdAsync(toDoCategory.ToDoCategoryId)))
+            if (existingToDoCategory == null)
             {
-                throw new InvalidOperationException("Category does not exist.");
+                throw new InvalidOperationException("Category was not found.");
             }
 
-            if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
+            toDoCategory.ToDoCategoryName = GetNameWithACapitalLetter(toDoCategory.ToDoCategoryName);
+            var oldCategoryName = existingToDoCategory.ToDoCategoryName;
+            var newCategoryName = toDoCategory.ToDoCategoryName;
+
+            if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, newCategoryName))
             {
                 throw new InvalidOperationException("Category with such name already exists.");
             }
 
-            if (toDoCategory.ToDoCategoryName == "Habbit" || toDoCategory.ToDoCategoryName == "Other")
+            if (newCategoryName == "Habbit" || newCategoryName == "Other")
             {
                 throw new ArgumentException("You cannot update this category.");
             }
-     
+
             await _repository.UpdateToDoCategoryAsync(toDoCategory);
-            //await _repository.UpdateToDosCategoryAsync(toDoCategory.UserId,)
+            await _repository.UpdateCategoryInToDosAsync(toDoCategory.UserId, oldCategoryName, newCategoryName);
         }
 
         /// <summary>
@@ -102,14 +104,30 @@ namespace Core.Services
         /// <param name="toDoCategoryName">The name of the ToDo category.</param>
         /// <param name="userId">The user Id.</param>
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
-        public async Task DeleteToDoCategoryAsync(Guid userId, string toDoCategoryName)
+        public async Task DeleteToDoCategoryAsync(Guid userId, Guid toDoCategoryId)
         {
-            if (toDoCategoryName == "Habbit" || toDoCategoryName == "Other")
+            var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+
+            if (existingToDoCategory == null)
+            {
+                throw new InvalidOperationException("ToDo category was not found.");
+            }
+
+            var oldCategoryName = existingToDoCategory.ToDoCategoryName;
+            var newCategoryName = "Other";
+
+            if (oldCategoryName == "Habbit" || oldCategoryName == "Other")
             {
                 throw new ArgumentException("You cannot delete this category.");
             }
 
-            await _repository.DeleteToDoCategoryAsync(userId, toDoCategoryName);
+            await _repository.DeleteToDoCategoryAsync(userId, toDoCategoryId);
+            await _repository.UpdateCategoryInToDosAsync(userId, oldCategoryName, newCategoryName);
+        }
+
+        private string GetNameWithACapitalLetter(string categoryName)
+        {
+            return char.ToUpper(categoryName[0]) + categoryName.Substring(1).ToLower();
         }
     }
 }
