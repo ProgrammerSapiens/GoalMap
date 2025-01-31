@@ -147,26 +147,27 @@ namespace Tests.UnitTests.ServicesTests
         [Fact]
         public async Task UpdateToDoCategoryAsync_ShouldUpdateCategory_WhenCategoryIsValid()
         {
-            // Arrange
             var userId = Guid.NewGuid();
             var oldToDoCategoryName = "Test category";
             var newToDoCategoryName = "New name";
 
             var existingToDoCategory = new ToDoCategory(userId, oldToDoCategoryName);
-            var toDoCategoryId = existingToDoCategory.ToDoCategoryId;
+            var newToDoCategory = new ToDoCategory(userId, newToDoCategoryName);
+            var toDoCategoryId = newToDoCategory.ToDoCategoryId;
+
+            var oldCategoryNameCope = existingToDoCategory.ToDoCategoryName;
 
             toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId)).ReturnsAsync(existingToDoCategory);
             toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByNameAsync(userId, newToDoCategoryName)).ReturnsAsync(false);
             toDoCategoryRepositoryMock.Setup(repo => repo.UpdateToDoCategoryAsync(It.IsAny<ToDoCategory>())).Returns(Task.CompletedTask);
             toDoCategoryRepositoryMock.Setup(repo => repo.UpdateCategoryInToDosAsync(userId, oldToDoCategoryName, newToDoCategoryName)).Returns(Task.CompletedTask);
 
-            existingToDoCategory.ToDoCategoryName = newToDoCategoryName; 
-            await toDoCategoryService.UpdateToDoCategoryAsync(existingToDoCategory);
+            await toDoCategoryService.UpdateToDoCategoryAsync(newToDoCategory);
 
             toDoCategoryRepositoryMock.Verify(repo => repo.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId), Times.Once());
             toDoCategoryRepositoryMock.Verify(repo => repo.CategoryExistsByNameAsync(userId, newToDoCategoryName), Times.Once());
             toDoCategoryRepositoryMock.Verify(repo => repo.UpdateToDoCategoryAsync(It.Is<ToDoCategory>(c => c.UserId == userId && c.ToDoCategoryName == newToDoCategoryName)), Times.Once());
-            toDoCategoryRepositoryMock.Verify(repo => repo.UpdateCategoryInToDosAsync(userId, It.Is<string>(s => s == oldToDoCategoryName), It.Is<string>(s => s == newToDoCategoryName)), Times.Once());
+            toDoCategoryRepositoryMock.Verify(repo => repo.UpdateCategoryInToDosAsync(userId, oldToDoCategoryName, newToDoCategoryName), Times.Once());
         }
 
         [Fact]
@@ -178,68 +179,67 @@ namespace Tests.UnitTests.ServicesTests
 
             toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByNameAsync(userId, toDoCategoryName)).ReturnsAsync(false);
 
-            var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory));
 
-            Assert.Equal("Category does not exist.", exception.Message);
+            Assert.Equal("Category was not found.", exception.Message);
         }
 
-        //[Theory]
-        //[InlineData("Habbit")]
-        //[InlineData("Other")]
-        //public async Task UpdateToDoCategoryAsync_ShouldThrowException_WhenCategoryIsDefault(string toDoCategoryName)
-        //{
-        //    var userId = Guid.NewGuid();
-        //    var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+        [Theory]
+        [InlineData("Habbit")]
+        [InlineData("Other")]
+        public async Task UpdateToDoCategoryAsync_ShouldThrowException_WhenCategoryIsDefault(string toDoCategoryName)
+        {
+            var userId = Guid.NewGuid();
+            var existingToDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var newToDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-        //    toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByCategoryIdAsync(toDoCategory.ToDoCategoryId)).ReturnsAsync(true);
+            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryIdAsync(userId, newToDoCategory.ToDoCategoryId)).ReturnsAsync(existingToDoCategory);
 
-        //    var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.UpdateToDoCategoryAsync(newToDoCategory));
 
-        //    var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory));
-
-        //    Assert.Equal("You cannot update this category.", exception.Message);
-        //    toDoCategoryRepositoryMock.Verify(repo => repo.UpdateToDoCategoryAsync(toDoCategory), Times.Never());
-        //}
+            Assert.Equal("You cannot update this category.", exception.Message);
+            toDoCategoryRepositoryMock.Verify(repo => repo.UpdateToDoCategoryAsync(newToDoCategory), Times.Never());
+        }
 
         #endregion
 
         #region DeleteToDoCategoryAsync(Guid toDoCategoryId) tests
 
-        //[Fact]
-        //public async Task DeleteToDoCategoryAsync_ShouldDeleteCategory_WhenCategoryExists()
-        //{
-        //    var toDoCategoryName = "Test Category";
-        //    var userId = Guid.NewGuid();
+        [Fact]
+        public async Task DeleteToDoCategoryAsync_ShouldDeleteCategory_WhenCategoryExists()
+        {
+            var toDoCategoryName = "Test category";
+            var userId = Guid.NewGuid();
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var toDoCategoryId = toDoCategory.ToDoCategoryId;
 
-        //    toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByNameAsync(userId, toDoCategoryName)).ReturnsAsync(true);
-        //    toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryName)).Returns(Task.CompletedTask);
+            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId)).ReturnsAsync(toDoCategory);
+            toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryId)).Returns(Task.CompletedTask);
+            toDoCategoryRepositoryMock.Setup(repo => repo.UpdateCategoryInToDosAsync(userId, toDoCategoryName, "Other")).Returns(Task.CompletedTask);
 
-        //    var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
+            await toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategory.ToDoCategoryId);
 
-        //    await toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategoryName);
+            toDoCategoryRepositoryMock.Verify(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryId), Times.Once);
+            toDoCategoryRepositoryMock.Verify(repo => repo.UpdateCategoryInToDosAsync(userId, toDoCategoryName, "Other"), Times.Once);
+        }
 
-        //    toDoCategoryRepositoryMock.Verify(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryName), Times.Once);
-        //}
+        [Theory]
+        [InlineData("Habbit")]
+        [InlineData("Other")]
+        public async Task DeleteToDoCategoryAsync_ShouldThrowException_WhenCategoryIsDefault(string toDoCategoryName)
+        {
+            var userId = Guid.NewGuid();
+            var existingToDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var toDoCategoryId = existingToDoCategory.ToDoCategoryId;
 
-        //[Theory]
-        //[InlineData("Habbit")]
-        //[InlineData("Other")]
-        //public async Task DeleteToDoCategoryAsync_ShouldThrowException_WhenCategoryIsDefault(string toDoCategoryName)
-        //{
-        //    var userId = Guid.NewGuid();
+            toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId)).ReturnsAsync(existingToDoCategory);
+            toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryId)).Returns(Task.CompletedTask);
 
-        //    toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByNameAsync(userId, toDoCategoryName)).ReturnsAsync(true);
-        //    toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryName)).Returns(Task.CompletedTask);
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategoryId));
 
-        //    var toDoCategoryService = new ToDoCategoryService(toDoCategoryRepositoryMock.Object);
-
-        //    var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategoryName));
-
-        //    Assert.Equal("You cannot delete this category.", exception.Message);
-        //    toDoCategoryRepositoryMock.Verify(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryName), Times.Never());
-        //}
+            Assert.Equal("You cannot delete this category.", exception.Message);
+            toDoCategoryRepositoryMock.Verify(repo => repo.DeleteToDoCategoryAsync(userId, toDoCategoryId), Times.Never());
+        }
 
         #endregion
     }

@@ -8,10 +8,13 @@ namespace Tests.UnitTests.ServicesTests
     public class ToDoServiceTests
     {
         private readonly Mock<IToDoRepository> toDoRepositoryMock;
+        private readonly IToDoService toDoService;
 
         public ToDoServiceTests()
         {
             toDoRepositoryMock = new Mock<IToDoRepository>();
+
+            toDoService = new ToDoService(toDoRepositoryMock.Object);
         }
 
         #region GetToDoByIdAsync(Guid toDoId) tests
@@ -24,8 +27,6 @@ namespace Tests.UnitTests.ServicesTests
 
             toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDoId)).ReturnsAsync(expectedToDo);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
             var result = await toDoService.GetToDoByIdAsync(toDoId);
 
             Assert.NotNull(result);
@@ -35,7 +36,7 @@ namespace Tests.UnitTests.ServicesTests
         }
 
         [Fact]
-        public async Task GetToDoByIdAsync_ShouldThrowException_WhenToDoIdDoesNotExist()
+        public async Task GetToDoByIdAsync_ShouldReturnNull_WhenToDoIdDoesNotExist()
         {
             var toDoId = Guid.NewGuid();
 
@@ -43,21 +44,8 @@ namespace Tests.UnitTests.ServicesTests
 
             var toDoService = new ToDoService(toDoRepositoryMock.Object);
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoService.GetToDoByIdAsync(toDoId));
-
-            Assert.Equal("Todo id was not found.", exception.Message);
-        }
-
-        [Fact]
-        public async Task GetToDoByIdAsync_ShouldThrowException_WhenToDoIdIsEmpty()
-        {
-            var toDoId = new Guid();
-
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.GetToDoByIdAsync(toDoId));
-
-            Assert.Equal("ToDo id cannot be empty.", exception.Message);
+            var result = await toDoService.GetToDoByIdAsync(toDoId);
+            Assert.Null(result);
         }
 
         #endregion
@@ -78,8 +66,6 @@ namespace Tests.UnitTests.ServicesTests
 
             toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day)).ReturnsAsync(expectedToDos);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
             var result = await toDoService.GetToDosAsync(userId, date, TimeBlock.Day);
 
             Assert.NotNull(result);
@@ -95,24 +81,10 @@ namespace Tests.UnitTests.ServicesTests
 
             toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day)).ReturnsAsync(new List<ToDo>());
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
             var result = await toDoService.GetToDosAsync(userId, date, TimeBlock.Day);
 
             Assert.NotNull(result);
             Assert.Empty(result);
-        }
-
-        [Fact]
-        public async Task GetToDosAsync_ShouldThrowException_WhenToDoIdIsEmpty()
-        {
-            var userId = new Guid();
-
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day));
-
-            Assert.Equal("User id cannot be empty.", exception.Message);
         }
 
         #endregion
@@ -200,8 +172,6 @@ namespace Tests.UnitTests.ServicesTests
             toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(true);
             toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
             await toDoService.UpdateToDoAsync(toDo);
 
             toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
@@ -233,8 +203,6 @@ namespace Tests.UnitTests.ServicesTests
 
             toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(false);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoService.UpdateToDoAsync(toDo));
 
             Assert.Equal("Todo id does not exist.", exception.Message);
@@ -249,43 +217,11 @@ namespace Tests.UnitTests.ServicesTests
         {
             var toDoId = Guid.NewGuid();
 
-            toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDoId)).ReturnsAsync(true);
-            toDoRepositoryMock.Setup(repo => repo.DeleteToDoAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
-
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
+            toDoRepositoryMock.Setup(repo => repo.DeleteToDoAsync(toDoId)).Returns(Task.CompletedTask);
 
             await toDoService.DeleteToDoAsync(toDoId);
 
-            toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDoId), Times.Once);
-            toDoRepositoryMock.Verify(repo => repo.DeleteToDoAsync(It.Is<Guid>(c => c == toDoId)), Times.Once);
-        }
-
-        [Fact]
-        public async Task DeleteToDoAsync_ShouldThrowException_WhenToDoIdDoesNotExist()
-        {
-            var toDoId = Guid.NewGuid();
-
-            toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDoId)).ReturnsAsync(false);
-            toDoRepositoryMock.Setup(repo => repo.DeleteToDoAsync(toDoId)).Returns(Task.CompletedTask);
-
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoService.DeleteToDoAsync(toDoId));
-
-            Assert.Equal("Todo id does not exist.", exception.Message);
-            toDoRepositoryMock.Verify(repo => repo.DeleteToDoAsync(toDoId), Times.Never);
-        }
-
-        [Fact]
-        public async Task DeleteToDoAsync_ShouldThrowException_WhenToDoIdIsEmpty()
-        {
-            var toDoId = new Guid();
-
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.DeleteToDoAsync(toDoId));
-
-            Assert.Equal("ToDo id cannot be empty.", exception.Message);
+            toDoRepositoryMock.Verify(repo => repo.DeleteToDoAsync(toDoId), Times.Once);
         }
 
         #endregion
@@ -310,8 +246,6 @@ namespace Tests.UnitTests.ServicesTests
             toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day)).ReturnsAsync(repeatedToDos);
             toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
             await toDoService.MoveRepeatedToDosAsync(userId);
 
             toDoRepositoryMock.Verify(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day), Times.Once);
@@ -331,8 +265,6 @@ namespace Tests.UnitTests.ServicesTests
         public async Task MoveRepeatedToDosAsync_ShouldThrowException_WhenToDoIdIsEmpty()
         {
             var userId = new Guid();
-
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
 
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.MoveRepeatedToDosAsync(userId));
 

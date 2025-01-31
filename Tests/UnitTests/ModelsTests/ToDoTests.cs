@@ -464,28 +464,26 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Equal(userId, toDo.ToDoCategory.UserId);
         }
 
-        //[Fact]
-        //public void ToDo_AssignUser_ShouldUpdateUser()
-        //{
-        //    string description = "Task description";
-        //    TimeBlock timeBlock = TimeBlock.Day;
-        //    Difficulty difficulty = Difficulty.Easy;
-        //    DateTime taskDate = DateTime.Now;
-        //    string toDoCategoryName = "Other";
-        //    string userName = "Test user";
-        //    string passwordHash = "Test password";
+        [Fact]
+        public void ToDo_AssignUser_ShouldUpdateUser()
+        {
+            string description = "Task description";
+            TimeBlock timeBlock = TimeBlock.Day;
+            Difficulty difficulty = Difficulty.Easy;
+            DateTime taskDate = DateTime.Now;
+            string toDoCategoryName = "Other";
+            string userName = "Test user";
 
-        //    var user = new User(userName, passwordHash);
-        //    Guid userId = user.UserId;
+            var user = new User(userName);
+            Guid userId = user.UserId;
 
-        //    var toDo = new ToDo(description, timeBlock, difficulty, taskDate, toDoCategoryName, userId);
-        //    toDo.User = user;
+            var toDo = new ToDo(description, timeBlock, difficulty, taskDate, toDoCategoryName, userId);
+            toDo.User = user;
 
-        //    Assert.NotNull(toDo.User);
-        //    Assert.Equal(userId, toDo.User.UserId);
-        //    Assert.Equal(passwordHash, toDo.User.PasswordHash);
-        //    Assert.Equal(userName, toDo.User.UserName);
-        //}
+            Assert.NotNull(toDo.User);
+            Assert.Equal(userId, toDo.User.UserId);
+            Assert.Equal(userName, toDo.User.UserName);
+        }
 
         #endregion
 

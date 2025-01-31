@@ -7,14 +7,14 @@ namespace Tests.IntegrationTests.RepositoriesTests
 {
     public class UserRepositoryTests : IAsyncLifetime
     {
-        private readonly DbContextOptions<AppDbContext> dbContextOptions;
-        private readonly AppDbContext context;
+        private readonly AppDbContext _context;
+        private readonly UserRepository _userRepository;
 
         public UserRepositoryTests()
         {
-            dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-
-            context = new AppDbContext(dbContextOptions);
+            var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+            _context = new AppDbContext(dbContextOptions);
+            _userRepository = new UserRepository(_context);
         }
 
         public Task InitializeAsync()
@@ -24,38 +24,59 @@ namespace Tests.IntegrationTests.RepositoriesTests
 
         public async Task DisposeAsync()
         {
-            await context.Database.EnsureDeletedAsync();
-            await context.DisposeAsync();
+            await _context.Database.EnsureDeletedAsync();
+            await _context.DisposeAsync();
         }
+
+        #region GetUserByUserIdAsync(Guid userId) tests
+
+        [Fact]
+        public async Task GetUserByUserIdAsync_ShouldReturnUser_WhenUserExists()
+        {
+            var userName = "TestUser";
+            var existingUser = new User(userName);
+            var userId = existingUser.UserId;
+
+            _context.Users.Add(existingUser);
+            await _context.SaveChangesAsync();
+
+            var result = await _userRepository.GetUserByUserIdAsync(userId);
+
+            Assert.NotNull(result);
+            Assert.Equal(userName, result.UserName);
+        }
+
+        [Fact]
+        public async Task GetUserByUserIdAsync_ShouldReturnNull_WhenUserDoesNotExist()
+        {
+            var result = await _userRepository.GetUserByUserIdAsync(Guid.NewGuid());
+
+            Assert.Null(result);
+        }
+
+        #endregion
 
         #region GetUserByUserNameAsync(string userName) tests
 
-        //[Fact]
-        //public async Task GetUserByUserNameAsync_ShouldReturnUser_WhenUserExists()
-        //{
-        //    var userName = "TestUser";
-        //    var password = "hashedPassword";
-        //    var existingUser = new User(userName, password);
+        [Fact]
+        public async Task GetUserByUserNameAsync_ShouldReturnUser_WhenUserExists()
+        {
+            var userName = "TestUser";
+            var existingUser = new User(userName);
 
-        //    context.Users.Add(existingUser);
-        //    await context.SaveChangesAsync();
+            _context.Users.Add(existingUser);
+            await _context.SaveChangesAsync();
 
-        //    var repository = new UserRepository(context);
+            var result = await _userRepository.GetUserByUserNameAsync(userName);
 
-        //    var result = await repository.GetUserByUserNameAsync(userName);
-
-        //    Assert.NotNull(result);
-        //    Assert.Equal(userName, result.UserName);
-        //    Assert.Equal(password, result.PasswordHash);
-        //    Assert.Equal(100, result.Experience);
-        //}
+            Assert.NotNull(result);
+            Assert.Equal(userName, result.UserName);
+        }
 
         [Fact]
         public async Task GetUserByUserNameAsync_ShouldReturnNull_WhenUserDoesNotExist()
         {
-            var repository = new UserRepository(context);
-
-            var result = await repository.GetUserByUserNameAsync("NonExistentUser");
+            var result = await _userRepository.GetUserByUserNameAsync("Non-existent user");
 
             Assert.Null(result);
         }
@@ -64,89 +85,81 @@ namespace Tests.IntegrationTests.RepositoriesTests
 
         #region AddUserAsync(User user) tests
 
-        //[Fact]
-        //public async Task AddUserAsync_ShouldAddUser_WhenDataIsValid()
-        //{
-        //    var repository = new UserRepository(context);
-        //    var newUser = new User("NewUser", "hashedPassword");
+        [Fact]
+        public async Task AddUserAsync_ShouldAddUser_WhenDataIsValid()
+        {
+            var newUser = new User("NewUser");
 
-        //    await repository.AddUserAsync(newUser);
+            await _userRepository.AddUserAsync(newUser);
 
-        //    var userInDb = await context.Users.FirstOrDefaultAsync(u => u.UserName == "NewUser");
-        //    Assert.NotNull(userInDb);
-        //    Assert.Equal("NewUser", userInDb.UserName);
-        //    Assert.Equal("hashedPassword", userInDb.PasswordHash);
-        //    Assert.Equal(0, userInDb.Experience);
-        //}
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == "NewUser");
+            Assert.NotNull(userInDb);
+        }
+
+        [Fact]
+        public async Task AddUserAsync_ShouldThrowException_WhenUserNameAlreadyExists()
+        {
+            var newUser = new User("User");
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _userRepository.AddUserAsync(newUser));
+            Assert.Equal("Username already exists.", exception.Message);
+        }
 
         #endregion
 
         #region UpdateUserAsync(User user) tests
 
-        //[Fact]
-        //public async Task UpdateUserAsync_ShouldUpdateUser_WhenUserExists()
-        //{
-        //    var repository = new UserRepository(context);
-        //    var existingUser = new User("ExistingUser", "hashedPassword");
+        [Fact]
+        public async Task UpdateUserAsync_ShouldUpdateUser_WhenUserExists()
+        {
+            var existingUser = new User("ExistingUser");
 
-        //    context.Users.Add(existingUser);
-        //    await context.SaveChangesAsync();
+            _context.Users.Add(existingUser);
+            await _context.SaveChangesAsync();
 
-        //    string newName = "NewUserName";
-        //    existingUser.UserName = newName;
-        //    await repository.UpdateUserAsync(existingUser);
+            string newName = "NewUserName";
+            existingUser.UserName = newName;
+            await _userRepository.UpdateUserAsync(existingUser);
 
-        //    var userInDb = await context.Users.FirstOrDefaultAsync(u => u.UserName == newName);
-        //    Assert.NotNull(userInDb);
-        //    Assert.Equal(existingUser.UserId, userInDb.UserId);
-        //    Assert.Equal(newName, userInDb.UserName);
-        //    Assert.Equal(existingUser.PasswordHash, userInDb.PasswordHash);
-        //    Assert.Equal(existingUser.Experience, userInDb.Experience);
-        //}
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == newName);
+            Assert.NotNull(userInDb);
+            Assert.Equal(existingUser.UserId, userInDb.UserId);
+        }
 
-        //[Fact]
-        //public async Task UpdateUserAsync_ShouldThrowException_WhenUserDoesNotExist()
-        //{
-        //    var repository = new UserRepository(context);
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrowException_WhenUserDoesNotExist()
+        {
+            var nonExistentUser = new User("NonExistentUser");
 
-        //    var nonExistentUser = new User("NonExistentUser", "hashedPassword");
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _userRepository.UpdateUserAsync(nonExistentUser));
 
-        //    var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.UpdateUserAsync(nonExistentUser));
-
-        //    Assert.Equal("User not found.", exception.Message);
-        //}
+            Assert.Equal("User not found.", exception.Message);
+        }
 
         #endregion
 
-        #region UserExistsAsync(string username) tests
+        #region AddDefaultCategoriesAsync(List<ToDoCategory> defaultCategories) tests
 
-        //[Fact]
-        //public async Task UserExists_ShouldReturnTrue_WhenUserExists()
-        //{
-        //    var repository = new UserRepository(context);
-        //    var existingUser = new User("ExistingUser", "hashedPassword", 10);
+        [Fact]
+        public async Task AddDefaultCategoriesAsync_ShouldUpdateCategories_WhenUserUpdates()
+        {
+            var userId = Guid.NewGuid();
 
-        //    context.Users.Add(existingUser);
-        //    await context.SaveChangesAsync();
+            var toDoCategories = new List<ToDoCategory>()
+            {
+                new ToDoCategory(userId,"Habbit"),
+                new ToDoCategory(userId,"Other")
+            };
 
-        //    var result = await repository.UserExistsAsync(existingUser.UserName);
-        //    Assert.True(result);
+            await _userRepository.AddDefaultCategoriesAsync(toDoCategories);
 
-        //    var userInDb = await context.Users.FirstOrDefaultAsync(u => u.UserName == existingUser.UserName);
-        //    Assert.NotNull(userInDb);
-        //}
-
-        //[Fact]
-        //public async Task UserExists_ShouldReturnFalse_WhenUserDoesNotExist()
-        //{
-        //    var repository = new UserRepository(context);
-
-        //    var result = await repository.UserExistsAsync("SomeUser");
-        //    Assert.False(result);
-
-        //    var userInDb = await context.Users.FirstOrDefaultAsync(u => u.UserName == "SomeUser");
-        //    Assert.Null(userInDb);
-        //}
+            var toDoCategoriesInDb = await _context.ToDoCategories.Where(c => c.UserId == userId).ToListAsync();
+            Assert.NotNull(toDoCategoriesInDb);
+            Assert.Contains(toDoCategoriesInDb, category => category.ToDoCategoryName == "Habbit" || category.ToDoCategoryName == "Other");
+        }
 
         #endregion
     }

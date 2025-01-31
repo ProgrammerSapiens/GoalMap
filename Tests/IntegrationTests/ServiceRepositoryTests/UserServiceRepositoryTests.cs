@@ -11,9 +11,8 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
     public class UserServiceRepositoryTests : IAsyncLifetime
     {
         private readonly IUserRepository _userRepository;
-        private readonly IToDoCategoryRepository _toDoCategoryRepository;
-        private readonly IToDoCategoryService _toDoCategoryService;
         private readonly Mock<IPasswordHasher> _passwordHasherMock;
+        private readonly IUserService userService;
         private readonly AppDbContext _context;
 
         public UserServiceRepositoryTests()
@@ -22,9 +21,9 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context = new AppDbContext(dbContextOptions);
 
             _userRepository = new UserRepository(_context);
-            _toDoCategoryRepository = new ToDoCategoryRepository(_context);
-            _toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
             _passwordHasherMock = new Mock<IPasswordHasher>();
+
+            userService = new UserService(_userRepository, _passwordHasherMock.Object);
         }
 
         public Task InitializeAsync()
@@ -38,71 +37,109 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             await _context.DisposeAsync();
         }
 
-        #region GetUserByUserNameAsync(string? userName)
+        #region GetUserByUserIdAsync(Guid userId) tests
 
-        //[Fact]
-        //public async Task GetUserByUserNameAsync_ShouldReturnUser_WhenUserExists()
-        //{
-        //    var userName = "TestUser";
-        //    var hashedPassword = "hashedPassword";
+        [Fact]
+        public async Task GetUserByUserIdAsync_ShouldReturnUser_WhenUserExists()
+        {
+            var userName = "TestUser";
 
-        //    var user = new User(userName, hashedPassword);
-        //    var userId = user.UserId;
+            var user = new User(userName);
+            var userId = user.UserId;
 
-        //    _context.Users.Add(user);
-        //    await _context.SaveChangesAsync();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-        //    var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+            var result = await userService.GetUserByUserIdAsync(userId);
 
-        //    var result = await userService.GetUserByUserNameAsync(userName);
+            Assert.NotNull(result);
+            Assert.Equal(userName, result.UserName);
+            Assert.Equal(userId, result.UserId);
+        }
 
-        //    Assert.NotNull(result);
-        //    Assert.Equal(userName, result.UserName);
-        //    Assert.Equal(hashedPassword, result.PasswordHash);
-        //    Assert.Equal(userId, result.UserId);
-        //}
+        [Fact]
+        public async Task GetUserByUserIdAsync_ShouldReturnNull_WhenUserDoesNotExist()
+        {
+            var userName = "TestUser";
+
+            var user = new User(userName);
+            var userId = user.UserId;
+
+            var result = await userService.GetUserByUserIdAsync(userId);
+            Assert.Null(result);
+
+            var userInDb = await _context.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            Assert.Null(userInDb);
+        }
 
         #endregion
 
-        #region UpdateUserExperienceAsync(string? userName, Difficulty taskDifficulty)
+        #region RegisterUserAsync(User user, string password) tests
 
-        //[Fact]
-        //public async Task UpdateUserExperienceAsync_ShouldUpdateUser_WhenUserExists()
-        //{
-        //    var userName = "TestUser";
-        //    var hashedPassword = "hashedPassword";
-        //    int experience = 10;
-        //    int updatedExperience = experience + (int)Difficulty.Nightmare;
+        [Fact]
+        public async Task RegisterUserAsync_ShouldSucceed_WhenUserIsValid()
+        {
+            var userName = "TestUser";
+            var password = "password";
+            var hashedPassword = "hashedPassword";
 
-        //    var user = new User(userName, hashedPassword, experience);
-        //    var userId = user.UserId;
+            var user = new User(userName);
+            var userId = user.UserId;
 
-        //    _context.Users.Add(user);
-        //    await _context.SaveChangesAsync();
+            _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
-        //    var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+            await userService.RegisterUserAsync(user, password);
 
-        //    await userService.UpdateUserExperienceAsync(userName, Difficulty.Nightmare);
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
 
-        //    var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            Assert.NotNull(userInDb);
+            Assert.Equal(hashedPassword, userInDb.PasswordHash);
+            Assert.Equal(userId, userInDb.UserId);
+        }
 
-        //    Assert.NotNull(userInDb);
-        //    Assert.Equal(userName, userInDb.UserName);
-        //    Assert.Equal(hashedPassword, userInDb.PasswordHash);
-        //    Assert.Equal(updatedExperience, userInDb.Experience);
-        //}
+        [Fact]
+        public async Task RegisterUserAsync_ShouldCreateDefaultCategories_WhenUserIsValid()
+        {
+            var userName = "TestUser";
+            var password = "password";
+            var hashedPassword = "hashedPassword";
 
-        //[Fact]
-        //public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserDoesNotExist()
-        //{
-        //    var userName = "TestUser";
+            var user = new User(userName);
+            var userId = user.UserId;
 
-        //    var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+            _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
-        //    var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(userName, Difficulty.Nightmare));
+            await userService.RegisterUserAsync(user, password);
 
-        //    Assert.Equal("User does not exist.", exception.Message);
-        //}
+            var defaultToDoCategoriesInDb = await _context.ToDoCategories.Where(c => c.ToDoCategoryName == "Habbit" || c.ToDoCategoryName == "Other").ToListAsync();
+
+            Assert.NotEmpty(defaultToDoCategoriesInDb);
+            Assert.Equal(2, defaultToDoCategoriesInDb.Count);
+            Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Habbit");
+            Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Other");
+            Assert.All(defaultToDoCategoriesInDb, category =>
+            {
+                Assert.Equal(userName, category.User.UserName);
+                Assert.Equal(userId, category.User.UserId);
+            });
+        }
+
+        [Fact]
+        public async Task RegisterUserAsync_ShouldThrowException_WhenUserAlreadyExists()
+        {
+            var userName = "TestUser";
+            var password = "password";
+
+            var user = new User(userName);
+            var userId = user.UserId;
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.RegisterUserAsync(user, password));
+
+            Assert.Equal("User name is already exists.", exception.Message);
+        }
 
         #endregion
 
@@ -123,78 +160,60 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
         #endregion
 
-        #region RegisterUserAsync(User user, string? password)
+        #region UpdateUserAsync(User user)
 
-        //[Fact]
-        //public async Task RegisterUserAsync_ShouldSucceed_WhenUserIsValid()
-        //{
-        //    var userName = "TestUser";
-        //    var password = "password";
-        //    var hashedPassword = "hashedPassword";
+        [Fact]
+        public async Task UpdateUserAsync_ShouldSucceed_WhenUserIsValid()
+        {
+            var userName = "TestUser";
+            var user = new User(userName);
 
-        //    var user = new User(userName, password);
-        //    var userId = user.UserId;
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-        //    _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
+            var newUserName = "NewUserName";
+            user.UserName = newUserName;
 
-        //    var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+            await _userRepository.UpdateUserAsync(user);
 
-        //    await userService.RegisterUserAsync(user, password);
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            Assert.NotNull(userInDb);
+            Assert.Equal(newUserName, userInDb.UserName);
+        }
 
-        //    var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        #endregion
 
-        //    Assert.NotNull(userInDb);
-        //    Assert.Equal(hashedPassword, userInDb.PasswordHash);
-        //    Assert.Equal(userId, userInDb.UserId);
-        //}
+        #region UpdateUserExperienceAsync(string? userName, Difficulty taskDifficulty)
 
-        //[Fact]
-        //public async Task RegisterUserAsync_ShouldCreateDefaultCategories_WhenUserIsValid()
-        //{
-        //    var userName = "TestUser";
-        //    var password = "password";
-        //    var hashedPassword = "hashedPassword";
+        [Fact]
+        public async Task UpdateUserExperienceAsync_ShouldUpdateUser_WhenUserExists()
+        {
+            var userName = "TestUser";
+            int experience = 10;
+            int updatedExperience = experience + (int)Difficulty.Nightmare;
 
-        //    var user = new User(userName, password);
-        //    var userId = user.UserId;
+            var user = new User(userName) { Experience = experience };
+            var userId = user.UserId;
 
-        //    _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-        //    var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
+            await userService.UpdateUserExperienceAsync(userId, Difficulty.Nightmare);
 
-        //    await userService.RegisterUserAsync(user, password);
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
-        //    var defaultToDoCategoriesInDb = await _context.ToDoCategories.Where(c => c.ToDoCategoryName == "Habbit" || c.ToDoCategoryName == "Other").ToListAsync();
+            Assert.NotNull(userInDb);
+            Assert.Equal(userName, userInDb.UserName);
+            Assert.Equal(updatedExperience, userInDb.Experience);
+        }
 
-        //    Assert.NotEmpty(defaultToDoCategoriesInDb);
-        //    Assert.Equal(2, defaultToDoCategoriesInDb.Count);
-        //    Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Habbit");
-        //    Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Other");
-        //    Assert.All(defaultToDoCategoriesInDb, category =>
-        //    {
-        //        Assert.Equal(userName, category.User.UserName);
-        //        Assert.Equal(userId, category.User.UserId);
-        //    });
-        //}
+        [Fact]
+        public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserDoesNotExist()
+        {
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(Guid.NewGuid(), Difficulty.Nightmare));
 
-        //[Fact]
-        //public async Task RegisterUserAsync_ShouldThrowException_WhenUserAlreadyExists()
-        //{
-        //    var userName = "TestUser";
-        //    var password = "password";
-
-        //    var user = new User(userName, password);
-        //    var userId = user.UserId;
-
-        //    _context.Users.Add(user);
-        //    await _context.SaveChangesAsync();
-
-        //    var userService = new UserService(_userRepository, _passwordHasherMock.Object, _toDoCategoryService);
-
-        //    var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.RegisterUserAsync(user, password));
-
-        //    Assert.Equal("User name is already exists.", exception.Message);
-        //}
+            Assert.Equal("User was not found.", exception.Message);
+        }
 
         #endregion
     }

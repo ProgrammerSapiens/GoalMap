@@ -1,5 +1,4 @@
-﻿using Core.Interfaces;
-using Data.Repositories;
+﻿using Data.Repositories;
 using Core.Models;
 using Data.DBContext;
 using Microsoft.EntityFrameworkCore;
@@ -8,14 +7,14 @@ namespace Tests.IntegrationTests.RepositoriesTests
 {
     public class ToDoRepositoryTests : IAsyncLifetime
     {
-        private readonly DbContextOptions<AppDbContext> dbContextOptions;
-        private readonly AppDbContext context;
+        private readonly AppDbContext _context;
+        private readonly ToDoRepository _toDoRepository;
 
         public ToDoRepositoryTests()
         {
-            dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
-
-            context = new AppDbContext(dbContextOptions);
+            var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+            _context = new AppDbContext(dbContextOptions);
+            _toDoRepository = new ToDoRepository(_context);
         }
 
         public Task InitializeAsync()
@@ -25,8 +24,8 @@ namespace Tests.IntegrationTests.RepositoriesTests
 
         public async Task DisposeAsync()
         {
-            await context.Database.EnsureDeletedAsync();
-            await context.DisposeAsync();
+            await _context.Database.EnsureDeletedAsync();
+            await _context.DisposeAsync();
         }
 
         #region GetToDoByIdAsync(Guid toDoId) tests
@@ -36,12 +35,10 @@ namespace Tests.IntegrationTests.RepositoriesTests
         {
             var existingToDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
 
-            context.ToDos.Add(existingToDo);
-            await context.SaveChangesAsync();
+            _context.ToDos.Add(existingToDo);
+            await _context.SaveChangesAsync();
 
-            var toDoRepository = new ToDoRepository(context);
-
-            var result = await toDoRepository.GetToDoByIdAsync(existingToDo.ToDoId);
+            var result = await _toDoRepository.GetToDoByIdAsync(existingToDo.ToDoId);
             Assert.NotNull(result);
             Assert.Equal(existingToDo.Description, result.Description);
             Assert.Equal(existingToDo.TimeBlock, result.TimeBlock);
@@ -56,11 +53,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
         {
             var toDoId = Guid.NewGuid();
 
-            var repository = new ToDoRepository(context);
+            var result = await _toDoRepository.GetToDoByIdAsync(toDoId);
 
-            var result = await repository.GetToDoByIdAsync(toDoId);
-
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.Null(result);
             Assert.Null(toDoInDb);
@@ -77,18 +72,16 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var date = DateTime.Today;
             TimeBlock timeBlock = TimeBlock.Day;
             var toDosList = new List<ToDo>()
-                {
-                    new ToDo("TestDescription", timeBlock, Difficulty.Easy, date, "Other", userId),
-                    new ToDo("TestDescription2", timeBlock, Difficulty.Easy, date, "Other", userId),
-                    new ToDo("TestDescription3", timeBlock, Difficulty.Easy, date, "Other", Guid.NewGuid())
-                };
+            {
+                new ToDo("TestDescription", timeBlock, Difficulty.Easy, date, "Other", userId),
+                new ToDo("TestDescription2", timeBlock, Difficulty.Easy, date, "Other", userId),
+                new ToDo("TestDescription3", timeBlock, Difficulty.Easy, date, "Other", Guid.NewGuid())
+            };
 
-            context.ToDos.AddRange(toDosList);
-            await context.SaveChangesAsync();
+            _context.ToDos.AddRange(toDosList);
+            await _context.SaveChangesAsync();
 
-            var repository = new ToDoRepository(context);
-
-            var result = await repository.GetToDosAsync(userId, date, timeBlock);
+            var result = await _toDoRepository.GetToDosAsync(userId, date, timeBlock);
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
@@ -107,11 +100,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var date = DateTime.Today;
             var timeBlock = TimeBlock.Day;
 
-            var repository = new ToDoRepository(context);
+            var result = await _toDoRepository.GetToDosAsync(userId, date, timeBlock);
 
-            var result = await repository.GetToDosAsync(userId, date, timeBlock);
-
-            var toDosInDb = context.ToDos.Where(t => t.UserId == userId && t.ToDoDate == date && t.TimeBlock == timeBlock);
+            var toDosInDb = _context.ToDos.Where(t => t.UserId == userId && t.ToDoDate == date && t.TimeBlock == timeBlock);
 
             Assert.Empty(result);
             Assert.Empty(toDosInDb);
@@ -124,14 +115,13 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task AddToDoAsync_ShouldAddToDo_WhenDataIsValid()
         {
-            var repository = new ToDoRepository(context);
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
             var userId = toDo.UserId;
 
-            await repository.AddToDoAsync(toDo);
+            await _toDoRepository.AddToDoAsync(toDo);
 
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.NotNull(toDoInDb);
             Assert.Equal("TestDescription", toDoInDb.Description);
@@ -146,13 +136,11 @@ namespace Tests.IntegrationTests.RepositoriesTests
         {
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
 
-            context.ToDos.Add(toDo);
-            await context.SaveChangesAsync();
+            _context.ToDos.Add(toDo);
+            await _context.SaveChangesAsync();
 
-            var repository = new ToDoRepository(context);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.AddToDoAsync(toDo));
-            Assert.Equal("ToDo with such an Id already exists.", exception.Message);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoRepository.AddToDoAsync(toDo));
+            Assert.Equal("Todo already exists.", exception.Message);
         }
 
         #endregion
@@ -165,16 +153,15 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
-            context.ToDos.Add(toDo);
-            await context.SaveChangesAsync();
+            _context.ToDos.Add(toDo);
+            await _context.SaveChangesAsync();
 
             string newDescription = "NewTestDescription";
             toDo.Description = newDescription;
 
-            var repository = new ToDoRepository(context);
-            await repository.UpdateToDoAsync(toDo);
+            await _toDoRepository.UpdateToDoAsync(toDo);
 
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.NotNull(toDoInDb);
             Assert.Equal(newDescription, toDoInDb.Description);
@@ -186,11 +173,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
-            var repository = new ToDoRepository(context);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoRepository.UpdateToDoAsync(toDo));
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => repository.UpdateToDoAsync(toDo));
-
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.Equal("ToDo with such an Id does not exists.", exception.Message);
             Assert.Null(toDoInDb);
@@ -206,13 +191,12 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
-            context.ToDos.Add(toDo);
-            await context.SaveChangesAsync();
+            _context.ToDos.Add(toDo);
+            await _context.SaveChangesAsync();
 
-            var repository = new ToDoRepository(context);
-            await repository.DeleteToDoAsync(toDoId);
+            await _toDoRepository.DeleteToDoAsync(toDoId);
 
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.Null(toDoInDb);
         }
@@ -223,12 +207,8 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
-            var repository = new ToDoRepository(context);
-            await repository.DeleteToDoAsync(toDoId);
-
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
-
-            Assert.Null(toDoInDb);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoRepository.DeleteToDoAsync(toDoId));
+            Assert.Equal("Todo id does not exist.", exception.Message);
         }
 
         #endregion
@@ -241,13 +221,12 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
-            context.ToDos.Add(toDo);
-            await context.SaveChangesAsync();
+            _context.ToDos.Add(toDo);
+            await _context.SaveChangesAsync();
 
-            var repository = new ToDoRepository(context);
-            var result = await repository.ToDoExistsAsync(toDoId);
+            var result = await _toDoRepository.ToDoExistsAsync(toDoId);
 
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.True(result);
             Assert.NotNull(toDoInDb);
@@ -259,10 +238,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
-            var repository = new ToDoRepository(context);
-            var result = await repository.ToDoExistsAsync(toDoId);
+            var result = await _toDoRepository.ToDoExistsAsync(toDoId);
 
-            var toDoInDb = await context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDoId);
 
             Assert.False(result);
             Assert.Null(toDoInDb);

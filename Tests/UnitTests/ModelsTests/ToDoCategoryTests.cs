@@ -86,26 +86,24 @@ namespace Tests.UnitTests.ModelsTests
 
         #region Tests for links
 
-        //[Fact]
-        //public void ToDoCategory_SetUser_ShouldAssignUserCorrectly()
-        //{
-        //    string userName = "Test User";
-        //    string passwordHash = "Test Password";
+        [Fact]
+        public void ToDoCategory_SetUser_ShouldAssignUserCorrectly()
+        {
+            string userName = "Test User";
 
-        //    var user = new User(userName, passwordHash);
+            var user = new User(userName);
 
-        //    string toDoCategoryName = "Test Category";
-        //    Guid userId = user.UserId;
+            string toDoCategoryName = "Test Category";
+            Guid userId = user.UserId;
 
-        //    var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
+            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-        //    toDoCategory.User = user;
+            toDoCategory.User = user;
 
-        //    Assert.NotNull(toDoCategory.User);
-        //    Assert.Equal(userName, toDoCategory.User.UserName);
-        //    Assert.Equal(passwordHash, toDoCategory.User.PasswordHash);
-        //    Assert.Equal(userId, toDoCategory.User.UserId);
-        //}
+            Assert.NotNull(toDoCategory.User);
+            Assert.Equal(userName, toDoCategory.User.UserName);
+            Assert.Equal(userId, toDoCategory.User.UserId);
+        }
 
         #endregion
     }
