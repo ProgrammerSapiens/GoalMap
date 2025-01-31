@@ -51,6 +51,11 @@ namespace Data.Repositories
         /// <exception cref="InvalidOperationException">Thrown if a ToDo item with the same Id already exists.</exception>
         public async Task AddToDoAsync(ToDo toDo)
         {
+            if (await ToDoExistsAsync(toDo.ToDoId))
+            {
+                throw new InvalidOperationException("Todo already exists.");
+            }
+
             await _context.ToDos.AddAsync(toDo);
             await _context.SaveChangesAsync();
         }

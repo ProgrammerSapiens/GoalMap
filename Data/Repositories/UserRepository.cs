@@ -45,6 +45,12 @@ namespace Data.Repositories
         /// <exception cref="InvalidOperationException">Thrown if a user with the same username already exists.</exception>
         public async Task AddUserAsync(User user)
         {
+            var userExists = await GetUserByUserNameAsync(user.UserName);
+            if (userExists != null)
+            {
+                throw new InvalidOperationException("Username already exists.");
+            }
+
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
         }
@@ -72,6 +78,7 @@ namespace Data.Repositories
         public async Task AddDefaultCategoriesAsync(List<ToDoCategory> defaultCategories)
         {
             await _context.ToDoCategories.AddRangeAsync(defaultCategories);
+            await _context.SaveChangesAsync();
         }
     }
 }

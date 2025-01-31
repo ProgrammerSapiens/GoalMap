@@ -56,6 +56,11 @@ namespace Data.Repositories
         /// </exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
+            if (await CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
+            {
+                throw new InvalidOperationException("Todo category already exists.");
+            }
+
             await _context.ToDoCategories.AddAsync(toDoCategory);
             await _context.SaveChangesAsync();
         }
