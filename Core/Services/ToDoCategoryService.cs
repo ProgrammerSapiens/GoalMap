@@ -89,7 +89,7 @@ namespace Core.Services
                 throw new InvalidOperationException("Category with such name already exists.");
             }
 
-            if (newCategoryName == "Habbit" || newCategoryName == "Other")
+            if (oldCategoryName == "Habbit" || oldCategoryName == "Other")
             {
                 throw new ArgumentException("You cannot update this category.");
             }
