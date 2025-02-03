@@ -86,6 +86,10 @@ namespace API.Controllers
 
                 return CreatedAtAction(nameof(GetToDoCategoryByCategoryId), new { categoryId = toDoCategory.ToDoCategoryId }, toDoCategory);
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);

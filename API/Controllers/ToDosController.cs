@@ -80,6 +80,14 @@ namespace API.Controllers
                 await _service.AddToDoAsync(toDo);
                 return CreatedAtAction(nameof(GetToDoById), new { toDoDescription = toDo.Description }, toDo);
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);

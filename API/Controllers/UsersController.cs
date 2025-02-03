@@ -59,9 +59,21 @@ namespace API.Controllers
                 await _userService.RegisterUserAsync(user, password);
                 return CreatedAtAction(nameof(GetCurrentUser), new { userName = user.UserName }, user);
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch(Exception)
+            {
+                return StatusCode(500, "Internal service error.");
             }
         }
 
