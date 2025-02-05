@@ -167,7 +167,7 @@
         public Guid UserId
         {
             get { return userId; }
-            set
+            private set
             {
                 if (Guid.Empty == value)
                     throw new ArgumentException(nameof(value), "The user id cannot be empty");
@@ -203,90 +203,6 @@
         protected ToDo() { }
 
         /// <summary>
-        /// Initializeds a new instance of the <see cref="ToDo"/> class.
-        /// </summary>
-        /// <param name="description">The todo's description.</param>
-        /// <param name="timeBlock">The time block for the todo.</param>
-        /// <param name="difficulty">The difficulty level of the todo.</param>
-        /// <param name="toDoDate">The creation date of the todo.</param>
-        /// <param name="toDoCategoryId">The unique identifier of the todo's category</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId)
-        {
-            if (string.IsNullOrEmpty(description))
-                throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
-
-            toDoId = Guid.NewGuid();
-            this.description = description;
-            this.timeBlock = timeBlock;
-            Difficulty = difficulty;
-            ToDoDate = toDoDate;
-            Deadline = null;
-            CompletionStatus = false;
-            parentToDoId = null;
-            RepeatFrequency = RepeatFrequency.None;
-            this.toDoCategoryName = toDoCategoryName;
-            UserId = userId;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ToDo"/> class with a dealine.
-        /// </summary>
-        /// <param name="description">The todo's description.</param>
-        /// <param name="timeBlock">The time block for the todo.</param>
-        /// <param name="difficulty">The difficulty level of the todo.</param>
-        /// <param name="toDoDate">The creating date of the todo.</param>
-        /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="deadline">The deadline for the todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline)
-        {
-            if (string.IsNullOrEmpty(description))
-                throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
-
-            toDoId = Guid.NewGuid();
-            this.description = description;
-            this.timeBlock = timeBlock;
-            Difficulty = difficulty;
-            ToDoDate = toDoDate;
-            Deadline = deadline;
-            CompletionStatus = false;
-            parentToDoId = null;
-            RepeatFrequency = RepeatFrequency.None;
-            this.toDoCategoryName = toDoCategoryName;
-            UserId = userId;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ToDo"/> class with a deadline and parent todo ID.
-        /// </summary>
-        /// <param name="description">The todo's description.</param>
-        /// <param name="timeBlock">The time block for the todo.</param>
-        /// <param name="difficulty">The difficulty level of the todo.</param>
-        /// <param name="toDoDate">The creating date of the todo.</param>
-        /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="deadline">The deadline for the todo.</param>
-        /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline, Guid parentToDoId)
-        {
-            if (string.IsNullOrEmpty(description))
-                throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
-
-            toDoId = Guid.NewGuid();
-            this.description = description;
-            this.timeBlock = timeBlock;
-            Difficulty = difficulty;
-            ToDoDate = toDoDate;
-            Deadline = deadline;
-            CompletionStatus = false;
-            this.parentToDoId = parentToDoId;
-            RepeatFrequency = RepeatFrequency.None;
-            this.toDoCategoryName = toDoCategoryName;
-            UserId = userId;
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ToDo"/> class with a deadline, parent todo ID, and repeat frequency.
         /// </summary>
         /// <param name="description">The todo's description.</param>
@@ -298,7 +214,7 @@
         /// <param name="deadline">The deadline for the todo.</param>
         /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
         /// <param name="repeatFrequency">The repeat frequency of the todo.</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline, Guid parentToDoId, RepeatFrequency repeatFrequency)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline = null, Guid parentToDoId = new Guid(), RepeatFrequency repeatFrequency = RepeatFrequency.None)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
