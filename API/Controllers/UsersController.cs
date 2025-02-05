@@ -2,6 +2,8 @@
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using Core.DTOs.User;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -10,34 +12,43 @@ namespace API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        //TODO: Add DTO models
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [Authorize]
         [HttpGet("me")]
-        public async Task<ActionResult<User>> GetCurrentUser()
+        public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
             var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
             {
-                return Unauthorized("User is not authenticated.");
+                return Unauthorized("User ID is not authenticated or invalid.");
             }
 
             try
             {
-                var user = await _userService.GetUserByUserIdAsync(Guid.Parse(userId));
+                var user = await _userService.GetUserByUserIdAsync(parsedUserId);
 
                 if (user == null)
                 {
                     return NotFound("User was not found.");
                 }
 
-                return user;
+                var userDto = new UserDto
+                {
+                    UserId = user.UserId,
+                    UserName = user.UserName,
+                    Experience = user.Experience,
+                    Level = user.Level,
+                };
+
+                return userDto;
             }
             //Add logger through DI
             catch (Exception)
@@ -47,8 +58,11 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> RegisterUser([FromBody] User user, [FromQuery] string? password)
+        public async Task<ActionResult<User>> RegisterUser([FromBody] UserRegAndAuthDto registerUserDto)
         {
+            var user = _mapper.Map<User>(registerUserDto);
+            var password = registerUserDto.Password;
+
             if (user == null || string.IsNullOrEmpty(password))
             {
                 return BadRequest("User data or password cannot be null");
@@ -57,7 +71,10 @@ namespace API.Controllers
             try
             {
                 await _userService.RegisterUserAsync(user, password);
-                return CreatedAtAction(nameof(GetCurrentUser), new { userName = user.UserName }, user);
+
+                var userDto = _mapper.Map<UserDto>(user);
+
+                return CreatedAtAction(nameof(GetCurrentUser), new { userName = user.UserName }, userDto);
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -71,7 +88,7 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return StatusCode(500, "Internal service error.");
             }
@@ -79,8 +96,11 @@ namespace API.Controllers
 
         //TODO: Add returning Token from service
         [HttpPost("authenticate")]
-        public async Task<IActionResult> AuthenticateUser([FromQuery] string? userName, [FromQuery] string? password)
+        public async Task<IActionResult> AuthenticateUser([FromBody] UserRegAndAuthDto authenticateUserDto)
         {
+            var userName = authenticateUserDto.UserName;
+            var password = authenticateUserDto.Password;
+
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
             {
                 return BadRequest("Username or password cannot be empty.");
@@ -108,18 +128,32 @@ namespace API.Controllers
         }
 
         [HttpPut("experience")]
-        public async Task<IActionResult> UpdateUser([FromBody] User user)
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto updateUserDto)
         {
             var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
             {
-                return Unauthorized("User is not authenticated.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
+
+            if (string.IsNullOrEmpty(updateUserDto.UserName))
+            {
+                return BadRequest("UserName cannot be empty.");
             }
 
             try
             {
-                await _userService.UpdateUserAsync(user);
+                var existingUser = await _userService.GetUserByUserIdAsync(parsedUserId);
+
+                if (existingUser == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                _mapper.Map(updateUserDto, existingUser);
+
+                await _userService.UpdateUserAsync(existingUser);
                 return NoContent();
             }
             catch (InvalidOperationException ex)

@@ -1,4 +1,6 @@
-﻿using Core.Interfaces;
+﻿using AutoMapper;
+using Core.DTOs.ToDo;
+using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,14 +11,16 @@ namespace API.Controllers
     public class ToDosController : ControllerBase
     {
         private readonly IToDoService _service;
+        private readonly IMapper _mapper;
 
-        public ToDosController(IToDoService service)
+        public ToDosController(IToDoService service, IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
         }
 
         [HttpGet("{toDoId}")]
-        public async Task<ActionResult<ToDo>> GetToDoById(Guid toDoId)
+        public async Task<ActionResult<ToDoDto>> GetToDoById(Guid toDoId)
         {
             if (Guid.Empty == toDoId)
             {
@@ -32,7 +36,9 @@ namespace API.Controllers
                     return NotFound("ToDo was not found.");
                 }
 
-                return toDo;
+                var toDoDto = _mapper.Map<ToDoDto>(toDo);
+
+                return toDoDto;
             }
             catch (Exception)
             {
@@ -41,25 +47,30 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ToDo>>> GetToDos(DateTime date, TimeBlock timeBlock)
+        public async Task<ActionResult<List<ToDoDto>>> GetToDos(ToDoGetByDateAndTimeBlockDto toDoGetByDateAndTimeBlockDto)
         {
             var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
             {
-                return Unauthorized("User is not authenticated.");
+                return Unauthorized("User ID is not authenticated or invalid.");
             }
+
+            var date = toDoGetByDateAndTimeBlockDto.Date;
+            var timeBlock = toDoGetByDateAndTimeBlockDto.TimeBlock;
 
             try
             {
-                var toDos = await _service.GetToDosAsync(Guid.Parse(userId), date, timeBlock);
+                var toDos = await _service.GetToDosAsync(parsedUserId, date, timeBlock);
 
                 if (toDos.Count == 0)
                 {
-                    return new List<ToDo>();
+                    return new List<ToDoDto>();
                 }
 
-                return toDos;
+                var toDosDto = _mapper.Map<List<ToDoDto>>(toDos);
+
+                return toDosDto;
             }
             catch (Exception)
             {
@@ -68,17 +79,19 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToDo([FromBody] ToDo? toDo)
+        public async Task<IActionResult> AddToDo([FromBody] ToDoAddDto toDoAddDto)
         {
-            if (toDo == null)
+            if (toDoAddDto == null)
             {
                 return BadRequest("ToDo data cannot be null.");
             }
 
             try
             {
+                var toDo = _mapper.Map<ToDo>(toDoAddDto);
+
                 await _service.AddToDoAsync(toDo);
-                return CreatedAtAction(nameof(GetToDoById), new { toDoDescription = toDo.Description }, toDo);
+                return CreatedAtAction(nameof(GetToDoById), new { toDoId = toDo.ToDoId }, toDo);
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -99,16 +112,25 @@ namespace API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateToDo([FromBody] ToDo? toDo)
+        public async Task<IActionResult> UpdateToDo([FromBody] ToDoUpdateDto toDoUpdateDto)
         {
-            if (toDo == null)
+            if (toDoUpdateDto == null)
             {
                 return BadRequest("ToDo data cannot be null.");
             }
 
             try
             {
-                await _service.UpdateToDoAsync(toDo);
+                var existingToDo = await _service.GetToDoByIdAsync(toDoUpdateDto.ToDoId);
+
+                if (existingToDo == null)
+                {
+                    return NotFound("ToDo was not found.");
+                }
+
+                _mapper.Map(toDoUpdateDto, existingToDo);
+
+                await _service.UpdateToDoAsync(existingToDo);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
@@ -121,7 +143,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{toDoId}")]
         public async Task<IActionResult> DeleteToDo(Guid toDoId)
         {
             if (Guid.Empty == toDoId)

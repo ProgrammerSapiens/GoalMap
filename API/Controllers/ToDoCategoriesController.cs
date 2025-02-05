@@ -1,4 +1,6 @@
-﻿using Core.Interfaces;
+﻿using AutoMapper;
+using Core.DTOs.ToDoCategory;
+using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,20 +11,22 @@ namespace API.Controllers
     public class ToDoCategoriesController : ControllerBase
     {
         private readonly IToDoCategoryService _service;
+        private readonly IMapper _mapper;
 
-        public ToDoCategoriesController(IToDoCategoryService toDoCategoryService)
+        public ToDoCategoriesController(IToDoCategoryService toDoCategoryService, IMapper mapper)
         {
             _service = toDoCategoryService;
+            _mapper = mapper;
         }
 
         [HttpGet("{toDoCategoryId}")]
-        public async Task<ActionResult<ToDoCategory>> GetToDoCategoryByCategoryId(Guid toDoCategoryId)
+        public async Task<ActionResult<CategoryDto>> GetToDoCategoryByCategoryId(Guid toDoCategoryId)
         {
             var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
             {
-                return Unauthorized("User id not authenticated.");
+                return Unauthorized("User ID is not authenticated or invalid.");
             }
             if (Guid.Empty == toDoCategoryId)
             {
@@ -31,13 +35,16 @@ namespace API.Controllers
 
             try
             {
-                var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(Guid.Parse(userId), toDoCategoryId);
+                var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(parsedUserId, toDoCategoryId);
 
                 if (toDoCategory == null)
                 {
                     return NotFound("Category not found.");
                 }
-                return toDoCategory;
+
+                var categoryDto = _mapper.Map<CategoryDto>(toDoCategory);
+
+                return categoryDto;
             }
             catch (Exception)
             {
@@ -46,25 +53,27 @@ namespace API.Controllers
         }
 
         [HttpGet("user")]
-        public async Task<ActionResult<List<ToDoCategory>>> GetToDoCategoriesByUserId()
+        public async Task<ActionResult<List<CategoryDto>>> GetToDoCategoriesByUserId()
         {
             var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
             {
-                return Unauthorized("User is not authenticated.");
+                return Unauthorized("User ID is not authenticated or invalid.");
             }
 
             try
             {
-                var categories = await _service.GetToDoCategoriesByUserIdAsync(Guid.Parse(userId));
+                var categories = await _service.GetToDoCategoriesByUserIdAsync(parsedUserId);
 
                 if (categories.Count == 0)
                 {
-                    return new List<ToDoCategory>();
+                    return new List<CategoryDto>();
                 }
 
-                return categories;
+                var categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
+
+                return categoriesDto;
             }
             catch (Exception)
             {
@@ -73,18 +82,28 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToDoCategory([FromBody] ToDoCategory toDoCategory)
+        public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto categoryAddOrUpdateDto)
         {
-            if (toDoCategory == null)
+            var userId = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
+            {
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
+
+            if (categoryAddOrUpdateDto == null)
             {
                 return BadRequest("Category data cannot be null.");
             }
 
             try
             {
-                await _service.AddToDoCategoryAsync(toDoCategory);
+                categoryAddOrUpdateDto.UserId = parsedUserId;
+                var category = _mapper.Map<ToDoCategory>(categoryAddOrUpdateDto);
+                await _service.AddToDoCategoryAsync(category);
 
-                return CreatedAtAction(nameof(GetToDoCategoryByCategoryId), new { categoryId = toDoCategory.ToDoCategoryId }, toDoCategory);
+                var categoryDto = _mapper.Map<CategoryDto>(category);
+                return CreatedAtAction(nameof(GetToDoCategoryByCategoryId), new { toDoCategoryId = category.ToDoCategoryId }, categoryDto);
             }
             catch (ArgumentException ex)
             {
@@ -101,16 +120,39 @@ namespace API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateToDoCategory([FromBody] ToDoCategory toDoCategory)
+        public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto categoryAddOrUpdateDto)
         {
-            if (toDoCategory == null)
+            var userId = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
+            {
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
+
+            if (categoryAddOrUpdateDto == null)
             {
                 return BadRequest("Category data cannot be null.");
             }
 
+            var categoryName = categoryAddOrUpdateDto.ToDoCategoryName;
+            var categoryId = categoryAddOrUpdateDto.ToDoCategoryId;
+
+            if (Guid.Empty == categoryId || string.IsNullOrEmpty(categoryName))
+            {
+                return BadRequest("Category name cannot be empty.");
+            }
+
             try
             {
-                await _service.UpdateToDoCategoryAsync(toDoCategory);
+                var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(parsedUserId, categoryId);
+                if (existingCategory == null)
+                {
+                    return NotFound("Category was not found.");
+                }
+
+                _mapper.Map(categoryAddOrUpdateDto, existingCategory);
+
+                await _service.UpdateToDoCategoryAsync(existingCategory);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
@@ -127,15 +169,16 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{toDoCategoryId}")]
         public async Task<IActionResult> DeleteToDoCategory(Guid toDoCategoryId)
         {
             var userId = User.Identity?.Name;
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
             {
-                return Unauthorized("User is not authenticated.");
+                return Unauthorized("User ID is not authenticated or invalid.");
             }
+
             if (Guid.Empty == toDoCategoryId)
             {
                 return BadRequest("ToDo category id cannot be empty.");
@@ -143,7 +186,7 @@ namespace API.Controllers
 
             try
             {
-                await _service.DeleteToDoCategoryAsync(Guid.Parse(userId), toDoCategoryId);
+                await _service.DeleteToDoCategoryAsync(parsedUserId, toDoCategoryId);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
