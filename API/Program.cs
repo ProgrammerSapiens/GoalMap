@@ -2,6 +2,7 @@ using Core;
 using Core.Interfaces;
 using Core.Services;
 using Data.Repositories;
+using API.DTOProfiles;
 
 namespace API
 {
@@ -24,6 +25,10 @@ namespace API
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IToDoCategoryService, ToDoCategoryService>();
             builder.Services.AddScoped<IToDoService, ToDoService>();
+
+            builder.Services.AddAutoMapper(typeof(UserProfile));
+            builder.Services.AddAutoMapper(typeof(CategoryProfile));
+            builder.Services.AddAutoMapper(typeof(ToDoProfile));
 
             var app = builder.Build();
 
