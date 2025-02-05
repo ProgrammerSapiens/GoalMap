@@ -43,7 +43,6 @@ namespace Core.Services
             return await _repository.GetToDoCategoriesByUserIdAsync(userId);
         }
 
-        //TODO: Write integration test to check if the filters are working correctly.
         /// <summary>
         /// Adds a new ToDo category.
         /// </summary>
