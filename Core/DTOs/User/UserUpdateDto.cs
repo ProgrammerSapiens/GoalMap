@@ -1,8 +1,10 @@
-﻿namespace Core.DTOs.User
+﻿using Core.Models;
+
+namespace Core.DTOs.User
 {
     public class UserUpdateDto
     {
-        public string UserName { get; set; }
-        public int Experience { get; set; }
+        public string? UserName { get; set; } = string.Empty;
+        public Difficulty Difficulty { get; set; } = Difficulty.None;
     }
 }

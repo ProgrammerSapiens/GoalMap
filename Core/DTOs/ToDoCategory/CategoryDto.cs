@@ -2,7 +2,7 @@
 {
     public class CategoryDto
     {
-        public Guid ToDoCategoryId { get; set; }
-        public string ToDoCategoryName { get; set; }
+        public Guid ToDoCategoryId { get; set; } = new Guid();
+        public string? ToDoCategoryName { get; set; } = null;
     }
 }

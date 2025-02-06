@@ -4,10 +4,10 @@ namespace Core.DTOs.ToDo
 {
     public class ToDoDto
     {
-        public string Description { get; set; }
-        public Difficulty Difficulty { get; set; }
-        public string ToDoCategoryName { get; set; }
-        public DateTime? Deadline { get; set; }
-        public RepeatFrequency RepeatFrequency { get; set; }
+        public string? Description { get; set; } = null;
+        public Difficulty Difficulty { get; set; } = Difficulty.None;
+        public string? ToDoCategoryName { get; set; } = null;
+        public DateTime? Deadline { get; set; } = null;
+        public RepeatFrequency RepeatFrequency { get; set; } = RepeatFrequency.None;
     }
 }

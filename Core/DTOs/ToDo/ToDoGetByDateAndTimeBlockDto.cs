@@ -4,7 +4,7 @@ namespace Core.DTOs.ToDo
 {
     public class ToDoGetByDateAndTimeBlockDto
     {
-        public DateTime Date { get; set; }
-        public TimeBlock TimeBlock { get; set; }
+        public DateTime Date { get; set; } = DateTime.MinValue;
+        public TimeBlock TimeBlock { get; set; } = TimeBlock.Day;
     }
 }
