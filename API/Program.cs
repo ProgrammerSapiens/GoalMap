@@ -16,16 +16,20 @@ namespace API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Registers repositories for dependency injection.
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IToDoCategoryRepository, ToDoCategoryRepository>();
             builder.Services.AddScoped<IToDoRepository, ToDoRepository>();
 
+            // Registers password hashing service.
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+            // Registers services for business logic.
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IToDoCategoryService, ToDoCategoryService>();
             builder.Services.AddScoped<IToDoService, ToDoService>();
 
+            // Registers AutoMapper profiles for object mapping.
             builder.Services.AddAutoMapper(typeof(UserProfile));
             builder.Services.AddAutoMapper(typeof(CategoryProfile));
             builder.Services.AddAutoMapper(typeof(ToDoProfile));

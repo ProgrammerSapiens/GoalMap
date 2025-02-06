@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Controller for managing ToDo categories.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ToDoCategoriesController : ControllerBase
@@ -13,21 +16,25 @@ namespace API.Controllers
         private readonly IToDoCategoryService _service;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ToDoCategoriesController"/> class.
+        /// </summary>
+        /// <param name="toDoCategoryService">Service for ToDo category operations.</param>
+        /// <param name="mapper">Mapper for mapping models to DTOs.</param>
         public ToDoCategoriesController(IToDoCategoryService toDoCategoryService, IMapper mapper)
         {
             _service = toDoCategoryService;
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Gets a ToDo category by its ID.
+        /// </summary>
+        /// <param name="toDoCategoryId">The unique identifier of the ToDo category.</param>
+        /// <returns>The requested ToDo category.</returns>
         [HttpGet("{toDoCategoryId}")]
         public async Task<ActionResult<CategoryDto>> GetToDoCategoryByCategoryId(Guid toDoCategoryId)
         {
-            var userId = User.Identity?.Name;
-
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
             if (Guid.Empty == toDoCategoryId)
             {
                 return BadRequest("Todo category id cannot be empty");
@@ -35,7 +42,7 @@ namespace API.Controllers
 
             try
             {
-                var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(parsedUserId, toDoCategoryId);
+                var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
                 if (toDoCategory == null)
                 {
@@ -52,6 +59,10 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets all ToDo categories for the authenticated user.
+        /// </summary>
+        /// <returns>A list of ToDo categories.</returns>
         [HttpGet("user")]
         public async Task<ActionResult<List<CategoryDto>>> GetToDoCategoriesByUserId()
         {
@@ -81,6 +92,11 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds a new ToDo category.
+        /// </summary>
+        /// <param name="categoryAddOrUpdateDto">The category data to be added.</param>
+        /// <returns>The created category.</returns>
         [HttpPost]
         public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
@@ -119,16 +135,14 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing ToDo category.
+        /// </summary>
+        /// <param name="categoryAddOrUpdateDto">The updated category data.</param>
+        /// <returns>No content if the update was successful.</returns>
         [HttpPut]
         public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
-            var userId = User.Identity?.Name;
-
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
-
             if (categoryAddOrUpdateDto == null)
             {
                 return BadRequest("Category data cannot be null.");
@@ -144,7 +158,7 @@ namespace API.Controllers
 
             try
             {
-                var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(parsedUserId, categoryId);
+                var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(categoryId);
                 if (existingCategory == null)
                 {
                     return NotFound("Category was not found.");
@@ -169,16 +183,14 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a ToDo category by its ID.
+        /// </summary>
+        /// <param name="toDoCategoryId">The unique identifier of the category to be deleted.</param>
+        /// <returns>No content if the deletion was successful.</returns>
         [HttpDelete("{toDoCategoryId}")]
         public async Task<IActionResult> DeleteToDoCategory(Guid toDoCategoryId)
         {
-            var userId = User.Identity?.Name;
-
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
-
             if (Guid.Empty == toDoCategoryId)
             {
                 return BadRequest("ToDo category id cannot be empty.");
@@ -186,7 +198,7 @@ namespace API.Controllers
 
             try
             {
-                await _service.DeleteToDoCategoryAsync(parsedUserId, toDoCategoryId);
+                await _service.DeleteToDoCategoryAsync(toDoCategoryId);
                 return NoContent();
             }
             catch (InvalidOperationException ex)

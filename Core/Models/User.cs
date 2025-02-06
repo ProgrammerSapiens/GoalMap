@@ -60,7 +60,7 @@
         /// <summary>
         /// Gets or sets the experience points of the user.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Throwm if the experience is negative.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the experience is negative.</exception>
         public int Experience
         {
             get { return experience; }
@@ -73,7 +73,7 @@
         }
 
         /// <summary>
-        /// Gets the current level of the user.
+        /// Gets the current level of the user based on experience points.
         /// </summary>
         public int Level
         {
@@ -81,7 +81,7 @@
         }
 
         /// <summary>
-        /// Gets or sets todos assigned to the user.
+        /// Gets or sets the list of ToDo tasks assigned to the user.
         /// </summary>
         public virtual ICollection<ToDo> ToDos
         {
@@ -90,7 +90,7 @@
         }
 
         /// <summary>
-        /// Gets or sets categories created by a user.
+        /// Gets or sets the list of ToDo categories created by the user.
         /// </summary>
         public virtual ICollection<ToDoCategory> ToDoCategories
         {
@@ -108,10 +108,10 @@
         protected User() { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="User"/> class with the specified parameters.
+        /// Initializes a new instance of the <see cref="User"/> class with the specified user name.
         /// </summary>
         /// <param name="userName">The name of the user.</param>
-        /// <param name="passwordHash">The hashed password of the user.</param>
+        /// <exception cref="ArgumentException">Thrown if the user name is null or empty.</exception>
         public User(string userName)
         {
             if (string.IsNullOrEmpty(userName))

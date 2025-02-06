@@ -23,15 +23,20 @@ namespace Data.Repositories
         }
 
         /// <summary>
-        /// Retrieves a user by their username.
+        /// Retrieves a user by their unique identifier.
         /// </summary>
-        /// <param name="userName">The username of the user to retrieve.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the user if found, or null otherwise.</returns>
         public async Task<User?> GetUserByUserIdAsync(Guid userId)
         {
             return await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserId == userId);
         }
 
+        /// <summary>
+        /// Retrieves a user by their username.
+        /// </summary>
+        /// <param name="userName">The username of the user to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the user if found, or null otherwise.</returns>
         public async Task<User?> GetUserByUserNameAsync(string userName)
         {
             return await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == userName);
@@ -75,6 +80,11 @@ namespace Data.Repositories
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Adds default to-do categories to the database.
+        /// </summary>
+        /// <param name="defaultCategories">A list of default categories to add.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task AddDefaultCategoriesAsync(List<ToDoCategory> defaultCategories)
         {
             await _context.ToDoCategories.AddRangeAsync(defaultCategories);

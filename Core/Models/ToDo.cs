@@ -3,24 +3,24 @@
     #region Enums
 
     /// <summary>
-    /// Enumeration for defining the task's time block.
+    /// Defines the time block for a task.
     /// </summary>
     public enum TimeBlock { Day, Week, Month, Year }
 
     /// <summary>
-    /// Enumeration for defining the task's difficulty level.
+    /// Represents the difficulty level of a task.
     /// </summary>
     public enum Difficulty { None = 0, Easy = 5, Medium = 10, Hard = 15, Nightmare = 20 }
 
     /// <summary>
-    /// Enumeration for defining the task's repeat frequency.
+    /// Specifies how often a task should repeat.
     /// </summary>
     public enum RepeatFrequency { None, Daily, Weekly, Monthly, Yearly }
 
     #endregion
 
     /// <summary>
-    /// Represents the todo's model.
+    /// Represents a to-do task with properties such as description, difficulty, deadline, and completion status.
     /// </summary>
     public class ToDo
     {
@@ -45,7 +45,7 @@
         #region Properties
 
         /// <summary>
-        /// Gets the unique identifier of the todo.
+        /// Gets the unique identifier of the to-do task.
         /// </summary>
         public Guid ToDoId
         {
@@ -54,7 +54,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the description of the todo.
+        /// Gets or sets the description of the to-do task.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown if the description is null or empty.</exception>
         public string Description
@@ -69,7 +69,7 @@
         }
 
         /// <summary>
-        /// Gets the time block of the todo.
+        /// Gets the time block assigned to the to-do task.
         /// </summary>
         public TimeBlock TimeBlock
         {
@@ -78,7 +78,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the difficulty level of the todo.
+        /// Gets or sets the difficulty level of the to-do task.
         /// </summary>
         public Difficulty Difficulty
         {
@@ -87,7 +87,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the deadline for the todo.
+        /// Gets or sets the deadline for the to-do task.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the deadline is in the past.</exception>
         public DateTime? Deadline
@@ -104,7 +104,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the date associated with the todo.
+        /// Gets or sets the date the task is scheduled for.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the date is in the past.</exception>
         public DateTime ToDoDate
@@ -119,7 +119,7 @@
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the todo is completed.
+        /// Gets or sets a value indicating whether the task is completed.
         /// </summary>
         public bool CompletionStatus
         {
@@ -128,7 +128,7 @@
         }
 
         /// <summary>
-        /// Gets the ID of the parent todo, if applicable.
+        /// Gets the unique identifier of the parent task, if applicable.
         /// </summary>
         public Guid? ParentToDoId
         {
@@ -137,7 +137,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the repeat frequency of the todo.
+        /// Gets or sets the repeat frequency of the task.
         /// </summary>
         public RepeatFrequency RepeatFrequency
         {
@@ -145,10 +145,11 @@
             set { repeatFrequency = value; }
         }
 
+        //TODO: Change category name to category id
         /// <summary>
-        /// Gets or sets the ID of the todo category assigned to the todo.
+        /// Gets or sets the name of the category assigned to the task.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the category ID is empty</exception>
+        /// <exception cref="ArgumentException">Thrown if the category name is empty.</exception>
         public string ToDoCategoryName
         {
             get { return toDoCategoryName; }
@@ -161,9 +162,9 @@
         }
 
         /// <summary>
-        /// Gets or sets the ID of the user assigned to the todo.
+        /// Gets or sets the unique identifier of the user assigned to the task.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the user ID is empty</exception>
+        /// <exception cref="ArgumentException">Thrown if the user ID is empty.</exception>
         public Guid UserId
         {
             get { return userId; }
@@ -176,7 +177,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the todo category assigned to the todo.
+        /// Gets or sets the category assigned to the task.
         /// </summary>
         public virtual ToDoCategory? ToDoCategory
         {
@@ -185,7 +186,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the user assigned to the todo.
+        /// Gets or sets the user assigned to the task.
         /// </summary>
         public virtual User? User
         {
@@ -203,21 +204,21 @@
         protected ToDo() { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToDo"/> class with a deadline, parent todo ID, and repeat frequency.
+        /// Initializes a new instance of the <see cref="ToDo"/> class.
         /// </summary>
-        /// <param name="description">The todo's description.</param>
-        /// <param name="timeBlock">The time block for the todo.</param>
-        /// <param name="difficulty">The difficulty level of the todo.</param>
-        /// <param name="toDoDate">The creating date of the todo.</param>
-        /// <param name="toDoCategoryName">The unique identifier of the todo's category.</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="deadline">The deadline for the todo.</param>
-        /// <param name="parentToDoId">The unique identifier of the parent todo.</param>
-        /// <param name="repeatFrequency">The repeat frequency of the todo.</param>
+        /// <param name="description">Description of the task.</param>
+        /// <param name="timeBlock">Time block for the task.</param>
+        /// <param name="difficulty">Difficulty level of the task.</param>
+        /// <param name="toDoDate">Scheduled date of the task.</param>
+        /// <param name="toDoCategoryName">Category name of the task.</param>
+        /// <param name="userId">Unique identifier of the user.</param>
+        /// <param name="deadline">Deadline for the task (optional).</param>
+        /// <param name="parentToDoId">Parent task ID (optional).</param>
+        /// <param name="repeatFrequency">Repeat frequency of the task (optional).</param>
         public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline = null, Guid parentToDoId = new Guid(), RepeatFrequency repeatFrequency = RepeatFrequency.None)
         {
             if (string.IsNullOrEmpty(description))
-                throw new ArgumentException(nameof(description), "The description of the todo cannot be empty or null");
+                throw new ArgumentException(nameof(description), "The description cannot be empty or null");
 
             toDoId = Guid.NewGuid();
             this.description = description;

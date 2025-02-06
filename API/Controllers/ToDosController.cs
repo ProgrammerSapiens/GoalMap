@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Controller for managing To-Do tasks.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ToDosController : ControllerBase
@@ -13,12 +16,22 @@ namespace API.Controllers
         private readonly IToDoService _service;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ToDosController"/> class.
+        /// </summary>
+        /// <param name="service">Service for handling To-Do operations.</param>
+        /// <param name="mapper">AutoMapper instance for DTO mapping.</param>
         public ToDosController(IToDoService service, IMapper mapper)
         {
             _service = service;
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Gets a To-Do by its ID.
+        /// </summary>
+        /// <param name="toDoId">The unique identifier of the To-Do.</param>
+        /// <returns>The requested To-Do item.</returns>
         [HttpGet("{toDoId}")]
         public async Task<ActionResult<ToDoDto>> GetToDoById(Guid toDoId)
         {
@@ -46,6 +59,11 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves all To-Dos for a given date and time block.
+        /// </summary>
+        /// <param name="toDoGetByDateAndTimeBlockDto">DTO containing date and time block information.</param>
+        /// <returns>A list of To-Do items.</returns>
         [HttpGet]
         public async Task<ActionResult<List<ToDoDto>>> GetToDos(ToDoGetByDateAndTimeBlockDto toDoGetByDateAndTimeBlockDto)
         {
@@ -78,6 +96,11 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Creates a new To-Do.
+        /// </summary>
+        /// <param name="toDoAddDto">DTO containing To-Do details.</param>
+        /// <returns>The created To-Do item.</returns>
         [HttpPost]
         public async Task<IActionResult> AddToDo([FromBody] ToDoAddDto? toDoAddDto)
         {
@@ -111,6 +134,11 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing To-Do.
+        /// </summary>
+        /// <param name="toDoUpdateDto">DTO containing updated To-Do details.</param>
+        /// <returns>No content if the update is successful.</returns>
         [HttpPut]
         public async Task<IActionResult> UpdateToDo([FromBody] ToDoUpdateDto? toDoUpdateDto)
         {
@@ -143,6 +171,11 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a To-Do by its ID.
+        /// </summary>
+        /// <param name="toDoId">The unique identifier of the To-Do.</param>
+        /// <returns>No content if the deletion is successful.</returns>
         [HttpDelete("{toDoId}")]
         public async Task<IActionResult> DeleteToDo(Guid toDoId)
         {

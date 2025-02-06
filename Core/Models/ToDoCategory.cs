@@ -17,7 +17,7 @@
         #region Properties
 
         /// <summary>
-        /// Gets the unique identifier of the todo category.
+        /// Gets the unique identifier of the to-do category.
         /// </summary>
         public Guid ToDoCategoryId
         {
@@ -26,9 +26,9 @@
         }
 
         /// <summary>
-        /// Gets or sets the name of the todo category.
+        /// Gets or sets the name of the to-do category.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the todo name is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if the category name is null or empty.</exception>
         public string ToDoCategoryName
         {
             get { return toDoCategoryName; }
@@ -41,7 +41,7 @@
         }
 
         /// <summary>
-        /// Gets the ID of the user assigned to the todo category.
+        /// Gets the unique identifier of the user associated with this category.
         /// </summary>
         public Guid UserId
         {
@@ -50,7 +50,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the User assigned to the todo category.
+        /// Gets or sets the user who owns this to-do category.
         /// </summary>
         public virtual User? User
         {
@@ -68,10 +68,11 @@
         protected ToDoCategory() { }
 
         /// <summary>
-        /// Initialize a new instance of the <see cref="ToDoCategory"/> class with the specified parameters.
+        /// Initializes a new instance of the <see cref="ToDoCategory"/> class with the specified parameters.
         /// </summary>
-        /// <param name="toDoCategoryName">The name of the todo category.</param>
-        /// <param name="userId">The ID of the user assigned to the todo category.</param>
+        /// <param name="userId">The unique identifier of the user associated with this category.</param>
+        /// <param name="toDoCategoryName">The name of the to-do category.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="userId"/> is empty or <paramref name="toDoCategoryName"/> is null or empty.</exception>
         public ToDoCategory(Guid userId, string toDoCategoryName)
         {
             if (userId == Guid.Empty)

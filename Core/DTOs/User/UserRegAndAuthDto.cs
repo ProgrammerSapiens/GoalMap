@@ -1,8 +1,18 @@
 ﻿namespace Core.DTOs.User
 {
+    /// <summary>
+    /// Represents the data required for user registration and authentication.
+    /// </summary>
     public class UserRegAndAuthDto
     {
-        public string? UserName { get; set; }
-        public string? Password { get; set; }
+        /// <summary>
+        /// The username of the user.
+        /// </summary>
+        public string? UserName { get; set; } = null;
+
+        /// <summary>
+        /// The password for user authentication.
+        /// </summary>
+        public string? Password { get; set; } = null;
     }
 }

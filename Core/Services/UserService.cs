@@ -4,7 +4,7 @@ using Core.Models;
 namespace Core.Services
 {
     /// <summary>
-    /// Service for managing user operations such as authentication, registration, and experience updates.
+    /// Provides user management functionalities such as authentication, registration, and experience updates.
     /// </summary>
     public class UserService : IUserService
     {
@@ -12,10 +12,11 @@ namespace Core.Services
         private readonly IPasswordHasher _passwordHasher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class with a user repository and password hasher.
+        /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
-        /// <param name="repository">The repository for user data access.</param>
-        /// <param name="passwordHasher">The password hasher for secure password operations.</param>
+        /// <param name="repository">The repository for accessing user data.</param>
+        /// <param name="passwordHasher">The password hasher for secure password management.</param>
+        /// <exception cref="ArgumentNullException">Thrown if either repository or passwordHasher is null.</exception>
         public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
         {
             if (repository == null || passwordHasher == null)
@@ -28,24 +29,22 @@ namespace Core.Services
         }
 
         /// <summary>
-        /// Retrieves a user by their username.
+        /// Retrieves a user by their unique identifier.
         /// </summary>
-        /// <param name="userName">The username of the user to retrieve.</param>
-        /// <returns>The user with the specified username.</returns>
-        /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>The user with the specified identifier, or null if not found.</returns>
         public async Task<User?> GetUserByUserIdAsync(Guid userId)
         {
             return await _repository.GetUserByUserIdAsync(userId);
         }
 
         /// <summary>
-        /// Registers a new user in the system.
+        /// Registers a new user with a hashed password.
         /// </summary>
         /// <param name="user">The user to register.</param>
-        /// <param name="password">The password for the user.</param>
+        /// <param name="password">The password to be hashed and stored.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the username already exists.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the username is already taken.</exception>
         public async Task RegisterUserAsync(User user, string password)
         {
             var existingUser = await _repository.GetUserByUserNameAsync(user.UserName);
@@ -64,12 +63,11 @@ namespace Core.Services
         }
 
         /// <summary>
-        /// Authenticates a user by verifying their username and password.
+        /// Authenticates a user by verifying their credentials.
         /// </summary>
         /// <param name="userName">The username of the user.</param>
         /// <param name="password">The password of the user.</param>
-        /// <returns><c>true</c> if authentication is successful; otherwise, <c>false</c>.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the username or password is null or empty.</exception>
+        /// <returns>True if authentication is successful; otherwise, false.</returns>
         public async Task<bool> AuthenticateUserAsync(string userName, string password)
         {
             var user = await _repository.GetUserByUserNameAsync(userName);
@@ -89,18 +87,22 @@ namespace Core.Services
             return true;
         }
 
+        /// <summary>
+        /// Updates the user's information.
+        /// </summary>
+        /// <param name="user">The user with updated details.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task UpdateUserAsync(User user)
         {
             await _repository.UpdateUserAsync(user);
         }
 
         /// <summary>
-        /// Updates the experience of a user based on the difficulty of a completed task.
+        /// Updates the user's experience points based on task difficulty.
         /// </summary>
-        /// <param name="userName">The username of the user to update.</param>
-        /// <param name="taskDifficulty">The difficulty of the task that was completed.</param>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="taskDifficulty">The difficulty level of the completed task.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="ArgumentException">Thrown when the username is null or empty.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
         public async Task UpdateUserExperienceAsync(Guid userId, Difficulty taskDifficulty)
         {
@@ -117,15 +119,10 @@ namespace Core.Services
         }
 
         /// <summary>
-        /// Creates and adds two default to-do categories for the specified user.
+        /// Creates default to-do categories for a newly registered user.
         /// </summary>
-        /// <param name="userId">The ID of the user for whom the categories will be created.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the to-do category service was not provided in the constructor.</exception>
-        /// <remarks>
-        /// The method creates two categories named "Habbit" and "Other" and adds them via the <c>_toDoCategoryService</c>.
-        /// Each category is associated with the specified <paramref name="userId"/>. If the to-do category service was not injected into the constructor,
-        /// the method will throw an <see cref="InvalidOperationException"/>.
-        /// </remarks>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task CreateDefaultCategoriesAsync(Guid userId)
         {
             var defaultToDoCategories = new List<ToDoCategory>()
