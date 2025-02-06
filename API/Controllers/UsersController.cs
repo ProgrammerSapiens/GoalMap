@@ -40,13 +40,7 @@ namespace API.Controllers
                     return NotFound("User was not found.");
                 }
 
-                var userDto = new UserDto
-                {
-                    UserId = user.UserId,
-                    UserName = user.UserName,
-                    Experience = user.Experience,
-                    Level = user.Level,
-                };
+                var userDto = _mapper.Map<UserDto>(user);
 
                 return userDto;
             }
@@ -74,7 +68,7 @@ namespace API.Controllers
 
                 var userDto = _mapper.Map<UserDto>(user);
 
-                return CreatedAtAction(nameof(GetCurrentUser), new { userName = user.UserName }, userDto);
+                return CreatedAtAction(nameof(GetCurrentUser), new { userName = userDto.UserName }, userDto);
             }
             catch (ArgumentOutOfRangeException ex)
             {
@@ -137,23 +131,30 @@ namespace API.Controllers
                 return Unauthorized("User ID is not authenticated or invalid.");
             }
 
-            if (string.IsNullOrEmpty(updateUserDto.UserName))
+            if (updateUserDto.Difficulty == Difficulty.None && string.IsNullOrEmpty(updateUserDto.UserName))
             {
                 return BadRequest("UserName cannot be empty.");
             }
 
             try
             {
-                var existingUser = await _userService.GetUserByUserIdAsync(parsedUserId);
-
-                if (existingUser == null)
+                if (updateUserDto.Difficulty == Difficulty.None)
                 {
-                    return NotFound("User not found.");
+                    var existingUser = await _userService.GetUserByUserIdAsync(parsedUserId);
+
+                    if (existingUser == null)
+                    {
+                        return NotFound("User was not found.");
+                    }
+
+                    _mapper.Map(updateUserDto, existingUser);
+
+                    await _userService.UpdateUserAsync(existingUser);
                 }
-
-                _mapper.Map(updateUserDto, existingUser);
-
-                await _userService.UpdateUserAsync(existingUser);
+                else
+                {
+                    await _userService.UpdateUserExperienceAsync(parsedUserId, updateUserDto.Difficulty);
+                }
                 return NoContent();
             }
             catch (InvalidOperationException ex)

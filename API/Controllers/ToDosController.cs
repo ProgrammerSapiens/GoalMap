@@ -79,7 +79,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToDo([FromBody] ToDoAddDto toDoAddDto)
+        public async Task<IActionResult> AddToDo([FromBody] ToDoAddDto? toDoAddDto)
         {
             if (toDoAddDto == null)
             {
@@ -112,7 +112,7 @@ namespace API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateToDo([FromBody] ToDoUpdateDto toDoUpdateDto)
+        public async Task<IActionResult> UpdateToDo([FromBody] ToDoUpdateDto? toDoUpdateDto)
         {
             if (toDoUpdateDto == null)
             {

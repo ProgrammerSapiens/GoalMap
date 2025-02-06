@@ -30,7 +30,7 @@ namespace API.Controllers
             }
             if (Guid.Empty == toDoCategoryId)
             {
-                return BadRequest("User id or category name cannot be empty");
+                return BadRequest("Todo category id cannot be empty");
             }
 
             try
@@ -39,7 +39,7 @@ namespace API.Controllers
 
                 if (toDoCategory == null)
                 {
-                    return NotFound("Category not found.");
+                    return NotFound("Category was not found.");
                 }
 
                 var categoryDto = _mapper.Map<CategoryDto>(toDoCategory);
@@ -82,7 +82,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto categoryAddOrUpdateDto)
+        public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
             var userId = User.Identity?.Name;
 
@@ -120,7 +120,7 @@ namespace API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto categoryAddOrUpdateDto)
+        public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
             var userId = User.Identity?.Name;
 
