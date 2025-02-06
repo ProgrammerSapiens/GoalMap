@@ -1,111 +1,466 @@
 ﻿using API.Controllers;
+using AutoMapper;
+using Core.DTOs.ToDoCategory;
 using Core.Interfaces;
 using Core.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace Tests.UnitTests.APITests
 {
     public class ToDoCategoriesControllerTests
     {
         private readonly Mock<IToDoCategoryService> _mockService;
-        private readonly ToDoCategoriesController _controller;
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly ToDoCategoriesController _categoriesController;
 
         public ToDoCategoriesControllerTests()
         {
             _mockService = new Mock<IToDoCategoryService>();
-            _controller = new ToDoCategoriesController(_mockService.Object);
+            _mockMapper = new Mock<IMapper>();
+            _categoriesController = new ToDoCategoriesController(_mockService.Object, _mockMapper.Object);
         }
 
-        #region GetToDoCategoryByCategoryName(Guid userId, string categoryName)
-
-        //[Fact]
-        //public async Task GetToDoCategoryByCategoryName_ReturnsCategory_WhenCategoryExists()
-        //{
-        //    var userId = Guid.NewGuid();
-        //    var toDoCategoryName = "TestCategory";
-        //    var expectedCategory = new ToDoCategory(userId, toDoCategoryName);
-
-        //    _mockService.Setup(service => service.GetToDoCategoryByCategoryNameAsync(userId, toDoCategoryName)).ReturnsAsync(expectedCategory);
-
-        //    var result = await _controller.GetToDoCategoryByCategoryName(toDoCategoryName);
-
-        //    var actionResult = Assert.IsType<ActionResult<ToDoCategory>>(result);
-        //    Assert.Equal(expectedCategory, actionResult.Value);
-        //}
-
-        #endregion
-
-        #region GetToDoCategoriesByUserId(Guid userId)
+        #region GetToDoCategoryByCategoryId(Guid toDoCategoryId)
 
         [Fact]
-        public async Task GetToDoCategoriesByUserId_ReturnsCategories_WhenUserHasCategories()
+        public async Task GetToDoCategoryByCategoryId_ShouldReturnCategory_WhenCategoryExists()
         {
-            var userId = Guid.NewGuid();
-            var expectedCategories = new List<ToDoCategory>
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
             {
-                new ToDoCategory (userId, "Work"),
-                new ToDoCategory (userId, "Personal")
+                HttpContext = new DefaultHttpContext { User = userClaims }
             };
 
-            _mockService.Setup(service => service.GetToDoCategoriesByUserIdAsync(userId)).ReturnsAsync(expectedCategories);
+            var expectedCategoryName = "ExpectedCategory";
+            var expectedCategory = new ToDoCategory(user.UserId, expectedCategoryName);
+            var toDoCategoryId = expectedCategory.ToDoCategoryId;
 
-            var result = await _controller.GetToDoCategoriesByUserId();
+            var categoryDto = new CategoryDto { ToDoCategoryId = toDoCategoryId, ToDoCategoryName = expectedCategoryName };
 
-            var actionResult = Assert.IsType<ActionResult<List<ToDoCategory>>>(result);
-            Assert.Equal(expectedCategories, actionResult.Value);
+            _mockService.Setup(service => service.GetToDoCategoryByCategoryIdAsync(user.UserId, toDoCategoryId)).ReturnsAsync(expectedCategory);
+            _mockMapper.Setup(mapper => mapper.Map<CategoryDto>(expectedCategory)).Returns(categoryDto);
+
+            var result = await _categoriesController.GetToDoCategoryByCategoryId(toDoCategoryId);
+
+            var actionResult = Assert.IsType<ActionResult<CategoryDto>>(result);
+            var returnedCategoryDto = Assert.IsType<CategoryDto>(actionResult.Value);
+            Assert.Equal(expectedCategory.ToDoCategoryId, returnedCategoryDto.ToDoCategoryId);
+            Assert.Equal(expectedCategory.ToDoCategoryName, returnedCategoryDto.ToDoCategoryName);
+        }
+
+        [Fact]
+        public async Task GetToDoCategoryByCategoryId_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity());
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var expectedCategoryName = "ExpectedCategory";
+            var expectedCategory = new ToDoCategory(user.UserId, expectedCategoryName);
+            var toDoCategoryId = expectedCategory.ToDoCategoryId;
+
+            var result = await _categoriesController.GetToDoCategoryByCategoryId(toDoCategoryId);
+            var actionResult = Assert.IsType<ActionResult<CategoryDto>>(result);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(actionResult.Result);
+            Assert.Equal("User ID is not authenticated or invalid.", unauthorizedResult.Value);
+        }
+
+        [Fact]
+        public async Task GetToDoCategoryByCategoryId_ShouldReturnBadRequest_WhenUserIdIsEmpty()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var result = await _categoriesController.GetToDoCategoryByCategoryId(new Guid());
+
+            var actionResult = Assert.IsType<ActionResult<CategoryDto>>(result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(actionResult.Result);
+            Assert.Equal("Todo category id cannot be empty", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task GetToDoCategoryByCategoryId_ShouldReturnNotFound_WhenCategoryDoesNotExist()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var expectedCategoryName = "ExpectedCategory";
+            var expectedCategory = new ToDoCategory(user.UserId, expectedCategoryName);
+            var toDoCategoryId = expectedCategory.ToDoCategoryId;
+
+            _mockService.Setup(service => service.GetToDoCategoryByCategoryIdAsync(user.UserId, toDoCategoryId)).ReturnsAsync((ToDoCategory?)null);
+
+            var result = await _categoriesController.GetToDoCategoryByCategoryId(toDoCategoryId);
+
+            var actionResult = Assert.IsType<ActionResult<CategoryDto>>(result);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(actionResult.Result);
+            Assert.Equal("Category was not found.", notFoundResult.Value);
         }
 
         #endregion
 
-        #region AddToDoCategory([FromBody] ToDoCategory toDoCategory)
+        #region GetToDoCategoriesByUserId()
 
-        //[Fact]
-        //public async Task AddToDoCategory_ReturnsCreatedAtAction_WhenCategoryIsValid()
-        //{
-        //    var newCategory = new ToDoCategory(Guid.NewGuid(), "Category");
+        [Fact]
+        public async Task GetToDoCategoriesByUserId_ShouldReturnCategories_WhenUserHasCategories()
+        {
+            var user = new User("TestUser");
 
-        //    _mockService.Setup(service => service.AddToDoCategoryAsync(newCategory)).Returns(Task.CompletedTask);
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
 
-        //    var result = await _controller.AddToDoCategory(newCategory);
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
 
-        //    var actionResult = Assert.IsType<CreatedAtActionResult>(result);
-        //    Assert.Equal(nameof(ToDoCategoriesController.GetToDoCategoryByCategoryName), actionResult.ActionName);
-        //    Assert.Equal(newCategory, actionResult.Value);
-        //}
+            var expectedCategories = new List<ToDoCategory>
+            {
+                new ToDoCategory (user.UserId, "Work"),
+                new ToDoCategory (user.UserId, "Personal")
+            };
+
+            var categoriesDto = new List<CategoryDto>
+            {
+                new CategoryDto { ToDoCategoryId = expectedCategories[0].ToDoCategoryId, ToDoCategoryName = "Work" },
+                new CategoryDto { ToDoCategoryId = expectedCategories[1].ToDoCategoryId, ToDoCategoryName = "Personal" }
+            };
+
+            _mockService.Setup(service => service.GetToDoCategoriesByUserIdAsync(user.UserId)).ReturnsAsync(expectedCategories);
+            _mockMapper.Setup(mapper => mapper.Map<List<CategoryDto>>(expectedCategories)).Returns(categoriesDto);
+
+            var result = await _categoriesController.GetToDoCategoriesByUserId();
+
+            var actionResult = Assert.IsType<ActionResult<List<CategoryDto>>>(result);
+            var returnedCategoriesDto = Assert.IsType<List<CategoryDto>>(actionResult.Value);
+            Assert.Equal(2, returnedCategoriesDto.Count);
+        }
+
+        [Fact]
+        public async Task GetToDoCategoriesByUserId_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+        {
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity());
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var result = await _categoriesController.GetToDoCategoriesByUserId();
+
+            var actionResult = Assert.IsType<ActionResult<List<CategoryDto>>>(result);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(actionResult.Result);
+            Assert.Equal("User ID is not authenticated or invalid.", unauthorizedResult.Value);
+        }
+
+        [Fact]
+        public async Task GetToDoCategoriesByUserId_ShouldReturnEmptyList_WhenNoCategoriesExist()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            _mockService.Setup(service => service.GetToDoCategoriesByUserIdAsync(user.UserId)).ReturnsAsync(new List<ToDoCategory>());
+
+            var result = await _categoriesController.GetToDoCategoriesByUserId();
+
+            var actionResult = Assert.IsType<ActionResult<List<CategoryDto>>>(result);
+            var returnedCategoriesDto = Assert.IsType<List<CategoryDto>>(actionResult.Value);
+            Assert.Empty(returnedCategoriesDto);
+        }
 
         #endregion
 
-        #region UpdateToDoCategory([FromBody] ToDoCategory toDoCategory)
+        #region AddToDoCategory([FromBody] CategoryAddOrUpdateDto categoryAddOrUpdateDto)
 
         [Fact]
-        public async Task UpdateToDoCategory_ReturnsNoContent_WhenCategoryIsValid()
+        public async Task AddToDoCategory_ShouldReturnCreatedAtAction_WhenCategoryIsValid()
         {
-            var updatedCategory = new ToDoCategory(Guid.NewGuid(), "SomeCategory");
+            var user = new User("TestUser");
 
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryName = "TestCategory" };
+            var newCategory = new ToDoCategory(user.UserId, categoryAddOrUpdateDto.ToDoCategoryName);
+            var categoryDto = new CategoryDto { ToDoCategoryId = newCategory.ToDoCategoryId, ToDoCategoryName = newCategory.ToDoCategoryName };
+
+            _mockMapper.Setup(mapper => mapper.Map<ToDoCategory>(categoryAddOrUpdateDto)).Returns(newCategory);
+            _mockService.Setup(service => service.AddToDoCategoryAsync(newCategory)).Returns(Task.CompletedTask);
+            _mockMapper.Setup(mapper => mapper.Map<CategoryDto>(newCategory)).Returns(categoryDto);
+
+            var result = await _categoriesController.AddToDoCategory(categoryAddOrUpdateDto);
+
+            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
+            var returnedCategoryDto = Assert.IsType<CategoryDto>(createdAtActionResult.Value);
+
+            Assert.Equal(nameof(_categoriesController.GetToDoCategoryByCategoryId), createdAtActionResult.ActionName);
+            Assert.Equal(newCategory.ToDoCategoryId, returnedCategoryDto.ToDoCategoryId);
+            Assert.Equal(newCategory.ToDoCategoryName, returnedCategoryDto.ToDoCategoryName);
+        }
+
+        [Fact]
+        public async Task AddToDoCategory_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity());
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryName = "TestCategory" };
+
+            var result = await _categoriesController.AddToDoCategory(categoryAddOrUpdateDto);
+
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("User ID is not authenticated or invalid.", unauthorizedResult.Value);
+        }
+
+        [Fact]
+        public async Task AddToDoCategory_ShouldReturnBadRequest_WhenDataIsEmpty()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            CategoryAddOrUpdateDto? categoryAddOrUpdateDto = null;
+
+            var result = await _categoriesController.AddToDoCategory(categoryAddOrUpdateDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Category data cannot be null.", badRequestResult.Value);
+        }
+
+        #endregion
+
+        #region UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto categoryAddOrUpdateDto)
+
+        [Fact]
+        public async Task UpdateToDoCategory_ShouldReturnNoContent_WhenCategoryIsValid()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var categoryName = "TestCategory";
+            var existingCategory = new ToDoCategory(user.UserId, categoryName);
+            var updatedCategory = new ToDoCategory(user.UserId, "NewName");
+            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { UserId = user.UserId, ToDoCategoryId = existingCategory.ToDoCategoryId, ToDoCategoryName = "NewName" };
+
+            _mockService.Setup(service => service.GetToDoCategoryByCategoryIdAsync(user.UserId, existingCategory.ToDoCategoryId)).ReturnsAsync(existingCategory);
+            _mockMapper.Setup(mapper => mapper.Map(categoryAddOrUpdateDto, existingCategory)).Returns(updatedCategory);
             _mockService.Setup(service => service.UpdateToDoCategoryAsync(updatedCategory)).Returns(Task.CompletedTask);
 
-            var result = await _controller.UpdateToDoCategory(updatedCategory);
+            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
 
             Assert.IsType<NoContentResult>(result);
         }
 
+        [Fact]
+        public async Task UpdateToDoCategory_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity());
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { UserId = user.UserId, ToDoCategoryName = "NewName" };
+
+            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("User ID is not authenticated or invalid.", unauthorizedResult.Value);
+        }
+
+        [Fact]
+        public async Task AddToDoCategory_ShouldReturnBadRequest_WhenDataIsNull()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            CategoryAddOrUpdateDto? categoryAddOrUpdateDto = null;
+
+            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Category data cannot be null.", badRequestResult.Value);
+        }
+
+        [Fact]
+        public async Task AddToDoCategory_ShouldReturnNotFound_WhenCategoryDoesNotExist()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var categoryName = "TestCategory";
+            var existingCategory = new ToDoCategory(user.UserId, categoryName);
+            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { UserId = user.UserId, ToDoCategoryId = existingCategory.ToDoCategoryId, ToDoCategoryName = "NewName" };
+
+            _mockService.Setup(service => service.GetToDoCategoryByCategoryIdAsync(user.UserId, existingCategory.ToDoCategoryId)).ReturnsAsync((ToDoCategory?)null);
+
+            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
+
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Category was not found.", notFoundResult.Value);
+        }
+
         #endregion
 
-        #region DeleteToDoCategory(Guid userId, string categoryName)
+        #region DeleteToDoCategory(Guid toDoCategoryId)
 
-        //[Fact]
-        //public async Task DeleteToDoCategory_ReturnsNoContent_WhenCategoryIsDeleted()
-        //{
-        //    var userId = Guid.NewGuid();
-        //    var categoryName = "CategoryToDelete";
+        [Fact]
+        public async Task DeleteToDoCategory_ShouldReturnNoContent_WhenCategoryIsDeleted()
+        {
+            var user = new User("TestUser");
 
-        //    _mockService.Setup(service => service.DeleteToDoCategoryAsync(userId, categoryName)).Returns(Task.CompletedTask);
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
 
-        //    var result = await _controller.DeleteToDoCategory(categoryName);
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
 
-        //    Assert.IsType<NoContentResult>(result);
-        //}
+            var categoryName = "CategoryToDelete";
+            var category = new ToDoCategory(user.UserId, categoryName);
+
+            _mockService.Setup(service => service.DeleteToDoCategoryAsync(user.UserId, category.ToDoCategoryId)).Returns(Task.CompletedTask);
+
+            var result = await _categoriesController.DeleteToDoCategory(category.ToDoCategoryId);
+
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteToDoCategory_ShouldReturnUnauthorized_WhenUserIsNotAuthenticated()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity());
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var categoryName = "CategoryToDelete";
+            var category = new ToDoCategory(user.UserId, categoryName);
+
+            var result = await _categoriesController.DeleteToDoCategory(category.ToDoCategoryId);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("User ID is not authenticated or invalid.", unauthorizedResult.Value);
+        }
+
+        [Fact]
+        public async Task DeleteToDoCategory_ShouldReturnBadRequest_WhenUserIdIsEmpty()
+        {
+            var user = new User("TestUser");
+
+            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, user.UserId.ToString())
+            ]));
+
+            _categoriesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = userClaims }
+            };
+
+            var result = await _categoriesController.DeleteToDoCategory(new Guid());
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("ToDo category id cannot be empty.", badRequest.Value);
+        }
 
         #endregion
     }

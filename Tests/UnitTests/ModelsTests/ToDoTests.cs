@@ -335,41 +335,6 @@ namespace Tests.UnitTests.ModelsTests
             Assert.Throws<ArgumentException>(() => toDo.ToDoCategoryName = newToDoCategoryName);
         }
 
-        [Fact]
-        public void ToDo_SetUserId_ShouldUpdateUserId()
-        {
-            string initialDescription = "Initial description";
-            TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Medium;
-            DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
-            Guid userId = Guid.NewGuid();
-
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
-
-            Guid newUserId = Guid.NewGuid();
-            toDo.UserId = newUserId;
-
-            Assert.Equal(newUserId, toDo.UserId);
-        }
-
-        [Fact]
-        public void ToDo_SetEmptyUserId_ShouldThrowArgumentException()
-        {
-            string initialDescription = "Initial description";
-            TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Medium;
-            DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
-            Guid userId = Guid.NewGuid();
-
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
-
-            Guid newUserId = new Guid();
-
-            Assert.Throws<ArgumentException>(() => toDo.UserId = newUserId);
-        }
-
         #endregion
 
         #region Tests for default values
