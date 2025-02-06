@@ -4,8 +4,7 @@ using Core.Models;
 namespace Core.Services
 {
     /// <summary>
-    /// Service for managing user ToDo categories.
-    /// Provides methods for adding, retrieving, updating, and deleting categories.
+    /// Provides functionality for managing user ToDo categories.
     /// </summary>
     public class ToDoCategoryService : IToDoCategoryService
     {
@@ -14,40 +13,38 @@ namespace Core.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="ToDoCategoryService"/> class.
         /// </summary>
-        /// <param name="repository">The repository for working with ToDo categories.</param>
+        /// <param name="repository">Repository for managing ToDo categories.</param>
         public ToDoCategoryService(IToDoCategoryRepository repository)
         {
             _repository = repository;
         }
 
         /// <summary>
-        /// Retrieves a ToDo category by its name and user Id.
+        /// Retrieves a ToDo category by its unique identifier.
         /// </summary>
-        /// <param name="toDoCategoryName">The name of the ToDo category.</param>
-        /// <param name="userId">The user Id.</param>
-        /// <returns>The ToDo category object.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
-        public async Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid userId, Guid toDoCategoryId)
+        /// <param name="toDoCategoryId">The unique identifier of the ToDo category.</param>
+        /// <returns>The requested ToDo category, or null if not found.</returns>
+        public async Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid toDoCategoryId)
         {
-            return await _repository.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+            return await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
         }
 
         /// <summary>
-        /// Retrieves all ToDo categories for the specified user.
+        /// Retrieves all ToDo categories associated with a specific user.
         /// </summary>
-        /// <param name="userId">The user Id.</param>
-        /// <returns>A list of ToDo categories.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the user is not found or has no categories.</exception>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>A list of the user's ToDo categories.</returns>
         public async Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId)
         {
             return await _repository.GetToDoCategoriesByUserIdAsync(userId);
         }
 
         /// <summary>
-        /// Adds a new ToDo category.
+        /// Adds a new ToDo category for a user.
         /// </summary>
-        /// <param name="toDoCategory">The ToDo category object.</param>
+        /// <param name="toDoCategory">The category to be added.</param>
         /// <exception cref="InvalidOperationException">Thrown if a category with the same name already exists.</exception>
+        /// <exception cref="ArgumentException">Thrown if the category name contains digits.</exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
             toDoCategory.ToDoCategoryName = GetNameWithACapitalLetter(toDoCategory.ToDoCategoryName);
@@ -70,9 +67,10 @@ namespace Core.Services
         /// </summary>
         /// <param name="toDoCategory">The updated ToDo category object.</param>
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
+        /// <exception cref="ArgumentException">Thrown if attempting to update a default category.</exception>
         public async Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
-            var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryId);
+            var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategory.ToDoCategoryId);
 
             if (existingToDoCategory == null)
             {
@@ -98,14 +96,14 @@ namespace Core.Services
         }
 
         /// <summary>
-        /// Deletes a ToDo category by its name and user Id.
+        /// Deletes a ToDo category and reassigns its tasks to the "Other" category.
         /// </summary>
-        /// <param name="toDoCategoryName">The name of the ToDo category.</param>
-        /// <param name="userId">The user Id.</param>
+        /// <param name="toDoCategoryId">The unique identifier of the ToDo category to delete.</param>
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
-        public async Task DeleteToDoCategoryAsync(Guid userId, Guid toDoCategoryId)
+        /// <exception cref="ArgumentException">Thrown if attempting to delete a protected category.</exception>
+        public async Task DeleteToDoCategoryAsync(Guid toDoCategoryId)
         {
-            var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+            var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
             if (existingToDoCategory == null)
             {
@@ -120,10 +118,15 @@ namespace Core.Services
                 throw new ArgumentException("You cannot delete this category.");
             }
 
-            await _repository.DeleteToDoCategoryAsync(userId, toDoCategoryId);
-            await _repository.UpdateCategoryInToDosAsync(userId, oldCategoryName, newCategoryName);
+            await _repository.DeleteToDoCategoryAsync(toDoCategoryId);
+            await _repository.UpdateCategoryInToDosAsync(existingToDoCategory.UserId, oldCategoryName, newCategoryName);
         }
 
+        /// <summary>
+        /// Capitalizes the first letter of a category name and converts the rest to lowercase.
+        /// </summary>
+        /// <param name="categoryName">The category name to format.</param>
+        /// <returns>The formatted category name.</returns>
         private string GetNameWithACapitalLetter(string categoryName)
         {
             return char.ToUpper(categoryName[0]) + categoryName.Substring(1).ToLower();

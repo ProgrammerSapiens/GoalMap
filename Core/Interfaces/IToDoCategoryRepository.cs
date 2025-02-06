@@ -3,52 +3,56 @@
 namespace Core.Interfaces
 {
     /// <summary>
-    /// Provides methods for managing todo categories in the repository, including CRUD operations.
+    /// Provides methods for managing To-Do categories in the repository, including CRUD operations.
     /// </summary>
     public interface IToDoCategoryRepository
     {
         /// <summary>
-        /// Retrieves a category by its name and associated user ID.
+        /// Retrieves a To-Do category by its unique identifier.
         /// </summary>
-        /// <param name="toDoCategoryName">The name of the ToDo category.</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>The category associated with the specified name and user ID.</returns>
-        Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid userId, Guid toDoCategoryId);
+        /// <param name="toDoCategoryId">The unique identifier of the To-Do category.</param>
+        /// <returns>The To-Do category associated with the specified ID, or <c>null</c> if not found.</returns>
+        Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid toDoCategoryId);
 
         /// <summary>
-        /// Retrieves all categories associated with a specific user.
+        /// Retrieves all To-Do categories associated with a specific user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>A list of categories associated with the specified user.</returns>
+        /// <returns>A list of To-Do categories belonging to the specified user.</returns>
         Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId);
 
         /// <summary>
-        /// Adds a new category to the repository.
+        /// Adds a new To-Do category to the repository.
         /// </summary>
-        /// <param name="toDoCategory">The category to be added.</param>
+        /// <param name="toDoCategory">The To-Do category to be added.</param>
         Task AddToDoCategoryAsync(ToDoCategory toDoCategory);
 
         /// <summary>
-        /// Updates an existing category in the repository.
+        /// Updates an existing To-Do category in the repository.
         /// </summary>
-        /// <param name="toDoCategory">The category to be updated with new information.</param>
+        /// <param name="toDoCategory">The To-Do category containing updated details.</param>
         Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory);
 
+        /// <summary>
+        /// Updates the category name in all associated To-Do tasks.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="oldCategoryName">The current name of the category.</param>
+        /// <param name="newCategoryName">The new name to replace the old one.</param>
         Task UpdateCategoryInToDosAsync(Guid userId, string oldCategoryName, string newCategoryName);
 
         /// <summary>
-        /// Deletes a category from the repository by its name and associated user ID.
+        /// Deletes a To-Do category from the repository by its unique identifier.
         /// </summary>
-        /// <param name="toDoCategoryName">The name of the ToDo category to be deleted.</param>
-        /// <param name="userId">The unique identifier of the user.</param>
-        Task DeleteToDoCategoryAsync(Guid userId, Guid toDoCategoryId);
+        /// <param name="toDoCategoryId">The unique identifier of the To-Do category to be deleted.</param>
+        Task DeleteToDoCategoryAsync(Guid toDoCategoryId);
 
         /// <summary>
-        /// Checks if a category exists in the repository by its name and associated user ID.
+        /// Checks if a To-Do category exists in the repository by its name and associated user ID.
         /// </summary>
-        /// <param name="toDoCategoryName">The name of the ToDo category.</param>
         /// <param name="userId">The unique identifier of the user.</param>
-        /// <returns>True if the category exists, otherwise false.</returns>
+        /// <param name="toDoCategoryName">The name of the To-Do category.</param>
+        /// <returns><c>true</c> if the category exists; otherwise, <c>false</c>.</returns>
         Task<bool> CategoryExistsByNameAsync(Guid userId, string toDoCategoryName);
     }
 }
