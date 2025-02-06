@@ -10,7 +10,7 @@
     /// <summary>
     /// Enumeration for defining the task's difficulty level.
     /// </summary>
-    public enum Difficulty { Easy = 5, Medium = 10, Hard = 15, Nightmare = 20 }
+    public enum Difficulty { None = 0, Easy = 5, Medium = 10, Hard = 15, Nightmare = 20 }
 
     /// <summary>
     /// Enumeration for defining the task's repeat frequency.
