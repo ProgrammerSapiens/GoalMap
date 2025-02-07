@@ -54,7 +54,7 @@ namespace Data.Repositories
         {
             if (await ToDoExistsAsync(toDo.ToDoId))
             {
-                throw new InvalidOperationException($"ToDo item with ID {toDo.ToDoId} already exists.");
+                throw new InvalidOperationException("Todo already exists.");
             }
 
             await _context.ToDos.AddAsync(toDo);
@@ -73,7 +73,7 @@ namespace Data.Repositories
 
             if (existingToDo == null)
             {
-                throw new InvalidOperationException($"ToDo item with ID {toDo.ToDoId} does not exist.");
+                throw new InvalidOperationException("ToDo with such an Id does not exists.");
             }
 
             _context.Entry(existingToDo).CurrentValues.SetValues(toDo);
@@ -93,7 +93,7 @@ namespace Data.Repositories
 
             if (existingToDo == null)
             {
-                throw new InvalidOperationException($"ToDo item with ID {toDoId} does not exist.");
+                throw new InvalidOperationException("Todo id does not exist.");
             }
 
             _context.ToDos.Remove(existingToDo);
