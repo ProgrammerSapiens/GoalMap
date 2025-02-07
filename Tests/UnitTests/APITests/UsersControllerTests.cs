@@ -154,7 +154,8 @@ namespace Tests.UnitTests.APITests
             _userServiceMock.Setup(service => service.AuthenticateUserAsync(userName, password)).ReturnsAsync(true);
 
             var result = await _usersController.AuthenticateUser(userAuthenticateDto);
-            var okResult = Assert.IsType<OkResult>(result);
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("Authentication successful", okResult.Value);
         }
 
         [Fact]
@@ -210,37 +211,10 @@ namespace Tests.UnitTests.APITests
             _userServiceMock.Setup(service => service.GetUserByUserIdAsync(user.UserId)).ReturnsAsync(user);
             _userServiceMock.Setup(service => service.UpdateUserAsync(user)).Returns(Task.CompletedTask);
 
-            var result = await _usersController.UpdateUser(userUpdateDto);
+            var result = await _usersController.UpdateUserProfile(userUpdateDto);
 
             var noContentResult = Assert.IsType<NoContentResult>(result);
             Assert.Equal(204, noContentResult.StatusCode);
-        }
-
-        [Fact]
-        public async Task UpdateUser_ShouldSuccessfullyUpdateUserExperience()
-        {
-            var user = new User("TestUser");
-
-            var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.Name,user.UserId.ToString())
-            ], "mock"));
-
-            _usersController.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = userClaims }
-            };
-
-            var userUpdateDto = new UserUpdateDto { Difficulty = Difficulty.Easy };
-
-            _userServiceMock.Setup(service => service.UpdateUserExperienceAsync(user.UserId, userUpdateDto.Difficulty)).Returns(Task.CompletedTask);
-
-            var result = await _usersController.UpdateUser(userUpdateDto);
-
-            var noContentResult = Assert.IsType<NoContentResult>(result);
-            Assert.Equal(204, noContentResult.StatusCode);
-
-            _userServiceMock.Verify(service => service.UpdateUserExperienceAsync(user.UserId, userUpdateDto.Difficulty), Times.Once);
         }
 
         [Fact]
@@ -255,7 +229,7 @@ namespace Tests.UnitTests.APITests
 
             var userUpdateDto = new UserUpdateDto { UserName = "TestUser" };
 
-            var result = await _usersController.UpdateUser(userUpdateDto);
+            var result = await _usersController.UpdateUserProfile(userUpdateDto);
 
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
             Assert.Equal("User ID is not authenticated or invalid.", unauthorizedResult.Value);
@@ -277,12 +251,10 @@ namespace Tests.UnitTests.APITests
                 HttpContext = new DefaultHttpContext { User = userClaims }
             };
 
-            var userUpdateDto = new UserUpdateDto { Difficulty = Difficulty.None };
-
-            var result = await _usersController.UpdateUser(userUpdateDto);
+            var result = await _usersController.UpdateUserProfile(null);
 
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("UserName cannot be empty.", badRequestResult.Value);
+            Assert.Equal("User data cannot be null.", badRequestResult.Value);
         }
 
         [Fact]
@@ -304,7 +276,7 @@ namespace Tests.UnitTests.APITests
 
             _userServiceMock.Setup(service => service.GetUserByUserIdAsync(user.UserId)).ReturnsAsync((User?)null);
 
-            var result = await _usersController.UpdateUser(userUpdateDto);
+            var result = await _usersController.UpdateUserProfile(userUpdateDto);
 
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("User was not found.", notFoundResult.Value);

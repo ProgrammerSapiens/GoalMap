@@ -88,12 +88,12 @@ namespace API.Controllers
         /// <param name="updateUserDto">The user update data.</param>
         /// <returns>HTTP 204 No Content if successful, otherwise an appropriate HTTP response.</returns>
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateUserProfile([FromBody] UserUpdateDto updateUserDto)
+        public async Task<IActionResult> UpdateUserProfile([FromBody] UserUpdateDto? updateUserDto)
         {
             var userId = GetUserId();
             if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
 
-            if (string.IsNullOrEmpty(updateUserDto.UserName)) return BadRequest("UserName cannot be empty.");
+            if (updateUserDto == null) return BadRequest("User data cannot be null.");
 
             var existingUser = await _userService.GetUserByUserIdAsync(userId);
             if (existingUser == null) return NotFound("User was not found.");
