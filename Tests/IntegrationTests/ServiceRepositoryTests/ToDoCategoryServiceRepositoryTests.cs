@@ -49,7 +49,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.ToDoCategories.Add(expectedCategory);
             await _context.SaveChangesAsync();
 
-            var result = await _toDoCategoryService.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+            var result = await _toDoCategoryService.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
             Assert.NotNull(result);
             Assert.Equal(expectedCategory.ToDoCategoryName, result.ToDoCategoryName);
@@ -73,7 +73,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             };
             var toDoCategoryId = expectedCategory.ToDoCategoryId;
 
-            var result = await _toDoCategoryService.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+            var result = await _toDoCategoryService.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
             Assert.Null(result);
         }
@@ -219,7 +219,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.ToDoCategories.Add(toDoCategory);
             await _context.SaveChangesAsync();
 
-            await _toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategoryId);
+            await _toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryId);
 
             var toDoCategoryInDb = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName);
 
@@ -232,7 +232,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategoryId));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryId));
 
             Assert.Equal("ToDo category was not found.", exception.Message);
         }
@@ -250,7 +250,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.ToDoCategories.Add(defaultCategory);
             await _context.SaveChangesAsync();
 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _toDoCategoryService.DeleteToDoCategoryAsync(userId, toDoCategoryId));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryId));
 
             Assert.Equal("You cannot delete this category.", exception.Message);
         }

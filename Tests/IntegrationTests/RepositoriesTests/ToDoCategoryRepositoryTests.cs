@@ -41,7 +41,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
             _context.ToDoCategories.Add(toDoCategory);
             await _context.SaveChangesAsync();
 
-            var result = await _categoryRepository.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+            var result = await _categoryRepository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.UserId);
@@ -57,7 +57,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDoCategory = new ToDoCategory(userId, categoryName);
             var toDoCategoryId = toDoCategory.ToDoCategoryId;
 
-            var result = await _categoryRepository.GetToDoCategoryByCategoryIdAsync(userId, toDoCategoryId);
+            var result = await _categoryRepository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
             var toDoCategoryInDb = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryName == categoryName);
 
@@ -223,9 +223,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
             _context.ToDoCategories.Add(toDoCategory);
             await _context.SaveChangesAsync();
 
-            await _categoryRepository.DeleteToDoCategoryAsync(userId, toDoCategoryId);
+            await _categoryRepository.DeleteToDoCategoryAsync(toDoCategoryId);
 
-            var toDoCategoryInDb = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.UserId == userId && c.ToDoCategoryId == toDoCategoryId);
+            var toDoCategoryInDb = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryId == toDoCategoryId);
 
             Assert.Null(toDoCategoryInDb);
         }
@@ -238,7 +238,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
             var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
             var toDoCategoryId = toDoCategory.ToDoCategoryId;
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _categoryRepository.DeleteToDoCategoryAsync(userId, toDoCategoryId));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _categoryRepository.DeleteToDoCategoryAsync(toDoCategoryId));
             Assert.Equal("Category does not exist.", exception.Message);
         }
 
