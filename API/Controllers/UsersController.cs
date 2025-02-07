@@ -36,31 +36,13 @@ namespace API.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
-            var userId = User.Identity?.Name;
+            var userId = GetUserId();
+            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
+            var user = await _userService.GetUserByUserIdAsync(userId);
+            if (user == null) return NotFound("User was not found.");
 
-            try
-            {
-                var user = await _userService.GetUserByUserIdAsync(parsedUserId);
-
-                if (user == null)
-                {
-                    return NotFound("User was not found.");
-                }
-
-                var userDto = _mapper.Map<UserDto>(user);
-
-                return userDto;
-            }
-            //Add logger through DI
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+            return _mapper.Map<UserDto>(user);
         }
 
         /// <summary>
@@ -71,41 +53,15 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> RegisterUser([FromBody] UserRegAndAuthDto registerUserDto)
         {
+            if (string.IsNullOrEmpty(registerUserDto.Password) || string.IsNullOrEmpty(registerUserDto.UserName)) return BadRequest("User data or password cannot be null");
+
             var user = _mapper.Map<User>(registerUserDto);
-            var password = registerUserDto.Password;
+            await _userService.RegisterUserAsync(user, registerUserDto.Password);
 
-            if (user == null || string.IsNullOrEmpty(password))
-            {
-                return BadRequest("User data or password cannot be null");
-            }
-
-            try
-            {
-                await _userService.RegisterUserAsync(user, password);
-
-                var userDto = _mapper.Map<UserDto>(user);
-
-                return CreatedAtAction(nameof(GetCurrentUser), new { userName = userDto.UserName }, userDto);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal service error.");
-            }
+            var userDto = _mapper.Map<UserDto>(user);
+            return CreatedAtAction(nameof(GetCurrentUser), new { userName = userDto.UserName }, userDto);
         }
 
-        //TODO: Add returning Token from service
         /// <summary>
         /// Authenticates a user and returns a token.
         /// </summary>
@@ -114,33 +70,16 @@ namespace API.Controllers
         [HttpPost("authenticate")]
         public async Task<IActionResult> AuthenticateUser([FromBody] UserRegAndAuthDto authenticateUserDto)
         {
-            var userName = authenticateUserDto.UserName;
-            var password = authenticateUserDto.Password;
-
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(authenticateUserDto.UserName) || string.IsNullOrWhiteSpace(authenticateUserDto.Password))
             {
                 return BadRequest("Username or password cannot be empty.");
             }
 
-            try
-            {
-                var authentication = await _userService.AuthenticateUserAsync(userName, password);
+            var isAuthenticated = await _userService.AuthenticateUserAsync(authenticateUserDto.UserName, authenticateUserDto.Password);
+            if (!isAuthenticated) return Unauthorized("Invalid username or password");
 
-                if (!authentication)
-                {
-                    return Unauthorized("Invalid username or password");
-                }
-
-                return Ok();
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+            //TODO: Return JWT token after the implementation of the authentication project
+            return Ok("Authentication successful");
         }
 
         /// <summary>
@@ -148,50 +87,29 @@ namespace API.Controllers
         /// </summary>
         /// <param name="updateUserDto">The user update data.</param>
         /// <returns>HTTP 204 No Content if successful, otherwise an appropriate HTTP response.</returns>
-        [HttpPut("experience")]
-        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto updateUserDto)
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateUserProfile([FromBody] UserUpdateDto updateUserDto)
         {
-            var userId = User.Identity?.Name;
+            var userId = GetUserId();
+            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
+            if (string.IsNullOrEmpty(updateUserDto.UserName)) return BadRequest("UserName cannot be empty.");
 
-            if (updateUserDto.Difficulty == Difficulty.None && string.IsNullOrEmpty(updateUserDto.UserName))
-            {
-                return BadRequest("UserName cannot be empty.");
-            }
+            var existingUser = await _userService.GetUserByUserIdAsync(userId);
+            if (existingUser == null) return NotFound("User was not found.");
 
-            try
-            {
-                if (updateUserDto.Difficulty == Difficulty.None)
-                {
-                    var existingUser = await _userService.GetUserByUserIdAsync(parsedUserId);
+            _mapper.Map(updateUserDto, existingUser);
+            await _userService.UpdateUserAsync(existingUser);
 
-                    if (existingUser == null)
-                    {
-                        return NotFound("User was not found.");
-                    }
+            return NoContent();
+        }
 
-                    _mapper.Map(updateUserDto, existingUser);
-
-                    await _userService.UpdateUserAsync(existingUser);
-                }
-                else
-                {
-                    await _userService.UpdateUserExperienceAsync(parsedUserId, updateUserDto.Difficulty);
-                }
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+        /// <summary>
+        /// Extracts the authenticated user's ID.
+        /// </summary>
+        private Guid GetUserId()
+        {
+            return Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
         }
     }
 }

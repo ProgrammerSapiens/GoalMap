@@ -35,28 +35,12 @@ namespace API.Controllers
         [HttpGet("{toDoCategoryId}")]
         public async Task<ActionResult<CategoryDto>> GetToDoCategoryByCategoryId(Guid toDoCategoryId)
         {
-            if (Guid.Empty == toDoCategoryId)
-            {
-                return BadRequest("Todo category id cannot be empty");
-            }
+            if (Guid.Empty == toDoCategoryId) return BadRequest("Todo category id cannot be empty");
 
-            try
-            {
-                var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
+            var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
+            if (toDoCategory == null) return NotFound("Category was not found.");
 
-                if (toDoCategory == null)
-                {
-                    return NotFound("Category was not found.");
-                }
-
-                var categoryDto = _mapper.Map<CategoryDto>(toDoCategory);
-
-                return categoryDto;
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+            return _mapper.Map<CategoryDto>(toDoCategory);
         }
 
         /// <summary>
@@ -66,30 +50,13 @@ namespace API.Controllers
         [HttpGet("user")]
         public async Task<ActionResult<List<CategoryDto>>> GetToDoCategoriesByUserId()
         {
-            var userId = User.Identity?.Name;
+            var userId = GetUserId();
+            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
+            var categories = await _service.GetToDoCategoriesByUserIdAsync(userId);
+            if (categories.Count == 0) return new List<CategoryDto>();
 
-            try
-            {
-                var categories = await _service.GetToDoCategoriesByUserIdAsync(parsedUserId);
-
-                if (categories.Count == 0)
-                {
-                    return new List<CategoryDto>();
-                }
-
-                var categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
-
-                return categoriesDto;
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+            return _mapper.Map<List<CategoryDto>>(categories);
         }
 
         /// <summary>
@@ -100,39 +67,18 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
-            var userId = User.Identity?.Name;
+            var userId = GetUserId();
+            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var parsedUserId))
-            {
-                return Unauthorized("User ID is not authenticated or invalid.");
-            }
+            if (categoryAddOrUpdateDto == null) return BadRequest("Category data cannot be null.");
 
-            if (categoryAddOrUpdateDto == null)
-            {
-                return BadRequest("Category data cannot be null.");
-            }
+            categoryAddOrUpdateDto.UserId = userId;
+            var category = _mapper.Map<ToDoCategory>(categoryAddOrUpdateDto);
+            await _service.AddToDoCategoryAsync(category);
 
-            try
-            {
-                categoryAddOrUpdateDto.UserId = parsedUserId;
-                var category = _mapper.Map<ToDoCategory>(categoryAddOrUpdateDto);
-                await _service.AddToDoCategoryAsync(category);
+            var categoryDto = _mapper.Map<CategoryDto>(category);
 
-                var categoryDto = _mapper.Map<CategoryDto>(category);
-                return CreatedAtAction(nameof(GetToDoCategoryByCategoryId), new { toDoCategoryId = category.ToDoCategoryId }, categoryDto);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+            return CreatedAtAction(nameof(GetToDoCategoryByCategoryId), new { toDoCategoryId = category.ToDoCategoryId }, categoryDto);
         }
 
         /// <summary>
@@ -143,44 +89,20 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
-            if (categoryAddOrUpdateDto == null)
-            {
-                return BadRequest("Category data cannot be null.");
-            }
+            if (categoryAddOrUpdateDto == null) return BadRequest("Category data cannot be null.");
 
-            var categoryName = categoryAddOrUpdateDto.ToDoCategoryName;
-            var categoryId = categoryAddOrUpdateDto.ToDoCategoryId;
-
-            if (Guid.Empty == categoryId || string.IsNullOrEmpty(categoryName))
+            if (Guid.Empty == categoryAddOrUpdateDto.ToDoCategoryId || string.IsNullOrEmpty(categoryAddOrUpdateDto.ToDoCategoryName))
             {
                 return BadRequest("Category name cannot be empty.");
             }
 
-            try
-            {
-                var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(categoryId);
-                if (existingCategory == null)
-                {
-                    return NotFound("Category was not found.");
-                }
+            var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(categoryAddOrUpdateDto.ToDoCategoryId);
+            if (existingCategory == null) return NotFound("Category was not found.");
 
-                _mapper.Map(categoryAddOrUpdateDto, existingCategory);
+            _mapper.Map(categoryAddOrUpdateDto, existingCategory);
+            await _service.UpdateToDoCategoryAsync(existingCategory);
 
-                await _service.UpdateToDoCategoryAsync(existingCategory);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal Server error.");
-            }
+            return NoContent();
         }
 
         /// <summary>
@@ -191,28 +113,19 @@ namespace API.Controllers
         [HttpDelete("{toDoCategoryId}")]
         public async Task<IActionResult> DeleteToDoCategory(Guid toDoCategoryId)
         {
-            if (Guid.Empty == toDoCategoryId)
-            {
-                return BadRequest("ToDo category id cannot be empty.");
-            }
+            if (Guid.Empty == toDoCategoryId) return BadRequest("ToDo category id cannot be empty.");
 
-            try
-            {
-                await _service.DeleteToDoCategoryAsync(toDoCategoryId);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Internal server error.");
-            }
+            await _service.DeleteToDoCategoryAsync(toDoCategoryId);
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Extracts the authenticated user's ID.
+        /// </summary>
+        private Guid GetUserId()
+        {
+            return Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
         }
     }
 }
