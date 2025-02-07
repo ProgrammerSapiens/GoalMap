@@ -44,6 +44,8 @@ namespace API
 
             app.UseHttpsRedirection();
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
             app.UseAuthorization();
 
             app.MapControllers();
