@@ -16,16 +16,18 @@ namespace API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IJwtTokenService _jwtTokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UsersController"/> class.
         /// </summary>
         /// <param name="userService">The user service instance.</param>
         /// <param name="mapper">The AutoMapper instance.</param>
-        public UsersController(IUserService userService, IMapper mapper)
+        public UsersController(IUserService userService, IMapper mapper, IJwtTokenService jwtTokenService)
         {
             _userService = userService;
             _mapper = mapper;
+            _jwtTokenService = jwtTokenService;
         }
 
         /// <summary>
@@ -75,11 +77,15 @@ namespace API.Controllers
                 return BadRequest("Username or password cannot be empty.");
             }
 
+            var user = await _userService.GetUserByUserNameAsync(authenticateUserDto.UserName);
+            if (user == null) return Unauthorized("Invalid username or password.");
+
             var isAuthenticated = await _userService.AuthenticateUserAsync(authenticateUserDto.UserName, authenticateUserDto.Password);
             if (!isAuthenticated) return Unauthorized("Invalid username or password");
 
-            //TODO: Return JWT token after the implementation of the authentication project
-            return Ok("Authentication successful");
+            var token = await _jwtTokenService.GenerateTokenAsync(user);
+
+            return Ok(new { Token = token });
         }
 
         /// <summary>
