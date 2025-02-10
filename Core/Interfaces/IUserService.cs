@@ -15,6 +15,13 @@ namespace Core.Interfaces
         Task<User?> GetUserByUserIdAsync(Guid userId);
 
         /// <summary>
+        /// Retrieves a user by their unique name.
+        /// </summary>
+        /// <param name="userName">The unique name of the user.</param>
+        /// <returns>The user object if found; otherwise, <c>null</c>.</returns>
+        Task<User?> GetUserByUserNameAsync(string userName);
+
+        /// <summary>
         /// Registers a new user in the system.
         /// </summary>
         /// <param name="user">The user object to register.</param>

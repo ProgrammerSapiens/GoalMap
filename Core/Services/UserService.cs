@@ -39,6 +39,16 @@ namespace Core.Services
         }
 
         /// <summary>
+        /// Retrieves a user by their unique name.
+        /// </summary>
+        /// <param name="userName">The unique name of the user.</param>
+        /// <returns>The user with the specified identifier, or null if not found.</returns>
+        public async Task<User?> GetUserByUserNameAsync(string userName)
+        {
+            return await _repository.GetUserByUserNameAsync(userName);
+        }
+
+        /// <summary>
         /// Registers a new user with a hashed password.
         /// </summary>
         /// <param name="user">The user to register.</param>
