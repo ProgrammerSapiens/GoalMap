@@ -1,8 +1,8 @@
-using Core;
 using Core.Interfaces;
 using Core.Services;
 using Data.Repositories;
 using API.DTOProfiles;
+using Authentication;
 
 namespace API
 {
