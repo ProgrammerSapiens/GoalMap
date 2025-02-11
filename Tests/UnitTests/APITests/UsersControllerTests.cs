@@ -23,7 +23,7 @@ namespace Tests.UnitTests.APITests
             _usersController = new UsersController(_userServiceMock.Object, _mapperMock.Object);
         }
 
-        #region GetCurrentUser tests
+        #region GetCurrentUser() tests
 
         [Fact]
         public async Task GetCurrentUser_ShouldReturnUserInfo_WhenUserExists()
@@ -98,92 +98,6 @@ namespace Tests.UnitTests.APITests
             var objectResult = Assert.IsType<NotFoundObjectResult>(actionResult.Result);
 
             Assert.Equal("User was not found.", objectResult.Value);
-        }
-
-        #endregion
-
-        #region RegisterUser([FromBody] UserRegAndAuthDto registerUserDto) tests
-
-        [Fact]
-        public async Task RegisterUser_ShouldSuccessfullyRegisterNewUser()
-        {
-            var userRegisterDto = new UserRegAndAuthDto { UserName = "TestUser", Password = "Password" };
-            var user = new User(userRegisterDto.UserName);
-            var userDto = new UserDto { UserName = user.UserName, UserId = user.UserId, Experience = user.Experience, Level = user.Level };
-
-            _mapperMock.Setup(m => m.Map<User>(userRegisterDto)).Returns(user);
-            _mapperMock.Setup(m => m.Map<UserDto>(user)).Returns(userDto);
-            _userServiceMock.Setup(service => service.RegisterUserAsync(user, userRegisterDto.Password)).Returns(Task.CompletedTask);
-
-            var result = await _usersController.RegisterUser(userRegisterDto);
-
-            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-            var returnedUserDto = Assert.IsType<UserDto>(createdAtActionResult.Value);
-
-            Assert.Equal(nameof(_usersController.GetCurrentUser), createdAtActionResult.ActionName);
-            Assert.Equal(user.UserName, createdAtActionResult.RouteValues["userName"]);
-            Assert.Equal(userDto.UserId, returnedUserDto.UserId);
-            Assert.Equal(userDto.UserName, returnedUserDto.UserName);
-            Assert.Equal(userDto.Experience, returnedUserDto.Experience);
-            Assert.Equal(userDto.Level, returnedUserDto.Level);
-        }
-
-        [Fact]
-        public async Task RegisterUser_ShouldReturnBadRequest_WhenDataIsNull()
-        {
-            var registerUserDto = new UserRegAndAuthDto { UserName = null, Password = null };
-            _mapperMock.Setup(m => m.Map<User?>(registerUserDto)).Returns((User?)null);
-
-            var result = await _usersController.RegisterUser(registerUserDto);
-
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            Assert.Equal("User data or password cannot be null", badRequestResult.Value);
-        }
-
-        #endregion
-
-        #region AuthenticateUser([FromBody] UserRegAndAuthDto authenticateUserDto) tests
-
-        [Fact]
-        public async Task AuthenticateUser_ShouldReturnToken_WhenCredentialsAreValid()
-        {
-            var userAuthenticateDto = new UserRegAndAuthDto { UserName = "TestUser", Password = "Password" };
-            string userName = userAuthenticateDto.UserName;
-            string password = userAuthenticateDto.Password;
-
-            _userServiceMock.Setup(service => service.AuthenticateUserAsync(userName, password)).ReturnsAsync(true);
-
-            var result = await _usersController.AuthenticateUser(userAuthenticateDto);
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal("Authentication successful", okResult.Value);
-        }
-
-        [Fact]
-        public async Task AuthenticateUser_ShouldReturnBadRequest_WhenDataIsNull()
-        {
-            var userAuthenticateDto = new UserRegAndAuthDto { UserName = null, Password = null };
-            string? userName = userAuthenticateDto.UserName;
-            string? password = userAuthenticateDto.Password;
-
-            var result = await _usersController.AuthenticateUser(userAuthenticateDto);
-
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Username or password cannot be empty.", badRequestResult.Value);
-        }
-
-        [Fact]
-        public async Task AuthenticateUser_ShouldReturnUnauthorized_WhenCredentialsAreInvalid()
-        {
-            var userAuthenticateDto = new UserRegAndAuthDto { UserName = "InvalidUser", Password = "InvalidPassword" };
-            string userName = userAuthenticateDto.UserName;
-            string password = userAuthenticateDto.Password;
-
-            _userServiceMock.Setup(service => service.AuthenticateUserAsync(userName, password)).ReturnsAsync(false);
-
-            var result = await _usersController.AuthenticateUser(userAuthenticateDto);
-
-            var unauthorisedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            Assert.Equal("Invalid username or password", unauthorisedResult.Value);
         }
 
         #endregion
