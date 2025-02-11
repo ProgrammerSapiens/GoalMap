@@ -2,6 +2,7 @@
 using Core.DTOs.ToDoCategory;
 using Core.Interfaces;
 using Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -11,6 +12,7 @@ namespace API.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ToDoCategoriesController : ControllerBase
     {
         private readonly IToDoCategoryService _service;
