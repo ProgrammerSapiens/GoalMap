@@ -1,12 +1,9 @@
-﻿using Core.Interfaces;
-using Data.DBContext;
+﻿using Data.DBContext;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Data.Repositories;
-using Core.Services;
-using Core;
+using Core.Models;
 
 namespace Tests.IntegrationTests.APITests
 {
@@ -26,7 +23,21 @@ namespace Tests.IntegrationTests.APITests
                 {
                     options.UseInMemoryDatabase("TestDb");
                 });
+
+                using var scope = services.BuildServiceProvider().CreateScope();
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<AppDbContext>();
+
+                db.Database.EnsureCreated();
+                SeedTestData(db);
             });
+        }
+
+        private static void SeedTestData(AppDbContext db)
+        {
+            db.Users.Add(new User("testUser"));
+
+            db.SaveChanges();
         }
     }
 }
