@@ -1,20 +1,24 @@
-﻿using Core.Interfaces;
+﻿using Castle.Core.Logging;
+using Core.Interfaces;
 using Core.Models;
 using Core.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Tests.UnitTests.ServicesTests
 {
     public class ToDoServiceTests
     {
-        private readonly Mock<IToDoRepository> toDoRepositoryMock;
-        private readonly IToDoService toDoService;
+        private readonly Mock<IToDoRepository> _toDoRepositoryMock;
+        private readonly Mock<ILogger<ToDoService>> _loggerMock;
+        private readonly IToDoService _toDoService;
 
         public ToDoServiceTests()
         {
-            toDoRepositoryMock = new Mock<IToDoRepository>();
+            _toDoRepositoryMock = new Mock<IToDoRepository>();
+            _loggerMock = new Mock<ILogger<ToDoService>>();
 
-            toDoService = new ToDoService(toDoRepositoryMock.Object);
+            _toDoService = new ToDoService(_toDoRepositoryMock.Object, _loggerMock.Object);
         }
 
         #region GetToDoByIdAsync(Guid toDoId) tests
@@ -25,14 +29,14 @@ namespace Tests.UnitTests.ServicesTests
             var expectedToDo = new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid(), DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily);
             var toDoId = expectedToDo.ToDoId;
 
-            toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDoId)).ReturnsAsync(expectedToDo);
+            _toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDoId)).ReturnsAsync(expectedToDo);
 
-            var result = await toDoService.GetToDoByIdAsync(toDoId);
+            var result = await _toDoService.GetToDoByIdAsync(toDoId);
 
             Assert.NotNull(result);
             Assert.Equal(expectedToDo.ToDoId, result.ToDoId);
             Assert.Equal(expectedToDo.Description, result.Description);
-            toDoRepositoryMock.Verify(repo => repo.GetToDoByIdAsync(toDoId), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.GetToDoByIdAsync(toDoId), Times.Once);
         }
 
         [Fact]
@@ -40,11 +44,9 @@ namespace Tests.UnitTests.ServicesTests
         {
             var toDoId = Guid.NewGuid();
 
-            toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDoId)).ReturnsAsync((ToDo?)null);
+            _toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDoId)).ReturnsAsync((ToDo?)null);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
-            var result = await toDoService.GetToDoByIdAsync(toDoId);
+            var result = await _toDoService.GetToDoByIdAsync(toDoId);
             Assert.Null(result);
         }
 
@@ -64,13 +66,13 @@ namespace Tests.UnitTests.ServicesTests
                 new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, date, "Other", userId, DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily)
             };
 
-            toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day)).ReturnsAsync(expectedToDos);
+            _toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day)).ReturnsAsync(expectedToDos);
 
-            var result = await toDoService.GetToDosAsync(userId, date, TimeBlock.Day);
+            var result = await _toDoService.GetToDosAsync(userId, date, TimeBlock.Day);
 
             Assert.NotNull(result);
             Assert.Equal(expectedToDos.Count, result.Count);
-            toDoRepositoryMock.Verify(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day), Times.Once);
         }
 
         [Fact]
@@ -79,9 +81,9 @@ namespace Tests.UnitTests.ServicesTests
             var userId = Guid.NewGuid();
             DateTime date = DateTime.Today;
 
-            toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day)).ReturnsAsync(new List<ToDo>());
+            _toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, date, TimeBlock.Day)).ReturnsAsync(new List<ToDo>());
 
-            var result = await toDoService.GetToDosAsync(userId, date, TimeBlock.Day);
+            var result = await _toDoService.GetToDosAsync(userId, date, TimeBlock.Day);
 
             Assert.NotNull(result);
             Assert.Empty(result);
@@ -105,15 +107,13 @@ namespace Tests.UnitTests.ServicesTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
 
-            toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(false);
-            toDoRepositoryMock.Setup(repo => repo.AddToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
+            _toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(false);
+            _toDoRepositoryMock.Setup(repo => repo.AddToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
+            await _toDoService.AddToDoAsync(toDo);
 
-            await toDoService.AddToDoAsync(toDo);
-
-            toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
-            toDoRepositoryMock.Verify(repo => repo.AddToDoAsync(It.Is<ToDo>(t => t.ToDoId == toDo.ToDoId
+            _toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.AddToDoAsync(It.Is<ToDo>(t => t.ToDoId == toDo.ToDoId
             && t.Description == toDo.Description
             && t.TimeBlock == toDo.TimeBlock
             && t.Difficulty == toDo.Difficulty
@@ -139,16 +139,14 @@ namespace Tests.UnitTests.ServicesTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
 
-            toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(true);
-            toDoRepositoryMock.Setup(repo => repo.AddToDoAsync(toDo)).Returns(Task.CompletedTask);
+            _toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(true);
+            _toDoRepositoryMock.Setup(repo => repo.AddToDoAsync(toDo)).Returns(Task.CompletedTask);
 
-            var toDoService = new ToDoService(toDoRepositoryMock.Object);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoService.AddToDoAsync(toDo));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.AddToDoAsync(toDo));
 
             Assert.Equal("ToDo id already exists.", exception.Message);
-            toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
-            toDoRepositoryMock.Verify(repo => repo.AddToDoAsync(toDo), Times.Never);
+            _toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.AddToDoAsync(toDo), Times.Never);
         }
 
         #endregion
@@ -169,13 +167,13 @@ namespace Tests.UnitTests.ServicesTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
 
-            toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(true);
-            toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
+            _toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(true);
+            _toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
 
-            await toDoService.UpdateToDoAsync(toDo);
+            await _toDoService.UpdateToDoAsync(toDo);
 
-            toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
-            toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.ToDoId == toDo.ToDoId
+            _toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.ToDoId == toDo.ToDoId
             && t.Description == toDo.Description
             && t.TimeBlock == toDo.TimeBlock
             && t.Difficulty == toDo.Difficulty
@@ -201,9 +199,9 @@ namespace Tests.UnitTests.ServicesTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
 
-            toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(false);
+            _toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(false);
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoService.UpdateToDoAsync(toDo));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.UpdateToDoAsync(toDo));
 
             Assert.Equal("Todo id does not exist.", exception.Message);
         }
@@ -217,11 +215,11 @@ namespace Tests.UnitTests.ServicesTests
         {
             var toDoId = Guid.NewGuid();
 
-            toDoRepositoryMock.Setup(repo => repo.DeleteToDoAsync(toDoId)).Returns(Task.CompletedTask);
+            _toDoRepositoryMock.Setup(repo => repo.DeleteToDoAsync(toDoId)).Returns(Task.CompletedTask);
 
-            await toDoService.DeleteToDoAsync(toDoId);
+            await _toDoService.DeleteToDoAsync(toDoId);
 
-            toDoRepositoryMock.Verify(repo => repo.DeleteToDoAsync(toDoId), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.DeleteToDoAsync(toDoId), Times.Once);
         }
 
         #endregion
@@ -243,22 +241,22 @@ namespace Tests.UnitTests.ServicesTests
                 new ToDo("Not repeated task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", Guid.NewGuid(), null, userId, RepeatFrequency.None)
             };
 
-            toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day)).ReturnsAsync(repeatedToDos);
-            toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
+            _toDoRepositoryMock.Setup(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day)).ReturnsAsync(repeatedToDos);
+            _toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
 
-            await toDoService.MoveRepeatedToDosAsync(userId);
+            await _toDoService.MoveRepeatedToDosAsync(userId);
 
-            toDoRepositoryMock.Verify(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day), Times.Once);
 
-            toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Daily && t.ToDoDate == originalDate.AddDays(1))), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Daily && t.ToDoDate == originalDate.AddDays(1))), Times.Once);
 
-            toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Weekly && t.ToDoDate == originalDate.AddDays(7))), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Weekly && t.ToDoDate == originalDate.AddDays(7))), Times.Once);
 
-            toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Monthly && t.ToDoDate == originalDate.AddMonths(1))), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Monthly && t.ToDoDate == originalDate.AddMonths(1))), Times.Once);
 
-            toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Yearly && t.ToDoDate == originalDate.AddYears(1))), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.Yearly && t.ToDoDate == originalDate.AddYears(1))), Times.Once);
 
-            toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.None && t.ToDoDate == originalDate)), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.RepeatFrequency == RepeatFrequency.None && t.ToDoDate == originalDate)), Times.Once);
         }
 
         [Fact]
@@ -266,7 +264,7 @@ namespace Tests.UnitTests.ServicesTests
         {
             var userId = new Guid();
 
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() => toDoService.MoveRepeatedToDosAsync(userId));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _toDoService.MoveRepeatedToDosAsync(userId));
 
             Assert.Equal("User id cannot be empty.", exception.Message);
         }

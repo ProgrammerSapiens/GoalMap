@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Core.Models;
 using Core.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Tests.IntegrationTests.Service_RepositoriyTests
 {
@@ -12,7 +13,8 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
     {
         private readonly IUserRepository _userRepository;
         private readonly Mock<IPasswordHasher> _passwordHasherMock;
-        private readonly IUserService userService;
+        private readonly Mock<ILogger<UserService>> _logger;
+        private readonly IUserService _userService;
         private readonly AppDbContext _context;
 
         public UserServiceRepositoryTests()
@@ -22,8 +24,9 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             _userRepository = new UserRepository(_context);
             _passwordHasherMock = new Mock<IPasswordHasher>();
+            _logger = new Mock<ILogger<UserService>>();
 
-            userService = new UserService(_userRepository, _passwordHasherMock.Object);
+            _userService = new UserService(_userRepository, _passwordHasherMock.Object, _logger.Object);
         }
 
         public Task InitializeAsync()
@@ -50,7 +53,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            var result = await userService.GetUserByUserIdAsync(userId);
+            var result = await _userService.GetUserByUserIdAsync(userId);
 
             Assert.NotNull(result);
             Assert.Equal(userName, result.UserName);
@@ -65,7 +68,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var user = new User(userName);
             var userId = user.UserId;
 
-            var result = await userService.GetUserByUserIdAsync(userId);
+            var result = await _userService.GetUserByUserIdAsync(userId);
             Assert.Null(result);
 
             var userInDb = await _context.Users.FirstOrDefaultAsync(x => x.UserId == userId);
@@ -88,7 +91,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
-            await userService.RegisterUserAsync(user, password);
+            await _userService.RegisterUserAsync(user, password);
 
             var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
 
@@ -109,7 +112,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
-            await userService.RegisterUserAsync(user, password);
+            await _userService.RegisterUserAsync(user, password);
 
             var defaultToDoCategoriesInDb = await _context.ToDoCategories.Where(c => c.ToDoCategoryName == "Habbit" || c.ToDoCategoryName == "Other").ToListAsync();
 
@@ -136,7 +139,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.RegisterUserAsync(user, password));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.RegisterUserAsync(user, password));
 
             Assert.Equal("User name is already exists.", exception.Message);
         }
@@ -198,7 +201,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            await userService.UpdateUserExperienceAsync(userId, Difficulty.Nightmare);
+            await _userService.UpdateUserExperienceAsync(userId, Difficulty.Nightmare);
 
             var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -210,7 +213,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         [Fact]
         public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserDoesNotExist()
         {
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => userService.UpdateUserExperienceAsync(Guid.NewGuid(), Difficulty.Nightmare));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.UpdateUserExperienceAsync(Guid.NewGuid(), Difficulty.Nightmare));
 
             Assert.Equal("User was not found.", exception.Message);
         }

@@ -16,16 +16,18 @@ namespace API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ILogger<UsersController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UsersController"/> class.
         /// </summary>
         /// <param name="userService">The user service instance.</param>
         /// <param name="mapper">The AutoMapper instance.</param>
-        public UsersController(IUserService userService, IMapper mapper)
+        public UsersController(IUserService userService, IMapper mapper, ILogger<UsersController> logger)
         {
             _userService = userService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -42,11 +44,21 @@ namespace API.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
+            _logger.LogInformation("GetCurrentUser");
+
             var userId = GetUserId();
-            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
+            if (Guid.Empty == userId)
+            {
+                _logger.LogWarning("User ID is not authenticated or invalid.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
 
             var user = await _userService.GetUserByUserIdAsync(userId);
-            if (user == null) return NotFound("User was not found.");
+            if (user == null)
+            {
+                _logger.LogError($"User with ID {userId} was not found.");
+                return NotFound("User was not found.");
+            }
 
             return _mapper.Map<UserDto>(user);
         }
@@ -68,13 +80,27 @@ namespace API.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateUserProfile([FromBody] UserUpdateDto? updateUserDto)
         {
-            var userId = GetUserId();
-            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
+            _logger.LogInformation("UpdateUserProfile");
 
-            if (updateUserDto == null) return BadRequest("User data cannot be null.");
+            var userId = GetUserId();
+            if (Guid.Empty == userId)
+            {
+                _logger.LogWarning("User ID is not authenticated or invalid.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
+
+            if (updateUserDto == null)
+            {
+                _logger.LogWarning("The entered data is empty.");
+                return BadRequest("User data cannot be null.");
+            }
 
             var existingUser = await _userService.GetUserByUserIdAsync(userId);
-            if (existingUser == null) return NotFound("User was not found.");
+            if (existingUser == null)
+            {
+                _logger.LogError($"User with ID {userId} was not found.");
+                return NotFound("User was not found.");
+            }
 
             _mapper.Map(updateUserDto, existingUser);
             await _userService.UpdateUserAsync(existingUser);

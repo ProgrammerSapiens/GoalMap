@@ -4,6 +4,7 @@ using Core.DTOs.User;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Tests.UnitTests.APITests
@@ -13,6 +14,7 @@ namespace Tests.UnitTests.APITests
         private readonly Mock<IUserService> _userServiceMock;
         private readonly Mock<IJwtTokenService> _jwtTokenServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<AuthController>> _loggerMock;
         private readonly AuthController _authController;
 
         public AuthControllerTests()
@@ -20,7 +22,8 @@ namespace Tests.UnitTests.APITests
             _userServiceMock = new Mock<IUserService>();
             _jwtTokenServiceMock = new Mock<IJwtTokenService>();
             _mapperMock = new Mock<IMapper>();
-            _authController = new AuthController(_userServiceMock.Object, _jwtTokenServiceMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<AuthController>>();
+            _authController = new AuthController(_userServiceMock.Object, _jwtTokenServiceMock.Object, _mapperMock.Object, _loggerMock.Object);
         }
 
         #region Register([FromBody] UserRegAndAuthDto registerUserDto) tests

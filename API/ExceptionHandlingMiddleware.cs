@@ -10,15 +10,16 @@ namespace API
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly Logger<ExceptionHandlingMiddleware> _logger;
 
-        //Add logger through DI
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next request delegate in the pipeline.</param>
-        public ExceptionHandlingMiddleware(RequestDelegate next)
+        public ExceptionHandlingMiddleware(RequestDelegate next, Logger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace API
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occured while processing the request.");
                 await HandleExceptionAsync(context, ex);
             }
         }

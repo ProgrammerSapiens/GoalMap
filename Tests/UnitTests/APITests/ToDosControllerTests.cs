@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
 
@@ -14,13 +15,15 @@ namespace Tests.UnitTests.APITests
     {
         private readonly Mock<IToDoService> _toDoServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<ToDosController>> _loggerMock;
         private readonly ToDosController _toDosController;
 
         public ToDosControllerTests()
         {
             _toDoServiceMock = new Mock<IToDoService>();
             _mapperMock = new Mock<IMapper>();
-            _toDosController = new ToDosController(_toDoServiceMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<ToDosController>>();
+            _toDosController = new ToDosController(_toDoServiceMock.Object, _mapperMock.Object, _loggerMock.Object);
         }
 
         #region GetToDoById(Guid toDoId) tests

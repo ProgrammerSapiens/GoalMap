@@ -3,6 +3,8 @@ using Core.Services;
 using Data.DBContext;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace Tests.IntegrationTests.Service_RepositoriyTests
 {
@@ -11,6 +13,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         private readonly AppDbContext _context;
         private readonly ToDoCategoryRepository _toDoCategoryRepository;
         private readonly ToDoCategoryService _toDoCategoryService;
+        private readonly Mock<ILogger<ToDoCategoryService>> _logger;
 
         public ToDoCategoryServiceRepositoryTests()
         {
@@ -18,7 +21,8 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context = new AppDbContext(dbContextOptions);
 
             _toDoCategoryRepository = new ToDoCategoryRepository(_context);
-            _toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
+            _logger = new Mock<ILogger<ToDoCategoryService>>();
+            _toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository, _logger.Object);
         }
 
         public Task InitializeAsync()
@@ -163,9 +167,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var newToDoCategoryName = "Newname";
             toDoCategory.ToDoCategoryName = newToDoCategoryName;
 
-            var toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
-
-            await toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory);
+            await _toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory);
 
             var toDoCategoryInDb = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryId == toDoCategoryId);
 
@@ -181,9 +183,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var userId = Guid.NewGuid();
             var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-            var toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoCategoryService.UpdateToDoCategoryAsync(toDoCategory));
 
             Assert.Equal("Category was not found.", exception.Message);
         }

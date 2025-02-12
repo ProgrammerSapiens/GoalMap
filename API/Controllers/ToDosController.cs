@@ -17,16 +17,18 @@ namespace API.Controllers
     {
         private readonly IToDoService _service;
         private readonly IMapper _mapper;
+        private readonly ILogger<ToDosController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToDosController"/> class.
         /// </summary>
         /// <param name="service">Service for handling To-Do operations.</param>
         /// <param name="mapper">AutoMapper instance for DTO mapping.</param>
-        public ToDosController(IToDoService service, IMapper mapper)
+        public ToDosController(IToDoService service, IMapper mapper, ILogger<ToDosController> logger)
         {
             _service = service;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -37,10 +39,20 @@ namespace API.Controllers
         [HttpGet("{toDoId}")]
         public async Task<ActionResult<ToDoDto>> GetToDoById(Guid toDoId)
         {
-            if (Guid.Empty == toDoId) return BadRequest("Todo id cannot be empty");
+            _logger.LogInformation("GetToDoById");
+
+            if (Guid.Empty == toDoId)
+            {
+                _logger.LogWarning("Todo id is invalid");
+                return BadRequest("Todo id cannot be empty");
+            }
 
             var toDo = await _service.GetToDoByIdAsync(toDoId);
-            if (toDo == null) return NotFound("ToDo was not found.");
+            if (toDo == null)
+            {
+                _logger.LogError($"ToDo with id {toDoId} was not found.");
+                return NotFound("ToDo was not found.");
+            }
 
             return _mapper.Map<ToDoDto>(toDo);
         }
@@ -53,11 +65,21 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ToDoDto>>> GetToDos(ToDoGetByDateAndTimeBlockDto toDoGetByDateAndTimeBlockDto)
         {
+            _logger.LogInformation("GetToDos");
+
             var userId = Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
-            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
+            if (Guid.Empty == userId)
+            {
+                _logger.LogWarning("User ID is not authenticated or invalid.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
 
             var toDos = await _service.GetToDosAsync(parsedUserId, toDoGetByDateAndTimeBlockDto.Date, toDoGetByDateAndTimeBlockDto.TimeBlock);
-            if (toDos.Count == 0) return new List<ToDoDto>();
+            if (toDos.Count == 0)
+            {
+                _logger.LogWarning("This Timeblock or Date doesn't have any todos.");
+                return new List<ToDoDto>();
+            }
 
             return _mapper.Map<List<ToDoDto>>(toDos);
         }
@@ -70,7 +92,13 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToDo([FromBody] ToDoAddDto? toDoAddDto)
         {
-            if (toDoAddDto == null) return BadRequest("ToDo data cannot be null.");
+            _logger.LogInformation("AddToDo");
+
+            if (toDoAddDto == null)
+            {
+                _logger.LogWarning("The entered data is empty.");
+                return BadRequest("ToDo data cannot be null.");
+            }
 
             var toDo = _mapper.Map<ToDo>(toDoAddDto);
             await _service.AddToDoAsync(toDo);
@@ -86,10 +114,20 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateToDo([FromBody] ToDoUpdateDto? toDoUpdateDto)
         {
-            if (toDoUpdateDto == null) return BadRequest("ToDo data cannot be null.");
+            _logger.LogInformation("UpdateToDo");
+
+            if (toDoUpdateDto == null)
+            {
+                _logger.LogWarning("The entered data is empty.");
+                return BadRequest("ToDo data cannot be null.");
+            }
 
             var existingToDo = await _service.GetToDoByIdAsync(toDoUpdateDto.ToDoId);
-            if (existingToDo == null) return NotFound("ToDo was not found.");
+            if (existingToDo == null)
+            {
+                _logger.LogError($"Todo with id {toDoUpdateDto.ToDoId} was not found.");
+                return NotFound("ToDo was not found.");
+            }
 
             _mapper.Map(toDoUpdateDto, existingToDo);
             await _service.UpdateToDoAsync(existingToDo);
@@ -105,7 +143,13 @@ namespace API.Controllers
         [HttpDelete("{toDoId}")]
         public async Task<IActionResult> DeleteToDo(Guid toDoId)
         {
-            if (Guid.Empty == toDoId) return BadRequest("ToDo id cannot be empty.");
+            _logger.LogInformation("DeleteToDo");
+
+            if (Guid.Empty == toDoId)
+            {
+                _logger.LogWarning("ToDo id is invalid.");
+                return BadRequest("ToDo id cannot be empty.");
+            }
 
             await _service.DeleteToDoAsync(toDoId);
 

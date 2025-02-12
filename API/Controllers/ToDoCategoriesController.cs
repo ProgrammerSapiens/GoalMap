@@ -17,16 +17,18 @@ namespace API.Controllers
     {
         private readonly IToDoCategoryService _service;
         private readonly IMapper _mapper;
+        private readonly ILogger<ToDoCategoriesController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToDoCategoriesController"/> class.
         /// </summary>
         /// <param name="toDoCategoryService">Service for ToDo category operations.</param>
         /// <param name="mapper">Mapper for mapping models to DTOs.</param>
-        public ToDoCategoriesController(IToDoCategoryService toDoCategoryService, IMapper mapper)
+        public ToDoCategoriesController(IToDoCategoryService toDoCategoryService, IMapper mapper, ILogger<ToDoCategoriesController> logger)
         {
             _service = toDoCategoryService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -37,10 +39,20 @@ namespace API.Controllers
         [HttpGet("{toDoCategoryId}")]
         public async Task<ActionResult<CategoryDto>> GetToDoCategoryByCategoryId(Guid toDoCategoryId)
         {
-            if (Guid.Empty == toDoCategoryId) return BadRequest("Todo category id cannot be empty");
+            _logger.LogInformation("GetToDoCategoryByCategoryId");
+
+            if (Guid.Empty == toDoCategoryId)
+            {
+                _logger.LogWarning("Todo category id is invalid.");
+                return BadRequest("Todo category id cannot be empty");
+            }
 
             var toDoCategory = await _service.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
-            if (toDoCategory == null) return NotFound("Category was not found.");
+            if (toDoCategory == null)
+            {
+                _logger.LogError($"Category with id {toDoCategoryId} was not found.");
+                return NotFound("Category was not found.");
+            }
 
             return _mapper.Map<CategoryDto>(toDoCategory);
         }
@@ -52,11 +64,21 @@ namespace API.Controllers
         [HttpGet("user")]
         public async Task<ActionResult<List<CategoryDto>>> GetToDoCategoriesByUserId()
         {
+            _logger.LogInformation("GetToDoCategoriesByUserId");
+
             var userId = GetUserId();
-            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
+            if (Guid.Empty == userId)
+            {
+                _logger.LogWarning("User ID is invalid.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
 
             var categories = await _service.GetToDoCategoriesByUserIdAsync(userId);
-            if (categories.Count == 0) return new List<CategoryDto>();
+            if (categories.Count == 0)
+            {
+                _logger.LogWarning("This user doesn't have any categories.");
+                return new List<CategoryDto>();
+            }
 
             return _mapper.Map<List<CategoryDto>>(categories);
         }
@@ -69,10 +91,20 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
-            var userId = GetUserId();
-            if (Guid.Empty == userId) return Unauthorized("User ID is not authenticated or invalid.");
+            _logger.LogInformation("AddToDoCategory");
 
-            if (categoryAddOrUpdateDto == null) return BadRequest("Category data cannot be null.");
+            var userId = GetUserId();
+            if (Guid.Empty == userId)
+            {
+                _logger.LogWarning("User ID is invalid.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
+
+            if (categoryAddOrUpdateDto == null)
+            {
+                _logger.LogWarning("The entered data is null.");
+                return BadRequest("Category data cannot be null.");
+            }
 
             categoryAddOrUpdateDto.UserId = userId;
             var category = _mapper.Map<ToDoCategory>(categoryAddOrUpdateDto);
@@ -91,15 +123,26 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
         {
-            if (categoryAddOrUpdateDto == null) return BadRequest("Category data cannot be null.");
+            _logger.LogInformation("UpdateToDoCategory");
+
+            if (categoryAddOrUpdateDto == null)
+            {
+                _logger.LogWarning("The entered data is null");
+                return BadRequest("Category data cannot be null.");
+            }
 
             if (Guid.Empty == categoryAddOrUpdateDto.ToDoCategoryId || string.IsNullOrEmpty(categoryAddOrUpdateDto.ToDoCategoryName))
             {
+                _logger.LogWarning("The entered data is invalid.");
                 return BadRequest("Category name cannot be empty.");
             }
 
             var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(categoryAddOrUpdateDto.ToDoCategoryId);
-            if (existingCategory == null) return NotFound("Category was not found.");
+            if (existingCategory == null)
+            {
+                _logger.LogError($"Category with id {categoryAddOrUpdateDto.ToDoCategoryId} was not found.");
+                return NotFound("Category was not found.");
+            }
 
             _mapper.Map(categoryAddOrUpdateDto, existingCategory);
             await _service.UpdateToDoCategoryAsync(existingCategory);
@@ -115,7 +158,13 @@ namespace API.Controllers
         [HttpDelete("{toDoCategoryId}")]
         public async Task<IActionResult> DeleteToDoCategory(Guid toDoCategoryId)
         {
-            if (Guid.Empty == toDoCategoryId) return BadRequest("ToDo category id cannot be empty.");
+            _logger.LogInformation("DeleteToDoCategory");
+
+            if (Guid.Empty == toDoCategoryId)
+            {
+                _logger.LogWarning("ToDo id is invalid.");
+                return BadRequest("ToDo category id cannot be empty.");
+            }
 
             await _service.DeleteToDoCategoryAsync(toDoCategoryId);
 

@@ -1,9 +1,12 @@
-﻿using Core.Interfaces;
+﻿using Castle.Core.Logging;
+using Core.Interfaces;
 using Core.Models;
 using Core.Services;
 using Data.DBContext;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace Tests.IntegrationTests.Service_RepositoriyTests
 {
@@ -11,6 +14,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
     {
         private readonly IToDoRepository _toDoRepository;
         private readonly IToDoService _toDoService;
+        private readonly Mock<ILogger<ToDoService>> _logger;
         private readonly AppDbContext _context;
 
         public ToDoServiceRepositoryTests()
@@ -19,7 +23,8 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context = new AppDbContext(dbContextOptions);
 
             _toDoRepository = new ToDoRepository(_context);
-            _toDoService = new ToDoService(_toDoRepository);
+            _logger = new Mock<ILogger<ToDoService>>();
+            _toDoService = new ToDoService(_toDoRepository, _logger.Object);
         }
 
         public Task InitializeAsync()

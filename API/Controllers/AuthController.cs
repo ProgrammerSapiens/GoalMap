@@ -13,12 +13,14 @@ namespace API.Controllers
         private readonly IUserService _userService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IMapper _mapper;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IUserService userService, IJwtTokenService jwtTokenService, IMapper mapper)
+        public AuthController(IUserService userService, IJwtTokenService jwtTokenService, IMapper mapper, ILogger<AuthController> logger)
         {
             _userService = userService;
             _jwtTokenService = jwtTokenService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -32,8 +34,13 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register([FromBody] UserRegAndAuthDto registerUserDto)
         {
+            _logger.LogInformation("Register");
+
             if (string.IsNullOrWhiteSpace(registerUserDto.UserName) || string.IsNullOrEmpty(registerUserDto.Password))
+            {
+                _logger.LogWarning("The entered data is invalid.");
                 return BadRequest("Username and password cannot be empty.");
+            }
 
             var user = _mapper.Map<User>(registerUserDto);
             await _userService.RegisterUserAsync(user, registerUserDto.Password);
@@ -54,12 +61,20 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserRegAndAuthDto loginDto)
         {
+            _logger.LogInformation("Login");
+
             if (string.IsNullOrWhiteSpace(loginDto.UserName) || string.IsNullOrWhiteSpace(loginDto.Password))
+            {
+                _logger.LogWarning("The entered data is invalid.");
                 return BadRequest("Username or password cannot be empty.");
+            }
 
             var user = await _userService.GetUserByUserNameAsync(loginDto.UserName);
-            if (user == null || !await _userService.AuthenticateUserAsync(loginDto.UserName, loginDto.Password)) 
+            if (user == null || !await _userService.AuthenticateUserAsync(loginDto.UserName, loginDto.Password))
+            {
+                _logger.LogWarning("Invalid username or password.");
                 return Unauthorized("Invalid username or password.");
+            }
 
             var token = await _jwtTokenService.GenerateTokenAsync(user);
             return Ok(new { Token = token });

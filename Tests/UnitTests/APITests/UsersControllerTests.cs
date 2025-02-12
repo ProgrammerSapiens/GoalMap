@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
 
@@ -15,12 +16,14 @@ namespace Tests.UnitTests.APITests
         private readonly Mock<IUserService> _userServiceMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly UsersController _usersController;
+        private readonly Mock<ILogger<UsersController>> _logger;
 
         public UsersControllerTests()
         {
             _userServiceMock = new Mock<IUserService>();
             _mapperMock = new Mock<IMapper>();
-            _usersController = new UsersController(_userServiceMock.Object, _mapperMock.Object);
+            _logger = new Mock<ILogger<UsersController>>();
+            _usersController = new UsersController(_userServiceMock.Object, _mapperMock.Object, _logger.Object);
         }
 
         #region GetCurrentUser() tests

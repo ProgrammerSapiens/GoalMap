@@ -1,5 +1,6 @@
 ﻿using Core.Interfaces;
 using Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Services
 {
@@ -9,14 +10,16 @@ namespace Core.Services
     public class ToDoCategoryService : IToDoCategoryService
     {
         private readonly IToDoCategoryRepository _repository;
+        private readonly ILogger<ToDoCategoryService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToDoCategoryService"/> class.
         /// </summary>
         /// <param name="repository">Repository for managing ToDo categories.</param>
-        public ToDoCategoryService(IToDoCategoryRepository repository)
+        public ToDoCategoryService(IToDoCategoryRepository repository, ILogger<ToDoCategoryService> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -26,6 +29,8 @@ namespace Core.Services
         /// <returns>The requested ToDo category, or null if not found.</returns>
         public async Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid toDoCategoryId)
         {
+            _logger.LogInformation($"GetToDoCategoryByCategoryIdAsync({toDoCategoryId})");
+
             return await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
         }
 
@@ -36,6 +41,8 @@ namespace Core.Services
         /// <returns>A list of the user's ToDo categories.</returns>
         public async Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId)
         {
+            _logger.LogInformation($"GetToDoCategoriesByUserIdAsync({userId})");
+
             return await _repository.GetToDoCategoriesByUserIdAsync(userId);
         }
 
@@ -47,15 +54,19 @@ namespace Core.Services
         /// <exception cref="ArgumentException">Thrown if the category name contains digits.</exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
+            _logger.LogInformation($"AddToDoCategoryAsync(ToDoCategory {toDoCategory.ToDoCategoryName})");
+
             toDoCategory.ToDoCategoryName = GetNameWithACapitalLetter(toDoCategory.ToDoCategoryName);
 
             if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
+                _logger.LogWarning("Category with such name already exists.");
                 throw new InvalidOperationException("Category with such name already exists.");
             }
 
             if (toDoCategory.ToDoCategoryName.Any(char.IsDigit))
             {
+                _logger.LogWarning("Category name cannot contain digits.");
                 throw new ArgumentException("Category name cannot contain digits.");
             }
 
@@ -70,10 +81,13 @@ namespace Core.Services
         /// <exception cref="ArgumentException">Thrown if attempting to update a default category.</exception>
         public async Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
+            _logger.LogInformation($"UpdateToDoCategoryAsync(ToDoCategory {toDoCategory.ToDoCategoryName})");
+
             var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategory.ToDoCategoryId);
 
             if (existingToDoCategory == null)
             {
+                _logger.LogWarning("Category was not found.");
                 throw new InvalidOperationException("Category was not found.");
             }
 
@@ -83,11 +97,13 @@ namespace Core.Services
 
             if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, newCategoryName))
             {
+                _logger.LogWarning("Category with such name already exists.");
                 throw new InvalidOperationException("Category with such name already exists.");
             }
 
             if (oldCategoryName == "Habbit" || oldCategoryName == "Other")
             {
+                _logger.LogWarning("You cannot update this category.");
                 throw new ArgumentException("You cannot update this category.");
             }
 
@@ -103,10 +119,13 @@ namespace Core.Services
         /// <exception cref="ArgumentException">Thrown if attempting to delete a protected category.</exception>
         public async Task DeleteToDoCategoryAsync(Guid toDoCategoryId)
         {
+            _logger.LogInformation($"DeleteToDoCategoryAsync({toDoCategoryId})");
+
             var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
 
             if (existingToDoCategory == null)
             {
+                _logger.LogWarning("ToDo category was not found.");
                 throw new InvalidOperationException("ToDo category was not found.");
             }
 
@@ -115,6 +134,7 @@ namespace Core.Services
 
             if (oldCategoryName == "Habbit" || oldCategoryName == "Other")
             {
+                _logger.LogWarning("You cannot delete this category.");
                 throw new ArgumentException("You cannot delete this category.");
             }
 
