@@ -1,174 +1,115 @@
-﻿using Core.Models;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Data.DBContext;
-using System.Net.Http.Json;
 using System.Net;
-using Newtonsoft.Json;
-using System.Text;
 using API;
-using System.Net.Http.Headers;
+using Core.DTOs.User;
+using Core.Models;
+using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net.Http.Json;
 
 namespace Tests.IntegrationTests.APITests
 {
-    public class UsersControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
+    public class UsersControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
+        private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public UsersControllerTests(CustomWebApplicationFactory<Program> factory)
+        public UsersControllerIntegrationTests(CustomWebApplicationFactory<Program> factory)
         {
             _factory = factory;
-            _client = factory.CreateClient();
+            _client = _factory.CreateClient();
+            _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
         }
 
-        private async Task ResetDatabaseAsync()
+        #region GetCurrentUser() tests
+
+        [Fact]
+        public async Task GetCurrentUser_ShouldReturnUser_WhenAuthenticated()
         {
-            using (var scope = _factory.Services.CreateScope())
+            using (var scope = _scopeFactory.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.Users.RemoveRange(dbContext.Users);
-                await dbContext.SaveChangesAsync();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var user = new User("TestUser");
+                context.Users.Add(user);
+                await context.SaveChangesAsync();
+            }
+
+            var response = await _client.GetAsync("/api/users/me");
+
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Test User", content);
+        }
+
+        [Fact]
+        public async Task GetCurrentUser_ShouldReturnUnauthorized_WhenNoUserId()
+        {
+            var response = await _client.GetAsync("/api/users/me");
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        #endregion
+
+        #region UpdateUserProfile([FromBody] UserUpdateDto? updateUserDto) tests
+
+        [Fact]
+        public async Task UpdateUserProfile_ShouldReturnUnauthorized_WhenNoUserId()
+        {
+            var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
+
+            var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateUserProfile_ShouldReturnNotFound_WhenUserDoesNotExist()
+        {
+            var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
+
+            var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateUserProfile_ShouldReturnNoContent_WhenSuccessfullyUpdated()
+        {
+            var user = new User("OldName");
+            var userId = user.UserId;
+
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                context.Users.Add(user);
+                await context.SaveChangesAsync();
+            }
+
+            var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
+
+            var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var updatedUser = await context.Users.FindAsync(userId);
+                Assert.Equal("Updated Name", updatedUser.UserName);
             }
         }
 
-        #region GetUserByUserName tests
+        //[Fact]
+        //public async Task UpdateUserProfile_ShouldReturnBadRequest_WhenDataIsInvalid()
+        //{
+        //    var response = await _client.PutAsJsonAsync("/api/users/profile", null);
 
-        [Fact]
-        public async Task GetUserByUserName_ShouldReturnUserInfo_WhenUserExists()
-        {
-            await ResetDatabaseAsync();
-
-            var userName = "testuser";
-            var password = "password123";
-            var newUser = new { Username = userName, Password = password };
-            var content = new StringContent(JsonConvert.SerializeObject(newUser), Encoding.UTF8, "application/json");
-
-            await _client.PostAsync("/api/auth/register", content);
-
-            var loginResponse = await _client.PostAsync("/api/auth/login", content);
-            var responseBody = await loginResponse.Content.ReadAsStringAsync();
-            var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
-            var token = jsonResponse["token"];
-
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _client.GetAsync($"/api/users/{userName}");
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task GetUserByUserName_ShouldReturnUnauthorized_WhenTokenIsMissing()
-        {
-            await ResetDatabaseAsync();
-
-            var userName = "testuser";
-            var response = await _client.GetAsync($"/api/users/{userName}");
-
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
-
-        #endregion
-
-        #region RegisterUser tests
-
-        [Fact]
-        public async Task RegisterUser_ShouldSuccessfullyRegisterNewUser()
-        {
-            await ResetDatabaseAsync();
-
-            var userName = "testuser";
-            var password = "password123";
-            var newUser = new { Username = userName, Password = password };
-            var content = new StringContent(JsonConvert.SerializeObject(newUser), Encoding.UTF8, "application/json");
-
-            var response = await _client.PostAsync("/api/auth/register", content);
-
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task RegisterUser_ShouldReturnError_WhenUserAlreadyExists()
-        {
-            await ResetDatabaseAsync();
-
-            var userName = "existinguser";
-            var password = "password123";
-            var existingUser = new { Username = userName, Password = password };
-            var content = new StringContent(JsonConvert.SerializeObject(existingUser), Encoding.UTF8, "application/json");
-
-            await _client.PostAsync("/api/auth/register", content);
-
-            var response = await _client.PostAsync("/api/auth/register", content);
-
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        #endregion
-
-        #region AuthenticateUser tests
-
-        [Fact]
-        public async Task AuthenticateUser_ShouldReturnToken_WhenCredentialsAreValid()
-        {
-            await ResetDatabaseAsync();
-
-            var userName = "validuser";
-            var password = "password123";
-            var newUser = new { Username = userName, Password = password };
-            var content = new StringContent(JsonConvert.SerializeObject(newUser), Encoding.UTF8, "application/json");
-
-            await _client.PostAsync("/api/auth/register", content);
-
-            var loginResponse = await _client.PostAsync("/api/auth/login", content);
-            var responseBody = await loginResponse.Content.ReadAsStringAsync();
-            var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
-
-            Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
-            Assert.True(jsonResponse.ContainsKey("token"));
-            Assert.False(string.IsNullOrEmpty(jsonResponse["token"]));
-        }
-
-        [Fact]
-        public async Task AuthenticateUser_ShouldReturnUnauthorized_WhenCredentialsAreInvalid()
-        {
-            await ResetDatabaseAsync();
-
-            var invalidUser = new { Username = "nonexistent", Password = "wrongpassword" };
-            var content = new StringContent(JsonConvert.SerializeObject(invalidUser), Encoding.UTF8, "application/json");
-
-            var response = await _client.PostAsync("/api/auth/login", content);
-
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
-
-        #endregion
-
-        #region UpdateUser tests
-
-        [Fact]
-        public async Task UpdateUser_ShouldReturnError_WhenTryingToUpdateAnotherUser()
-        {
-            await ResetDatabaseAsync();
-
-            var user1 = new { Username = "user1", Password = "password123" };
-            var user2 = new { Username = "user2", Password = "password456" };
-            var content1 = new StringContent(JsonConvert.SerializeObject(user1), Encoding.UTF8, "application/json");
-            var content2 = new StringContent(JsonConvert.SerializeObject(user2), Encoding.UTF8, "application/json");
-
-            await _client.PostAsync("/api/auth/register", content1);
-            await _client.PostAsync("/api/auth/register", content2);
-
-            var loginResponse = await _client.PostAsync("/api/auth/login", content1);
-            var responseBody = await loginResponse.Content.ReadAsStringAsync();
-            var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
-            var token = jsonResponse["token"];
-
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var updateContent = new StringContent(JsonConvert.SerializeObject(new { Username = "user2", Password = "newpass" }), Encoding.UTF8, "application/json");
-            var response = await _client.PutAsync("/api/users/user2", updateContent);
-
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        }
+        //    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        //}
 
         #endregion
     }

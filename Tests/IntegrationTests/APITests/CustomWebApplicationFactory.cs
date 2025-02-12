@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Core.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace Tests.IntegrationTests.APITests
 {
@@ -11,12 +11,24 @@ namespace Tests.IntegrationTests.APITests
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.ConfigureAppConfiguration((context, config) =>
+            {
+                var testConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "../Tests/appsettings.Test.json");
+                config.AddJsonFile(testConfigPath, optional: true, reloadOnChange: true);
+            });
+
             builder.ConfigureServices(services =>
             {
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                if (descriptor != null)
+                var dbContextDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                if (dbContextDescriptor != null)
                 {
-                    services.Remove(descriptor);
+                    services.Remove(dbContextDescriptor);
+                }
+
+                var dbContextInstance = services.SingleOrDefault(d => d.ServiceType == typeof(AppDbContext));
+                if (dbContextInstance != null)
+                {
+                    services.Remove(dbContextInstance);
                 }
 
                 services.AddDbContext<AppDbContext>(options =>
@@ -25,19 +37,10 @@ namespace Tests.IntegrationTests.APITests
                 });
 
                 using var scope = services.BuildServiceProvider().CreateScope();
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<AppDbContext>();
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
                 db.Database.EnsureCreated();
-                SeedTestData(db);
             });
-        }
-
-        private static void SeedTestData(AppDbContext db)
-        {
-            db.Users.Add(new User("testUser"));
-
-            db.SaveChanges();
         }
     }
 }

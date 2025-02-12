@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <ContentRoot>$(MSBuildProjectDirectory)\..\..\</ContentRoot>
+    <EnvironmentName>Test</EnvironmentName>
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
@@ -32,6 +33,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\API\API.csproj" />
+    <ProjectReference Include="..\Authentication\Authentication.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
 
