@@ -28,14 +28,5 @@ namespace Data.DBContext
         /// Gets or sets the ToDoCategories table in the database.
         /// </summary>
         public DbSet<ToDoCategory> ToDoCategories { get; set; }
-
-        /// <summary>
-        /// Configures the database options, enabling lazy loading proxies.
-        /// </summary>
-        /// <param name="optionsBuilder">The options builder used to configure the database context.</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseLazyLoadingProxies();
-        }
     }
 }
