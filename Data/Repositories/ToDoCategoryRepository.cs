@@ -2,6 +2,7 @@
 using Core.Models;
 using Data.DBContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Data.Repositories
 {
@@ -12,14 +13,16 @@ namespace Data.Repositories
     public class ToDoCategoryRepository : IToDoCategoryRepository
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<ToDoCategoryRepository> _logger;
 
         /// <summary>
         /// Initializes a new instance of the repository with a given database context.
         /// </summary>
         /// <param name="context">The database context used to interact with the data store.</param>
-        public ToDoCategoryRepository(AppDbContext context)
+        public ToDoCategoryRepository(AppDbContext context, ILogger<ToDoCategoryRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         /// <summary>
@@ -29,7 +32,21 @@ namespace Data.Repositories
         /// <returns>A ToDoCategory object if found, otherwise <c>null</c>.</returns>
         public async Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid toDoCategoryId)
         {
+            _logger.LogInformation($"GetToDoCategoryByCategoryIdAsync({toDoCategoryId})");
+
             return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.ToDoCategoryId == toDoCategoryId);
+        }
+
+        /// <summary>
+        /// Retrieves a ToDoCategory by its name.
+        /// </summary>
+        /// <param name="toDoCategoryName">The name of the to-do category.</param>
+        /// <returns>A ToDoCategory object if found, otherwise <c>null</c>.</returns>
+        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName)
+        {
+            _logger.LogInformation($"GetToDoCategoryByCategoryNameAsync({toDoCategoryName})");
+
+            return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName);
         }
 
         /// <summary>
@@ -39,6 +56,8 @@ namespace Data.Repositories
         /// <returns>A list of ToDoCategory objects associated with the given user ID.</returns>
         public async Task<List<ToDoCategory>> GetToDoCategoriesByUserIdAsync(Guid userId)
         {
+            _logger.LogInformation($"GetToDoCategoriesByUserIdAsync({userId})");
+
             return await _context.ToDoCategories.AsNoTracking().Where(c => c.UserId == userId).ToListAsync();
         }
 
@@ -51,8 +70,11 @@ namespace Data.Repositories
         /// </exception>
         public async Task AddToDoCategoryAsync(ToDoCategory toDoCategory)
         {
+            _logger.LogInformation($"AddToDoCategoryAsync(ToDoCategory {toDoCategory.ToDoCategoryName})");
+
             if (await CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
+                _logger.LogWarning($"Todo category {toDoCategory.ToDoCategoryName} already exists.");
                 throw new InvalidOperationException("Todo category already exists.");
             }
 
@@ -69,10 +91,13 @@ namespace Data.Repositories
         /// </exception>
         public async Task UpdateToDoCategoryAsync(ToDoCategory toDoCategory)
         {
+            _logger.LogInformation($"UpdateToDoCategoryAsync(ToDoCategory {toDoCategory.ToDoCategoryName})");
+
             var existingToDoCategory = await _context.ToDoCategories.FirstOrDefaultAsync(c => c.ToDoCategoryId == toDoCategory.ToDoCategoryId);
 
             if (existingToDoCategory == null)
             {
+                _logger.LogWarning($"Category {toDoCategory.ToDoCategoryName} does not exist.");
                 throw new InvalidOperationException("Category does not exist.");
             }
 
@@ -87,13 +112,15 @@ namespace Data.Repositories
         /// <param name="userId">The ID of the user.</param>
         /// <param name="oldCategoryName">The old category name.</param>
         /// <param name="newCategoryName">The new category name.</param>
-        public async Task UpdateCategoryInToDosAsync(Guid userId, string oldCategoryName, string newCategoryName)
+        public async Task UpdateCategoryInToDosAsync(Guid userId, Guid oldCategoryId, Guid newCategoryId)
         {
-            var toDosToUpdate = await _context.ToDos.Where(t => t.UserId == userId && t.ToDoCategoryName == oldCategoryName).ToListAsync();
+            _logger.LogInformation($"UpdateCategoryInToDosAsync({userId}, {oldCategoryId}, {newCategoryId})");
+
+            var toDosToUpdate = await _context.ToDos.Where(t => t.UserId == userId && t.ToDoCategoryId == oldCategoryId).ToListAsync();
 
             foreach (var toDo in toDosToUpdate)
             {
-                toDo.ToDoCategoryName = newCategoryName;
+                toDo.ToDoCategoryId = newCategoryId;
             }
 
             await _context.SaveChangesAsync();
@@ -106,10 +133,13 @@ namespace Data.Repositories
         /// <exception cref="InvalidOperationException">Thrown if the category does not exist.</exception>
         public async Task DeleteToDoCategoryAsync(Guid toDoCategoryId)
         {
+            _logger.LogInformation($"DeleteToDoCategoryAsync({toDoCategoryId})");
+
             var toDoCategory = await _context.ToDoCategories.SingleOrDefaultAsync(c => c.ToDoCategoryId == toDoCategoryId);
 
             if (toDoCategory == null)
             {
+                _logger.LogWarning($"Category {toDoCategoryId} does not exist.");
                 throw new InvalidOperationException("Category does not exist.");
             }
 
@@ -125,6 +155,8 @@ namespace Data.Repositories
         /// <returns><c>true</c> if the category exists, otherwise <c>false</c>.</returns>
         public async Task<bool> CategoryExistsByNameAsync(Guid userId, string toDoCategoryName)
         {
+            _logger.LogInformation($"CategoryExistsByNameAsync({userId}, {toDoCategoryName})");
+
             return await _context.ToDoCategories.AsNoTracking().AnyAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
         }
     }

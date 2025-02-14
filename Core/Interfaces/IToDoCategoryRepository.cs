@@ -15,6 +15,13 @@ namespace Core.Interfaces
         Task<ToDoCategory?> GetToDoCategoryByCategoryIdAsync(Guid toDoCategoryId);
 
         /// <summary>
+        /// Retrieves a To-Do category by its name.
+        /// </summary>
+        /// <param name="toDoCategoryName">The unique identifier of the To-Do category.</param>
+        /// <returns>The To-Do category associated with the specified name, or <c>null</c> if not found.</returns>
+        Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName);
+
+        /// <summary>
         /// Retrieves all To-Do categories associated with a specific user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
@@ -37,9 +44,9 @@ namespace Core.Interfaces
         /// Updates the category name in all associated To-Do tasks.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="oldCategoryName">The current name of the category.</param>
-        /// <param name="newCategoryName">The new name to replace the old one.</param>
-        Task UpdateCategoryInToDosAsync(Guid userId, string oldCategoryName, string newCategoryName);
+        /// <param name="oldCategoryId">The current id of the category.</param>
+        /// <param name="newCategoryId">The new id to replace the old one.</param>
+        Task UpdateCategoryInToDosAsync(Guid userId, Guid oldCategoryId, Guid newCategoryId);
 
         /// <summary>
         /// Deletes a To-Do category from the repository by its unique identifier.
