@@ -108,7 +108,7 @@ namespace Core.Services
             }
 
             await _repository.UpdateToDoCategoryAsync(toDoCategory);
-            await _repository.UpdateCategoryInToDosAsync(toDoCategory.UserId, oldCategoryName, newCategoryName);
+            await _repository.UpdateCategoryInToDosAsync(toDoCategory.UserId, existingToDoCategory.ToDoCategoryId, toDoCategory.ToDoCategoryId);
         }
 
         /// <summary>
@@ -122,24 +122,30 @@ namespace Core.Services
             _logger.LogInformation($"DeleteToDoCategoryAsync({toDoCategoryId})");
 
             var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
-
             if (existingToDoCategory == null)
             {
                 _logger.LogWarning("ToDo category was not found.");
                 throw new InvalidOperationException("ToDo category was not found.");
             }
 
-            var oldCategoryName = existingToDoCategory.ToDoCategoryName;
-            var newCategoryName = "Other";
-
-            if (oldCategoryName == "Habbit" || oldCategoryName == "Other")
+            if (existingToDoCategory.ToDoCategoryName == "Habbit" || existingToDoCategory.ToDoCategoryName == "Other")
             {
                 _logger.LogWarning("You cannot delete this category.");
                 throw new ArgumentException("You cannot delete this category.");
             }
 
+            var otherToDoCategory = await _repository.GetToDoCategoryByCategoryNameAsync("Other");
+            if (otherToDoCategory == null)
+            {
+                _logger.LogError("Default todo category was not found.");
+                throw new InvalidOperationException("ToDo category was not found.");
+            }
+
+            var oldCategoryId = existingToDoCategory.ToDoCategoryId;
+            var newCategoryId = otherToDoCategory.ToDoCategoryId;
+
             await _repository.DeleteToDoCategoryAsync(toDoCategoryId);
-            await _repository.UpdateCategoryInToDosAsync(existingToDoCategory.UserId, oldCategoryName, newCategoryName);
+            await _repository.UpdateCategoryInToDosAsync(existingToDoCategory.UserId, oldCategoryId, newCategoryId);
         }
 
         /// <summary>
