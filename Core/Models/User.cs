@@ -11,8 +11,6 @@
         private string userName;
         private string passwordHash;
         private int experience;
-        private ICollection<ToDo>? toDos;
-        private ICollection<ToDoCategory>? toDoCategories;
 
         #endregion
 
@@ -80,24 +78,6 @@
             get { return (int)Math.Sqrt(Experience / 100); }
         }
 
-        /// <summary>
-        /// Gets or sets the list of ToDo tasks assigned to the user.
-        /// </summary>
-        public virtual ICollection<ToDo> ToDos
-        {
-            get { return toDos; }
-            set { toDos = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the list of ToDo categories created by the user.
-        /// </summary>
-        public virtual ICollection<ToDoCategory> ToDoCategories
-        {
-            get { return toDoCategories; }
-            set { toDoCategories = value; }
-        }
-
         #endregion
 
         #region Constructors
@@ -121,8 +101,6 @@
             this.userName = userName;
             this.passwordHash = "NotHashed";
             Experience = 0;
-            ToDos = new List<ToDo>();
-            ToDoCategories = new List<ToDoCategory>();
         }
 
         #endregion

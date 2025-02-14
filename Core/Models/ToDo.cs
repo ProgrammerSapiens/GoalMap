@@ -35,10 +35,8 @@
         private bool completionStatus;
         private Guid? parentToDoId;
         private RepeatFrequency repeatFrequency;
-        private string toDoCategoryName;
+        private Guid toDoCategoryId;
         private Guid userId;
-        private ToDoCategory? toDoCategory;
-        private User? user;
 
         #endregion
 
@@ -145,19 +143,18 @@
             set { repeatFrequency = value; }
         }
 
-        //TODO: Change category name to category id
         /// <summary>
         /// Gets or sets the name of the category assigned to the task.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if the category name is empty.</exception>
-        public string ToDoCategoryName
+        /// <exception cref="ArgumentException">Thrown if the category id is empty.</exception>
+        public Guid ToDoCategoryId
         {
-            get { return toDoCategoryName; }
+            get { return toDoCategoryId; }
             set
             {
-                if (string.IsNullOrEmpty(value))
+                if (Guid.Empty == value)
                     throw new ArgumentException(nameof(value), "The category id cannot be empty");
-                toDoCategoryName = value;
+                toDoCategoryId = value;
             }
         }
 
@@ -174,24 +171,6 @@
                     throw new ArgumentException(nameof(value), "The user id cannot be empty");
                 userId = value;
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the category assigned to the task.
-        /// </summary>
-        public virtual ToDoCategory? ToDoCategory
-        {
-            get { return toDoCategory; }
-            set { toDoCategory = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the user assigned to the task.
-        /// </summary>
-        public virtual User? User
-        {
-            get { return user; }
-            set { user = value; }
         }
 
         #endregion
@@ -215,7 +194,7 @@
         /// <param name="deadline">Deadline for the task (optional).</param>
         /// <param name="parentToDoId">Parent task ID (optional).</param>
         /// <param name="repeatFrequency">Repeat frequency of the task (optional).</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, string toDoCategoryName, Guid userId, DateTime? deadline = null, Guid parentToDoId = new Guid(), RepeatFrequency repeatFrequency = RepeatFrequency.None)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId, DateTime? deadline = null, Guid parentToDoId = new Guid(), RepeatFrequency repeatFrequency = RepeatFrequency.None)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description cannot be empty or null");
@@ -229,7 +208,7 @@
             CompletionStatus = false;
             this.parentToDoId = parentToDoId;
             RepeatFrequency = repeatFrequency;
-            this.toDoCategoryName = toDoCategoryName;
+            ToDoCategoryId = toDoCategoryId;
             UserId = userId;
         }
 

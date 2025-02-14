@@ -10,7 +10,6 @@
         private Guid toDoCategoryId;
         private string toDoCategoryName;
         private Guid userId;
-        private User? user;
 
         #endregion
 
@@ -47,15 +46,6 @@
         {
             get { return userId; }
             private set { userId = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the user who owns this to-do category.
-        /// </summary>
-        public virtual User? User
-        {
-            get { return user; }
-            set { user = value; }
         }
 
         #endregion
