@@ -28,9 +28,9 @@ namespace Core.DTOs.ToDo
         public DateTime ToDoDate { get; set; } = DateTime.MinValue;
 
         /// <summary>
-        /// The name of the category associated with the To-Do item.
+        /// The id of the category associated with the To-Do item.
         /// </summary>
-        public string? ToDoCategoryName { get; set; } = null;
+        public Guid ToDoCategoryId { get; set; } = Guid.Empty;
 
         /// <summary>
         /// The unique identifier of the user who owns the To-Do item.
