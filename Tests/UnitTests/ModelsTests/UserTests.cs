@@ -134,55 +134,5 @@ namespace Tests.UnitTests.ModelsTests
         }
 
         #endregion
-
-        #region Tests for links
-
-        [Fact]
-        public void User_AssignTasks_ShouldUpdateTasksCollection()
-        {
-            string userName = "Test user";
-            var user = new User(userName);
-
-            string description = "Test description";
-            TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Medium;
-            DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
-            Guid userId = Guid.NewGuid();
-            var toDos = new List<ToDo>
-            {
-                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryName,userId),
-                new ToDo (description,timeBlock,difficulty,toDoDate,toDoCategoryName,userId)
-            };
-
-            user.ToDos = toDos;
-
-            Assert.NotNull(user.ToDos);
-            Assert.Equal(2, user.ToDos.Count);
-            Assert.Contains(toDos[0], user.ToDos);
-            Assert.Contains(toDos[1], user.ToDos);
-        }
-
-        [Fact]
-        public void User_AssignCategories_ShouldUpdateCategoriesCollection()
-        {
-            string userName = "Test user";
-            var user = new User(userName);
-
-            var toDoCategories = new List<ToDoCategory>
-            {
-                new ToDoCategory(Guid.NewGuid(),"Category 1"),
-                new ToDoCategory(Guid.NewGuid(), "Category 2")
-            };
-
-            user.ToDoCategories = toDoCategories;
-
-            Assert.NotNull(user.ToDoCategories);
-            Assert.Equal(2, user.ToDoCategories.Count);
-            Assert.Contains(toDoCategories[0], user.ToDoCategories);
-            Assert.Contains(toDoCategories[1], user.ToDoCategories);
-        }
-
-        #endregion
     }
 }

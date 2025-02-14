@@ -120,11 +120,6 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.Equal(2, defaultToDoCategoriesInDb.Count);
             Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Habbit");
             Assert.Contains(defaultToDoCategoriesInDb, c => c.ToDoCategoryName == "Other");
-            Assert.All(defaultToDoCategoriesInDb, category =>
-            {
-                Assert.Equal(userName, category.User.UserName);
-                Assert.Equal(userId, category.User.UserId);
-            });
         }
 
         [Fact]

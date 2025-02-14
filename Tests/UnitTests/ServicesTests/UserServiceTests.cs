@@ -28,11 +28,7 @@ namespace Tests.UnitTests.ServicesTests
         public async Task GetUserByUserIdAsync_ShouldReturnUser_WhenUserIdExists()
         {
             var userId = Guid.NewGuid();
-            var expectedUser = new User("TestUser")
-            {
-                ToDos = new List<ToDo>(),
-                ToDoCategories = new List<ToDoCategory>()
-            };
+            var expectedUser = new User("TestUser");
 
             _userRepositoryMock.Setup(repo => repo.GetUserByUserIdAsync(userId)).ReturnsAsync(expectedUser);
 
@@ -42,8 +38,6 @@ namespace Tests.UnitTests.ServicesTests
             Assert.Equal(expectedUser.UserId, result.UserId);
             Assert.Equal(expectedUser.UserName, result.UserName);
             Assert.Equal(expectedUser.Experience, result.Experience);
-            Assert.Empty(result.ToDos);
-            Assert.Empty(result.ToDoCategories);
         }
 
         [Fact]
@@ -150,9 +144,16 @@ namespace Tests.UnitTests.ServicesTests
 
         #endregion
 
-        #region UpdateUserAsync(User user) tests (Empty)
+        #region UpdateUserAsync(User user) tests
 
+        public async Task UpdateUserAsync_ShouldUpdate()
+        {
+            var user = new User("User");
 
+            _userRepositoryMock.Setup(repo => repo.UpdateUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
+
+            _userRepositoryMock.Verify(repo => repo.UpdateUserAsync(user), Times.Once());
+        }
 
         #endregion
 

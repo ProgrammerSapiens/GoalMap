@@ -44,10 +44,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var toDoCategoryName = "Test Category";
             var user = new User("TestUser");
             var userId = user.UserId;
-            var expectedCategory = new ToDoCategory(userId, toDoCategoryName)
-            {
-                User = user
-            };
+            var expectedCategory = new ToDoCategory(userId, toDoCategoryName);
             var toDoCategoryId = expectedCategory.ToDoCategoryId;
 
             _context.ToDoCategories.Add(expectedCategory);
@@ -59,10 +56,6 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.Equal(expectedCategory.ToDoCategoryName, result.ToDoCategoryName);
             Assert.Equal(expectedCategory.ToDoCategoryId, result.ToDoCategoryId);
             Assert.Equal(expectedCategory.UserId, result.UserId);
-            Assert.NotNull(result.User);
-            Assert.Equal(expectedCategory.User.UserName, result.User.UserName);
-            Assert.Equal(expectedCategory.User.PasswordHash, result.User.PasswordHash);
-            Assert.Equal(expectedCategory.User.Experience, result.User.Experience);
         }
 
         [Fact]
@@ -71,10 +64,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var toDoCategoryName = "Test Category";
             var user = new User("TestUser");
             var userId = user.UserId;
-            var expectedCategory = new ToDoCategory(userId, toDoCategoryName)
-            {
-                User = user
-            };
+            var expectedCategory = new ToDoCategory(userId, toDoCategoryName);
             var toDoCategoryId = expectedCategory.ToDoCategoryId;
 
             var result = await _toDoCategoryService.GetToDoCategoryByCategoryIdAsync(toDoCategoryId);
@@ -216,7 +206,10 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
             var toDoCategoryId = toDoCategory.ToDoCategoryId;
 
+            var defaultCategory = new ToDoCategory(userId, "Other");
+
             _context.ToDoCategories.Add(toDoCategory);
+            _context.ToDoCategories.Add(defaultCategory);
             await _context.SaveChangesAsync();
 
             await _toDoCategoryService.DeleteToDoCategoryAsync(toDoCategoryId);

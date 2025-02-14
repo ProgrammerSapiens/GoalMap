@@ -30,10 +30,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             using (var scope = _factory.Services.CreateScope())
             {
@@ -57,10 +57,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var response = await _client.GetAsync($"/api/todos/{toDo.ToDoId}");
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -85,13 +85,13 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
             var toDos = new List<ToDo>()
             {
-                new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId),
-                new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId)
+                new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId),
+                new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId)
             };
 
             using (var scope = _factory.Services.CreateScope())
@@ -132,10 +132,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var content = new StringContent(JsonConvert.SerializeObject(toDo), Encoding.UTF8, "application/json");
 
@@ -152,7 +152,7 @@ namespace Tests.IntegrationTests.APITests
                 Assert.Equal(timeBlock, toDoInDb.TimeBlock);
                 Assert.Equal(difficulty, toDoInDb.Difficulty);
                 Assert.Equal(toDoDate, toDoInDb.ToDoDate);
-                Assert.Equal(toDoCategoryName, toDoInDb.ToDoCategoryName);
+                Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
                 Assert.Equal(userId, toDoInDb.UserId);
             }
         }
@@ -168,10 +168,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             using (var scope = _factory.Services.CreateScope())
             {
@@ -198,7 +198,7 @@ namespace Tests.IntegrationTests.APITests
                 Assert.Equal(timeBlock, toDoInDb.TimeBlock);
                 Assert.Equal(difficulty, toDoInDb.Difficulty);
                 Assert.Equal(toDoDate, toDoInDb.ToDoDate);
-                Assert.Equal(toDoCategoryName, toDoInDb.ToDoCategoryName);
+                Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
                 Assert.Equal(userId, toDoInDb.UserId);
             }
         }
@@ -210,10 +210,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var content = new StringContent(JsonConvert.SerializeObject(toDo), Encoding.UTF8, "application/json");
 
@@ -240,10 +240,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             using (var scope = _factory.Services.CreateScope())
             {
@@ -271,10 +271,10 @@ namespace Tests.IntegrationTests.APITests
             var timeBlock = TimeBlock.Day;
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
-            var toDoCategoryName = "SomeCategory";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var response = await _client.DeleteAsync($"/api/todos/{toDo.ToDoId}");
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

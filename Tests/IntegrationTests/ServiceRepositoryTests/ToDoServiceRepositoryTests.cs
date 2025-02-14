@@ -43,7 +43,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         [Fact]
         public async Task GetTodoByIdAsync_ShouldReturnCorrectToDo_WhenToDoIdExists()
         {
-            var toDo = new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid(), DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily);
+            var toDo = new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid(), DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily);
             var toDoId = toDo.ToDoId;
 
             _context.ToDos.Add(toDo);
@@ -77,8 +77,8 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             var expectedToDos = new List<ToDo>
             {
-                new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, date, "Other", userId, DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily),
-                new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, date, "Other", userId, DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily)
+                new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, date, Guid.NewGuid(), userId, DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily),
+                new ToDo("testDescription", TimeBlock.Day, Difficulty.Easy, date, Guid.NewGuid(), userId, DateTime.Today.AddDays(1), Guid.NewGuid(), RepeatFrequency.Daily)
             };
 
             _context.ToDos.AddRange(expectedToDos);
@@ -113,12 +113,12 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Today;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             DateTime deadline = DateTime.Today.AddDays(1);
             var parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
             var toDoId = toDo.ToDoId;
 
             await _toDoService.AddToDoAsync(toDo);
@@ -130,7 +130,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.Equal(timeBlock, toDoInDb.TimeBlock);
             Assert.Equal(difficulty, toDoInDb.Difficulty);
             Assert.Equal(toDoDate, toDoInDb.ToDoDate);
-            Assert.Equal(toDoCategoryName, toDoInDb.ToDoCategoryName);
+            Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
             Assert.Equal(userId, toDoInDb.UserId);
             Assert.Equal(deadline, toDoInDb.Deadline);
             Assert.Equal(parentToDoId, toDoInDb.ParentToDoId);
@@ -144,12 +144,12 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Today;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             DateTime deadline = DateTime.Today.AddDays(1);
             var parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
 
             _context.ToDos.Add(toDo);
             await _context.SaveChangesAsync();
@@ -170,12 +170,12 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Today;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             DateTime deadline = DateTime.Today.AddDays(1);
             var parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
             var toDoId = toDo.ToDoId;
 
             _context.ToDos.Add(toDo);
@@ -190,7 +190,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             Assert.Equal(timeBlock, toDoInDb.TimeBlock);
             Assert.Equal(difficulty, toDoInDb.Difficulty);
             Assert.Equal(toDoDate, toDoInDb.ToDoDate);
-            Assert.Equal(toDoCategoryName, toDoInDb.ToDoCategoryName);
+            Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
             Assert.Equal(userId, toDoInDb.UserId);
             Assert.Equal(deadline, toDoInDb.Deadline);
             Assert.Equal(parentToDoId, toDoInDb.ParentToDoId);
@@ -204,12 +204,12 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Today;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             DateTime deadline = DateTime.Today.AddDays(1);
             var parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.UpdateToDoAsync(toDo));
 
@@ -227,12 +227,12 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Today;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             var userId = Guid.NewGuid();
             DateTime deadline = DateTime.Today.AddDays(1);
             var parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
             var toDoId = toDo.ToDoId;
 
             _context.ToDos.Add(toDo);
@@ -267,11 +267,11 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             var repeatedToDos = new List<ToDo>
             {
-                new ToDo("Daily Task", TimeBlock.Day, Difficulty.Easy, originalDate, "Other", userId, null, Guid.NewGuid(), RepeatFrequency.Daily),
-                new ToDo("Weekly Task", TimeBlock.Day, Difficulty.Medium, originalDate, "Other", userId, null, Guid.NewGuid(), RepeatFrequency.Weekly),
-                new ToDo("Monthly Task", TimeBlock.Day, Difficulty.Hard, originalDate, "Other", userId, null, Guid.NewGuid(), RepeatFrequency.Monthly),
-                new ToDo("Yearly Task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", userId, null, Guid.NewGuid(), RepeatFrequency.Yearly),
-                new ToDo("Not repeated task", TimeBlock.Day, Difficulty.Nightmare, originalDate, "Other", userId, null, Guid.NewGuid(), RepeatFrequency.None)
+                new ToDo("Daily Task", TimeBlock.Day, Difficulty.Easy, originalDate, Guid.NewGuid(), userId, null, Guid.NewGuid(), RepeatFrequency.Daily),
+                new ToDo("Weekly Task", TimeBlock.Day, Difficulty.Medium, originalDate, Guid.NewGuid(), userId, null, Guid.NewGuid(), RepeatFrequency.Weekly),
+                new ToDo("Monthly Task", TimeBlock.Day, Difficulty.Hard, originalDate, Guid.NewGuid(), userId, null, Guid.NewGuid(), RepeatFrequency.Monthly),
+                new ToDo("Yearly Task", TimeBlock.Day, Difficulty.Nightmare, originalDate, Guid.NewGuid(), userId, null, Guid.NewGuid(), RepeatFrequency.Yearly),
+                new ToDo("Not repeated task", TimeBlock.Day, Difficulty.Nightmare, originalDate, Guid.NewGuid(), userId, null, Guid.NewGuid(), RepeatFrequency.None)
             };
 
             _context.ToDos.AddRange(repeatedToDos);

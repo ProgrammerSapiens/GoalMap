@@ -184,26 +184,27 @@ namespace Tests.IntegrationTests.RepositoriesTests
         public async Task UpdateCategoryInToDosAsync_ShouldUpdateCategoryInToDos_WhenCategoryUpdates()
         {
             var userId = Guid.NewGuid();
-            var oldCategoryName = "OldName";
-            var newCategoryName = "NewName";
+            var oldCategoryId = Guid.NewGuid();
+            var newCategoryId = Guid.NewGuid();
+            var otherCategoryId = Guid.NewGuid();
 
             var toDos = new List<ToDo>()
             {
-                new ToDo("TestToDo",TimeBlock.Day,Difficulty.Easy,DateTime.Today,oldCategoryName,userId),
-                new ToDo("TestToDo2",TimeBlock.Week,Difficulty.Hard,DateTime.Today,oldCategoryName,userId),
-                new ToDo("TestToDo3",TimeBlock.Month,Difficulty.Medium,DateTime.Today,"OtherName",userId)
+                new ToDo("TestToDo",TimeBlock.Day,Difficulty.Easy,DateTime.Today,oldCategoryId,userId),
+                new ToDo("TestToDo2",TimeBlock.Week,Difficulty.Hard,DateTime.Today,oldCategoryId,userId),
+                new ToDo("TestToDo3",TimeBlock.Month,Difficulty.Medium,DateTime.Today,otherCategoryId,userId)
             };
 
             _context.ToDos.AddRange(toDos);
             await _context.SaveChangesAsync();
 
-            await _categoryRepository.UpdateCategoryInToDosAsync(userId, oldCategoryName, newCategoryName);
+            await _categoryRepository.UpdateCategoryInToDosAsync(userId, oldCategoryId, newCategoryId);
 
-            var toDosInDb = await _context.ToDos.Where(t => t.UserId == userId && t.ToDoCategoryName == newCategoryName).ToListAsync();
+            var toDosInDb = await _context.ToDos.Where(t => t.UserId == userId && t.ToDoCategoryId == newCategoryId).ToListAsync();
             Assert.NotEmpty(toDosInDb);
             Assert.Equal(2, toDosInDb.Count);
 
-            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.UserId == userId && t.ToDoCategoryName == "OtherName");
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.UserId == userId && t.ToDoCategoryId == otherCategoryId);
             Assert.NotNull(toDoInDb);
             Assert.Equal("TestToDo3", toDoInDb.Description);
         }

@@ -33,7 +33,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task GetToDoByIdAsync_ShouldReturnToDo_WhenToDoExists()
         {
-            var existingToDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var existingToDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
 
             _context.ToDos.Add(existingToDo);
             await _context.SaveChangesAsync();
@@ -73,9 +73,9 @@ namespace Tests.IntegrationTests.RepositoriesTests
             TimeBlock timeBlock = TimeBlock.Day;
             var toDosList = new List<ToDo>()
             {
-                new ToDo("TestDescription", timeBlock, Difficulty.Easy, date, "Other", userId),
-                new ToDo("TestDescription2", timeBlock, Difficulty.Easy, date, "Other", userId),
-                new ToDo("TestDescription3", timeBlock, Difficulty.Easy, date, "Other", Guid.NewGuid())
+                new ToDo("TestDescription", timeBlock, Difficulty.Easy, date, Guid.NewGuid(), userId),
+                new ToDo("TestDescription2", timeBlock, Difficulty.Easy, date, Guid.NewGuid(), userId),
+                new ToDo("TestDescription3", timeBlock, Difficulty.Easy, date, Guid.NewGuid(), Guid.NewGuid())
             };
 
             _context.ToDos.AddRange(toDosList);
@@ -115,7 +115,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task AddToDoAsync_ShouldAddToDo_WhenDataIsValid()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
             var userId = toDo.UserId;
 
@@ -134,7 +134,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task AddToDoAsync_ShouldThrowException_WhenToDoIdAlreadyExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
 
             _context.ToDos.Add(toDo);
             await _context.SaveChangesAsync();
@@ -150,7 +150,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task UpdateToDoAsync_ShouldUpdateToDo_WhenToDoExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             _context.ToDos.Add(toDo);
@@ -170,7 +170,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task UpdateToDoAsync_ShouldThrowException_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoRepository.UpdateToDoAsync(toDo));
@@ -188,7 +188,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task DeleteToDoAsync_ShouldDeleteToDo_WhenToDoExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             _context.ToDos.Add(toDo);
@@ -204,7 +204,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task DeleteToDoAsync_ShouldDoNothing_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoRepository.DeleteToDoAsync(toDoId));
@@ -218,7 +218,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task ToDoExistsAsync_ShouldReturnTrue_WhenToDoExists()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             _context.ToDos.Add(toDo);
@@ -235,7 +235,7 @@ namespace Tests.IntegrationTests.RepositoriesTests
         [Fact]
         public async Task ToDoExistsAsync_ShouldReturnFalse_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, "Other", Guid.NewGuid());
+            var toDo = new ToDo("TestDescription", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
             var toDoId = toDo.ToDoId;
 
             var result = await _toDoRepository.ToDoExistsAsync(toDoId);

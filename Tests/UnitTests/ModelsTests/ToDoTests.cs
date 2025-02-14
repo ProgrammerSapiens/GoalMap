@@ -13,16 +13,16 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
             Assert.Equal(difficulty, toDo.Difficulty);
             Assert.Equal(toDoDate, toDo.ToDoDate);
-            Assert.Equal(toDoCategoryName, toDo.ToDoCategoryName);
+            Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
             Assert.NotEqual(Guid.Empty, toDo.ToDoId);
         }
@@ -34,17 +34,17 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
             Assert.Equal(difficulty, toDo.Difficulty);
             Assert.Equal(toDoDate, toDo.ToDoDate);
-            Assert.Equal(toDoCategoryName, toDo.ToDoCategoryName);
+            Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
             Assert.NotEqual(Guid.Empty, toDo.ToDoId);
             Assert.Equal(deadline, toDo.Deadline);
@@ -57,18 +57,18 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
             Guid parentToDoId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
             Assert.Equal(difficulty, toDo.Difficulty);
             Assert.Equal(toDoDate, toDo.ToDoDate);
-            Assert.Equal(toDoCategoryName, toDo.ToDoCategoryName);
+            Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
             Assert.NotEqual(Guid.Empty, toDo.ToDoId);
             Assert.Equal(deadline, toDo.Deadline);
@@ -82,19 +82,19 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
             Guid parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Weekly;
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
             Assert.Equal(difficulty, toDo.Difficulty);
             Assert.Equal(toDoDate, toDo.ToDoDate);
-            Assert.Equal(toDoCategoryName, toDo.ToDoCategoryName);
+            Assert.Equal(toDoCategoryId, toDo.ToDoCategoryId);
             Assert.Equal(userId, toDo.UserId);
             Assert.NotEqual(Guid.Empty, toDo.ToDoId);
             Assert.Equal(deadline, toDo.Deadline);
@@ -109,16 +109,16 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
             Guid parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Weekly;
 
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency));
         }
 
         [Fact]
@@ -128,13 +128,13 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now.AddDays(2);
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime earlierThenNowDeadline = DateTime.Now.AddDays(-1);
             DateTime earlierThenToDoDateDeadline = DateTime.Now.AddDays(1);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, earlierThenNowDeadline));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, earlierThenToDoDateDeadline));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, earlierThenNowDeadline));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, earlierThenToDoDateDeadline));
         }
 
         #endregion
@@ -148,10 +148,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             string newDescription = "Updated description";
             toDo.Description = newDescription;
@@ -166,10 +166,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             string newDescription = "";
 
@@ -183,11 +183,11 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
 
             DateTime newDeadline = DateTime.Now.AddDays(4);
             toDo.Deadline = newDeadline;
@@ -202,11 +202,11 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
 
             DateTime newDeadline = DateTime.Now.AddDays(-1);
 
@@ -220,11 +220,11 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now.AddDays(2);
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(3);
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
 
             DateTime newDeadline = DateTime.Now.AddDays(1);
 
@@ -238,10 +238,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             DateTime newToDoDate = DateTime.Now.AddDays(1);
             toDo.ToDoDate = newToDoDate;
@@ -256,10 +256,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             DateTime newToDoDate = DateTime.Now.AddDays(-1);
 
@@ -273,10 +273,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             toDo.CompletionStatus = true;
 
@@ -290,10 +290,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             toDo.RepeatFrequency = RepeatFrequency.Daily;
 
@@ -307,15 +307,15 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
-            string newToDoCategoryName = "SomeCategory";
-            toDo.ToDoCategoryName = newToDoCategoryName;
+            Guid newToDoCategoryId = Guid.NewGuid();
+            toDo.ToDoCategoryId = newToDoCategoryId;
 
-            Assert.Equal(newToDoCategoryName, toDo.ToDoCategoryName);
+            Assert.Equal(newToDoCategoryId, toDo.ToDoCategoryId);
         }
 
         [Fact]
@@ -325,14 +325,14 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Medium;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            var toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
-            string newToDoCategoryName = "";
+            Guid newToDoCategoryId = Guid.Empty;
 
-            Assert.Throws<ArgumentException>(() => toDo.ToDoCategoryName = newToDoCategoryName);
+            Assert.Throws<ArgumentException>(() => toDo.ToDoCategoryId = newToDoCategoryId);
         }
 
         #endregion
@@ -346,10 +346,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             Assert.False(toDo.CompletionStatus, "The default CompletionStatus should be false.");
         }
@@ -361,10 +361,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid(); ;
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             Assert.Equal(RepeatFrequency.None, toDo.RepeatFrequency);
         }
@@ -376,10 +376,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             Assert.Null(toDo.Deadline);
         }
@@ -395,59 +395,13 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
-            var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
+            var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             Assert.NotEqual(toDo1.ToDoId, toDo2.ToDoId);
-        }
-
-        #endregion
-
-        #region Tests for links
-
-        [Fact]
-        public void ToDo_AssignTaskCategory_ShouldUpdateTaskCategory()
-        {
-            string description = "Task description";
-            TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Easy;
-            DateTime toDoDate = DateTime.Now;
-            Guid userId = Guid.NewGuid();
-            string toDoCategoryName = "Category name";
-
-            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
-
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
-            toDo.ToDoCategory = toDoCategory;
-
-            Assert.NotNull(toDo.ToDoCategory);
-            Assert.Equal(toDoCategoryName, toDo.ToDoCategory.ToDoCategoryName);
-            Assert.Equal("Category name", toDo.ToDoCategory.ToDoCategoryName);
-            Assert.Equal(userId, toDo.ToDoCategory.UserId);
-        }
-
-        [Fact]
-        public void ToDo_AssignUser_ShouldUpdateUser()
-        {
-            string description = "Task description";
-            TimeBlock timeBlock = TimeBlock.Day;
-            Difficulty difficulty = Difficulty.Easy;
-            DateTime taskDate = DateTime.Now;
-            string toDoCategoryName = "Other";
-            string userName = "Test user";
-
-            var user = new User(userName);
-            Guid userId = user.UserId;
-
-            var toDo = new ToDo(description, timeBlock, difficulty, taskDate, toDoCategoryName, userId);
-            toDo.User = user;
-
-            Assert.NotNull(toDo.User);
-            Assert.Equal(userId, toDo.User.UserId);
-            Assert.Equal(userName, toDo.User.UserName);
         }
 
         #endregion
@@ -461,10 +415,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.UtcNow;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var exactNow = DateTime.UtcNow.AddSeconds(1);
 
@@ -481,10 +435,10 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.UtcNow;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var beginningOfTheDay = DateTime.UtcNow.Date;
 
@@ -504,7 +458,7 @@ namespace Tests.UnitTests.ModelsTests
             string description = "Task description";
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
             var timeBlock1 = TimeBlock.Day;
@@ -512,10 +466,10 @@ namespace Tests.UnitTests.ModelsTests
             var timeBlock3 = TimeBlock.Month;
             var timeBlock4 = TimeBlock.Year;
 
-            var toDo1 = new ToDo(description, timeBlock1, difficulty, toDoDate, toDoCategoryName, userId);
-            var toDo2 = new ToDo(description, timeBlock2, difficulty, toDoDate, toDoCategoryName, userId);
-            var toDo3 = new ToDo(description, timeBlock3, difficulty, toDoDate, toDoCategoryName, userId);
-            var toDo4 = new ToDo(description, timeBlock4, difficulty, toDoDate, toDoCategoryName, userId);
+            var toDo1 = new ToDo(description, timeBlock1, difficulty, toDoDate, toDoCategoryId, userId);
+            var toDo2 = new ToDo(description, timeBlock2, difficulty, toDoDate, toDoCategoryId, userId);
+            var toDo3 = new ToDo(description, timeBlock3, difficulty, toDoDate, toDoCategoryId, userId);
+            var toDo4 = new ToDo(description, timeBlock4, difficulty, toDoDate, toDoCategoryId, userId);
 
             Assert.Equal(timeBlock1, toDo1.TimeBlock);
             Assert.Equal(timeBlock2, toDo2.TimeBlock);
@@ -529,7 +483,7 @@ namespace Tests.UnitTests.ModelsTests
             string description = "Task description";
             TimeBlock timeBlock = TimeBlock.Day;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
 
             var difficulty1 = Difficulty.Easy;
@@ -537,10 +491,10 @@ namespace Tests.UnitTests.ModelsTests
             var difficulty3 = Difficulty.Hard;
             var difficulty4 = Difficulty.Nightmare;
 
-            var toDo1 = new ToDo(description, timeBlock, difficulty1, toDoDate, toDoCategoryName, userId);
-            var toDo2 = new ToDo(description, timeBlock, difficulty2, toDoDate, toDoCategoryName, userId);
-            var toDo3 = new ToDo(description, timeBlock, difficulty3, toDoDate, toDoCategoryName, userId);
-            var toDo4 = new ToDo(description, timeBlock, difficulty4, toDoDate, toDoCategoryName, userId);
+            var toDo1 = new ToDo(description, timeBlock, difficulty1, toDoDate, toDoCategoryId, userId);
+            var toDo2 = new ToDo(description, timeBlock, difficulty2, toDoDate, toDoCategoryId, userId);
+            var toDo3 = new ToDo(description, timeBlock, difficulty3, toDoDate, toDoCategoryId, userId);
+            var toDo4 = new ToDo(description, timeBlock, difficulty4, toDoDate, toDoCategoryId, userId);
 
             Assert.Equal(difficulty1, toDo1.Difficulty);
             Assert.Equal(difficulty2, toDo2.Difficulty);
@@ -555,7 +509,7 @@ namespace Tests.UnitTests.ModelsTests
             TimeBlock timeBlock = TimeBlock.Day;
             Difficulty difficulty = Difficulty.Easy;
             DateTime toDoDate = DateTime.Now;
-            string toDoCategoryName = "Other";
+            Guid toDoCategoryId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
             Guid parentToDoId = Guid.NewGuid();
@@ -566,11 +520,11 @@ namespace Tests.UnitTests.ModelsTests
             var repeatFrequency4 = RepeatFrequency.Monthly;
             var repeatFrequency5 = RepeatFrequency.Yearly;
 
-            var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency1);
-            var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency2);
-            var toDo3 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency3);
-            var toDo4 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency4);
-            var toDo5 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryName, userId, deadline, parentToDoId, repeatFrequency5);
+            var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency1);
+            var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency2);
+            var toDo3 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency3);
+            var toDo4 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency4);
+            var toDo5 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency5);
 
             Assert.Equal(repeatFrequency1, toDo1.RepeatFrequency);
             Assert.Equal(repeatFrequency2, toDo2.RepeatFrequency);
