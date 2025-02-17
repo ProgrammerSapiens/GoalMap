@@ -56,18 +56,12 @@ namespace Core.Services
         {
             _logger.LogInformation($"AddToDoCategoryAsync(ToDoCategory {toDoCategory.ToDoCategoryName})");
 
-            toDoCategory.ToDoCategoryName = GetNameWithACapitalLetter(toDoCategory.ToDoCategoryName);
+            toDoCategory.ToDoCategoryName = GetNameWithACapitalLetterAndValidate(toDoCategory.ToDoCategoryName);
 
             if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
                 _logger.LogWarning("Category with such name already exists.");
                 throw new InvalidOperationException("Category with such name already exists.");
-            }
-
-            if (toDoCategory.ToDoCategoryName.Any(char.IsDigit))
-            {
-                _logger.LogWarning("Category name cannot contain digits.");
-                throw new ArgumentException("Category name cannot contain digits.");
             }
 
             await _repository.AddToDoCategoryAsync(toDoCategory);
@@ -84,27 +78,18 @@ namespace Core.Services
             _logger.LogInformation($"UpdateToDoCategoryAsync(ToDoCategory {toDoCategory.ToDoCategoryName})");
 
             var existingToDoCategory = await _repository.GetToDoCategoryByCategoryIdAsync(toDoCategory.ToDoCategoryId);
-
             if (existingToDoCategory == null)
             {
                 _logger.LogWarning("Category was not found.");
                 throw new InvalidOperationException("Category was not found.");
             }
 
-            toDoCategory.ToDoCategoryName = GetNameWithACapitalLetter(toDoCategory.ToDoCategoryName);
-            var oldCategoryName = existingToDoCategory.ToDoCategoryName;
-            var newCategoryName = toDoCategory.ToDoCategoryName;
+            toDoCategory.ToDoCategoryName = GetNameWithACapitalLetterAndValidate(toDoCategory.ToDoCategoryName);
 
-            if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, newCategoryName))
+            if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
             {
                 _logger.LogWarning("Category with such name already exists.");
                 throw new InvalidOperationException("Category with such name already exists.");
-            }
-
-            if (oldCategoryName == "Habbit" || oldCategoryName == "Other")
-            {
-                _logger.LogWarning("You cannot update this category.");
-                throw new ArgumentException("You cannot update this category.");
             }
 
             await _repository.UpdateToDoCategoryAsync(toDoCategory);
@@ -141,11 +126,8 @@ namespace Core.Services
                 throw new InvalidOperationException("ToDo category was not found.");
             }
 
-            var oldCategoryId = existingToDoCategory.ToDoCategoryId;
-            var newCategoryId = otherToDoCategory.ToDoCategoryId;
-
             await _repository.DeleteToDoCategoryAsync(toDoCategoryId);
-            await _repository.UpdateCategoryInToDosAsync(existingToDoCategory.UserId, oldCategoryId, newCategoryId);
+            await _repository.UpdateCategoryInToDosAsync(existingToDoCategory.UserId, existingToDoCategory.ToDoCategoryId, otherToDoCategory.ToDoCategoryId);
         }
 
         /// <summary>
@@ -153,9 +135,23 @@ namespace Core.Services
         /// </summary>
         /// <param name="categoryName">The category name to format.</param>
         /// <returns>The formatted category name.</returns>
-        private string GetNameWithACapitalLetter(string categoryName)
+        private string GetNameWithACapitalLetterAndValidate(string categoryName)
         {
-            return char.ToUpper(categoryName[0]) + categoryName.Substring(1).ToLower();
+            string validatedCategoryName = char.ToUpper(categoryName[0]) + categoryName.Substring(1).ToLower();
+
+            if (validatedCategoryName.Any(char.IsDigit))
+            {
+                _logger.LogWarning("Category name cannot contain digits.");
+                throw new ArgumentException("Category name cannot contain digits.");
+            }
+
+            if (validatedCategoryName == "Habbit" || validatedCategoryName == "Other")
+            {
+                _logger.LogWarning("You cannot add/update this category.");
+                throw new ArgumentException("You cannot add/update this category.");
+            }
+
+            return validatedCategoryName;
         }
     }
 }

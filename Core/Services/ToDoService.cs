@@ -111,10 +111,9 @@ namespace Core.Services
             }
 
             var todayToDos = await _repository.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day);
-
             if (!todayToDos.Any())
             {
-                _logger.LogWarning("There are no todos that repeated");
+                _logger.LogInformation("There are no todos that repeated");
                 return;
             }
 
@@ -131,7 +130,6 @@ namespace Core.Services
 
                 await _repository.UpdateToDoAsync(todo);
             }
-
         }
     }
 }

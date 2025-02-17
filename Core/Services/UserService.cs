@@ -62,16 +62,13 @@ namespace Core.Services
             _logger.LogInformation($"RegisterUserAsync(User {user.UserName}, {password})");
 
             var existingUser = await _repository.GetUserByUserNameAsync(user.UserName);
-
             if (existingUser != null)
             {
                 _logger.LogWarning("User name is already exists.");
                 throw new InvalidOperationException("User name is already exists.");
             }
 
-            string hashedPassword = await _passwordHasher.HashPasswordAsync(password);
-
-            user.PasswordHash = hashedPassword;
+            user.PasswordHash = await _passwordHasher.HashPasswordAsync(password);
 
             await _repository.AddUserAsync(user);
             await CreateDefaultCategoriesAsync(user.UserId);
@@ -88,18 +85,10 @@ namespace Core.Services
             _logger.LogInformation($"AuthenticateUserAsync({userName}, {password})");
 
             var user = await _repository.GetUserByUserNameAsync(userName);
-
-            if (user == null)
-            {
-                return false;
-            }
+            if (user == null) return false;
 
             var passwordIsRight = await _passwordHasher.VerifyPasswordAsync(password, user.PasswordHash);
-
-            if (!passwordIsRight)
-            {
-                return false;
-            }
+            if (!passwordIsRight) return false;
 
             return true;
         }
@@ -128,7 +117,6 @@ namespace Core.Services
             _logger.LogInformation($"RegisterUserAsync({userId}, {taskDifficulty})");
 
             var user = await _repository.GetUserByUserIdAsync(userId);
-
             if (user == null)
             {
                 _logger.LogWarning("User was not found.");
@@ -136,7 +124,6 @@ namespace Core.Services
             }
 
             user.Experience += (int)taskDifficulty;
-
             await _repository.UpdateUserAsync(user);
         }
 
