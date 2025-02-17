@@ -75,10 +75,23 @@ namespace Core.Services
         {
             _logger.LogInformation($"UpdateToDoAsync(ToDo {toDo.Description})");
 
-            if (!(await _repository.ToDoExistsAsync(toDo.ToDoId)))
+            var existingToDo = await _repository.GetToDoByIdAsync(toDo.ToDoId);
+            if (existingToDo == null)
             {
                 _logger.LogWarning("ToDo id does not exist.");
                 throw new InvalidOperationException("Todo id does not exist.");
+            }
+
+            if (existingToDo.CompletionStatus == true)
+            {
+                _logger.LogWarning("Todo is already completed");
+                throw new InvalidOperationException("You cannot update completed todo");
+            }
+
+            if (toDo.CompletionStatus == true)
+            {
+                var experience = (int)toDo.Difficulty;
+                await _repository.UpdateUserExperienceAsync(toDo.UserId, experience);
             }
 
             await _repository.UpdateToDoAsync(toDo);

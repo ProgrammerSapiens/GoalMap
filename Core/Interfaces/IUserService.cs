@@ -43,12 +43,5 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="user">The user object containing updated data.</param>
         Task UpdateUserAsync(User user);
-
-        /// <summary>
-        /// Updates a user's experience points based on difficulty level.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="difficulty">The difficulty level affecting experience points.</param>
-        Task UpdateUserExperienceAsync(Guid userId, Difficulty difficulty);
     }
 }

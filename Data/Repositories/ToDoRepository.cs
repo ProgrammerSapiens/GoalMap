@@ -95,6 +95,27 @@ namespace Data.Repositories
         }
 
         /// <summary>
+        /// Updates the experience points of a user.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="experience">The amount of experience to add.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the user is not found.</exception>
+        public async Task UpdateUserExperienceAsync(Guid userId, int experience)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                _logger.LogError($"User {userId} was not found.");
+                throw new InvalidOperationException("User was not found.");
+            }
+
+            user.Experience += experience;
+            await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
         /// Deletes a ToDo item by its unique identifier.
         /// </summary>
         /// <param name="toDoId">The unique identifier of the ToDo item to delete.</param>

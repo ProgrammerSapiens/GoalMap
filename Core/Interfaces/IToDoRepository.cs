@@ -36,6 +36,14 @@ namespace Core.Interfaces
         Task UpdateToDoAsync(ToDo toDo);
 
         /// <summary>
+        /// Updates the experience points of a user.
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <param name="experience">The amount of experience to add.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        Task UpdateUserExperienceAsync(Guid userId, int experience);
+
+        /// <summary>
         /// Deletes a To-Do task from the repository by its unique identifier.
         /// </summary>
         /// <param name="toDoId">The unique identifier of the To-Do task to be deleted.</param>
