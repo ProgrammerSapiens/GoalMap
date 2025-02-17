@@ -13,16 +13,19 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         private readonly AppDbContext _context;
         private readonly ToDoCategoryRepository _toDoCategoryRepository;
         private readonly ToDoCategoryService _toDoCategoryService;
-        private readonly Mock<ILogger<ToDoCategoryService>> _logger;
+        private readonly Mock<ILogger<ToDoCategoryService>> _serviceLoggerMock;
+        private readonly Mock<ILogger<ToDoCategoryRepository>> _repositoryLoggerMock;
 
         public ToDoCategoryServiceRepositoryTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(dbContextOptions);
 
-            _toDoCategoryRepository = new ToDoCategoryRepository(_context);
-            _logger = new Mock<ILogger<ToDoCategoryService>>();
-            _toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository, _logger.Object);
+            _serviceLoggerMock = new Mock<ILogger<ToDoCategoryService>>();
+            _repositoryLoggerMock = new Mock<ILogger<ToDoCategoryRepository>>();
+
+            _toDoCategoryRepository = new ToDoCategoryRepository(_context, _repositoryLoggerMock.Object);
+            _toDoCategoryService = new ToDoCategoryService(_toDoCategoryRepository, _serviceLoggerMock.Object);
         }
 
         public Task InitializeAsync()
@@ -189,9 +192,9 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             _context.ToDoCategories.Add(defaultCategory);
             await _context.SaveChangesAsync();
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoCategoryService.UpdateToDoCategoryAsync(defaultCategory));
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() => _toDoCategoryService.UpdateToDoCategoryAsync(defaultCategory));
 
-            Assert.Equal("Category with such name already exists.", exception.Message);
+            Assert.Equal("You cannot add/update this category.", exception.Message);
         }
 
         #endregion

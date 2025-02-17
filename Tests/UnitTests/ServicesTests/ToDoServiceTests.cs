@@ -167,12 +167,12 @@ namespace Tests.UnitTests.ServicesTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
 
-            _toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(true);
+            _toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDo.ToDoId)).ReturnsAsync(toDo);
             _toDoRepositoryMock.Setup(repo => repo.UpdateToDoAsync(It.IsAny<ToDo>())).Returns(Task.CompletedTask);
 
             await _toDoService.UpdateToDoAsync(toDo);
 
-            _toDoRepositoryMock.Verify(repo => repo.ToDoExistsAsync(toDo.ToDoId), Times.Once);
+            _toDoRepositoryMock.Verify(repo => repo.GetToDoByIdAsync(toDo.ToDoId), Times.Once);
             _toDoRepositoryMock.Verify(repo => repo.UpdateToDoAsync(It.Is<ToDo>(t => t.ToDoId == toDo.ToDoId
             && t.Description == toDo.Description
             && t.TimeBlock == toDo.TimeBlock
@@ -199,11 +199,34 @@ namespace Tests.UnitTests.ServicesTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
 
-            _toDoRepositoryMock.Setup(repo => repo.ToDoExistsAsync(toDo.ToDoId)).ReturnsAsync(false);
+            _toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDo.ToDoId)).ReturnsAsync((ToDo?)null);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.UpdateToDoAsync(toDo));
-
             Assert.Equal("Todo id does not exist.", exception.Message);
+        }
+
+        [Fact]
+        public async Task UpdateToDoAsync_ShouldThrowException_WhenToDoIsAlreadyCompleted()
+        {
+            string description = "testDescription";
+            TimeBlock timeBlock = TimeBlock.Day;
+            Difficulty difficulty = Difficulty.Easy;
+            DateTime toDoDate = DateTime.Today;
+            var toDoCategoryId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            DateTime deadline = DateTime.Today.AddDays(1);
+            var parentToDoId = Guid.NewGuid();
+            RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
+            bool isCompleted = true;
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
+
+            toDo.CompletionStatus = isCompleted;
+
+            _toDoRepositoryMock.Setup(repo => repo.GetToDoByIdAsync(toDo.ToDoId)).ReturnsAsync(toDo);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.UpdateToDoAsync(toDo));
+            Assert.Equal("You cannot update completed todo", exception.Message);
+
         }
 
         #endregion

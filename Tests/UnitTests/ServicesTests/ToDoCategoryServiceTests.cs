@@ -128,11 +128,7 @@ namespace Tests.UnitTests.ServicesTests
 
             var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
 
-            _toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByNameAsync(userId, toDoCategoryName)).ReturnsAsync(false);
-
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => _toDoCategoryService.AddToDoCategoryAsync(toDoCategory));
-
-            _toDoCategoryRepositoryMock.Verify(repo => repo.CategoryExistsByNameAsync(userId, toDoCategory.ToDoCategoryName), Times.Once);
             Assert.Equal("Category name cannot contain digits.", exception.Message);
         }
 
@@ -195,7 +191,7 @@ namespace Tests.UnitTests.ServicesTests
 
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => _toDoCategoryService.UpdateToDoCategoryAsync(newToDoCategory));
 
-            Assert.Equal("You cannot update this category.", exception.Message);
+            Assert.Equal("You cannot add/update this category.", exception.Message);
             _toDoCategoryRepositoryMock.Verify(repo => repo.UpdateToDoCategoryAsync(newToDoCategory), Times.Never());
         }
 

@@ -2,6 +2,8 @@
 using Core.Models;
 using Data.DBContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace Tests.IntegrationTests.RepositoriesTests
 {
@@ -9,12 +11,15 @@ namespace Tests.IntegrationTests.RepositoriesTests
     {
         private readonly AppDbContext _context;
         private readonly ToDoRepository _toDoRepository;
+        private readonly Mock<ILogger<ToDoRepository>> _logger;
 
         public ToDoRepositoryTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(dbContextOptions);
-            _toDoRepository = new ToDoRepository(_context);
+
+            _logger = new Mock<ILogger<ToDoRepository>>();
+            _toDoRepository = new ToDoRepository(_context, _logger.Object);
         }
 
         public Task InitializeAsync()
@@ -179,6 +184,34 @@ namespace Tests.IntegrationTests.RepositoriesTests
 
             Assert.Equal("ToDo with such an Id does not exists.", exception.Message);
             Assert.Null(toDoInDb);
+        }
+
+        #endregion
+
+        #region UpdateUserExperienceAsync(Guid userId, int experience) tests
+
+        [Fact]
+        public async Task UpdateUserExperienceAsync_ShouldUpdateExperience_WhenUserExists()
+        {
+            var user = new User("TestUser");
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            await _toDoRepository.UpdateUserExperienceAsync(user.UserId, 10);
+
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            Assert.NotNull(userInDb);
+            Assert.Equal(10, userInDb.Experience);
+        }
+
+        [Fact]
+        public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserDoesNotExist()
+        {
+            var user = new User("TestUser");
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoRepository.UpdateUserExperienceAsync(user.UserId, 10));
+            Assert.Equal("User was not found.", exception.Message);
         }
 
         #endregion

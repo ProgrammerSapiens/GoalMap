@@ -156,44 +156,5 @@ namespace Tests.UnitTests.ServicesTests
         }
 
         #endregion
-
-        #region UpdateUserExperienceAsync(Guid userId, Difficulty taskDifficulty) tests
-
-        [Theory]
-        [InlineData(Difficulty.Easy)]
-        [InlineData(Difficulty.Medium)]
-        [InlineData(Difficulty.Hard)]
-        [InlineData(Difficulty.Nightmare)]
-        public async Task UpdateUserExperienceAsync_ShouldUpdateExperience_WhenInputsAreValid(Difficulty difficulty)
-        {
-            var userName = "TestUser";
-            int initialExperience = 5;
-            int updatedExperience = initialExperience + (int)difficulty;
-
-            var user = new User(userName) { Experience = initialExperience };
-            var userId = user.UserId;
-
-            _userRepositoryMock.Setup(repo => repo.GetUserByUserIdAsync(userId)).ReturnsAsync(user);
-            _userRepositoryMock.Setup(repo => repo.UpdateUserAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
-
-            await _userService.UpdateUserExperienceAsync(userId, difficulty);
-
-            Assert.Equal(updatedExperience, user.Experience);
-            _userRepositoryMock.Verify(repo => repo.UpdateUserAsync(It.Is<User>(u => u.Experience == updatedExperience)), Times.Once);
-        }
-
-        [Fact]
-        public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserNameDoesNotExist()
-        {
-            var userId = Guid.NewGuid();
-
-            _userRepositoryMock.Setup(repo => repo.GetUserByUserIdAsync(userId)).ReturnsAsync((User?)null);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.UpdateUserExperienceAsync(userId, Difficulty.Easy));
-
-            Assert.Equal("User was not found.", exception.Message);
-        }
-
-        #endregion
     }
 }

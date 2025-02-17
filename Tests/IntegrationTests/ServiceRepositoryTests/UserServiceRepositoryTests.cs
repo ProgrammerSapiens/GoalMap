@@ -6,14 +6,16 @@ using Moq;
 using Core.Models;
 using Core.Services;
 using Microsoft.Extensions.Logging;
+using Authentication;
 
 namespace Tests.IntegrationTests.Service_RepositoriyTests
 {
     public class UserServiceRepositoryTests : IAsyncLifetime
     {
         private readonly IUserRepository _userRepository;
-        private readonly Mock<IPasswordHasher> _passwordHasherMock;
-        private readonly Mock<ILogger<UserService>> _logger;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly Mock<ILogger<UserService>> _serviceLoggerMock;
+        private readonly Mock<ILogger<UserRepository>> _repositoryLoggerMock;
         private readonly IUserService _userService;
         private readonly AppDbContext _context;
 
@@ -22,11 +24,12 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(dbContextOptions);
 
-            _userRepository = new UserRepository(_context);
-            _passwordHasherMock = new Mock<IPasswordHasher>();
-            _logger = new Mock<ILogger<UserService>>();
+            _serviceLoggerMock = new Mock<ILogger<UserService>>();
+            _repositoryLoggerMock = new Mock<ILogger<UserRepository>>();
 
-            _userService = new UserService(_userRepository, _passwordHasherMock.Object, _logger.Object);
+            _userRepository = new UserRepository(_context, _repositoryLoggerMock.Object);
+            _passwordHasher = new PasswordHasher();
+            _userService = new UserService(_userRepository, _passwordHasher, _serviceLoggerMock.Object);
         }
 
         public Task InitializeAsync()
@@ -84,19 +87,15 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         {
             var userName = "TestUser";
             var password = "password";
-            var hashedPassword = "hashedPassword";
 
             var user = new User(userName);
             var userId = user.UserId;
-
-            _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
             await _userService.RegisterUserAsync(user, password);
 
             var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
 
             Assert.NotNull(userInDb);
-            Assert.Equal(hashedPassword, userInDb.PasswordHash);
             Assert.Equal(userId, userInDb.UserId);
         }
 
@@ -105,12 +104,9 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         {
             var userName = "TestUser";
             var password = "password";
-            var hashedPassword = "hashedPassword";
 
             var user = new User(userName);
             var userId = user.UserId;
-
-            _passwordHasherMock.Setup(hasher => hasher.HashPasswordAsync(password)).ReturnsAsync(hashedPassword);
 
             await _userService.RegisterUserAsync(user, password);
 
@@ -141,19 +137,49 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
         #endregion
 
-        //TODO: Write AuthenticateUserAsync after the implementation of the authentication project
-        #region AuthenticateUserAsync(string? userName, string? password)
+        #region AuthenticateUserAsync(string userName, string? password)
 
         [Fact]
         public async Task AuthenticateUserAsync_ShouldReturnTrue_WhenCredentialsAreValid()
         {
+            var user = new User("TestUser");
+            var password = "password";
+            var hashedPassword = await _passwordHasher.HashPasswordAsync(password);
 
+            user.PasswordHash = hashedPassword;
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var result = await _userService.AuthenticateUserAsync(user.UserName, password);
+            Assert.True(result);
         }
 
         [Fact]
         public async Task AuthenticateUserAsync_ShouldReturnFalse_WhenCredentialsAreInvalid()
         {
+            var user = new User("TestUser");
+            var password = "password";
+            var invalidPassword = "InvalidPassword";
+            var hashedPassword = await _passwordHasher.HashPasswordAsync(password);
 
+            user.PasswordHash = hashedPassword;
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var result = await _userService.AuthenticateUserAsync(user.UserName, invalidPassword);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task AuthenticateUserAsync_ShouldReturnFalse_WhenUserDoesNotExist()
+        {
+            var user = new User("TestUser");
+            var password = "password";
+
+            var result = await _userService.AuthenticateUserAsync(user.UserName, password);
+            Assert.False(result);
         }
 
         #endregion
@@ -177,40 +203,6 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
             Assert.NotNull(userInDb);
             Assert.Equal(newUserName, userInDb.UserName);
-        }
-
-        #endregion
-
-        #region UpdateUserExperienceAsync(string? userName, Difficulty taskDifficulty)
-
-        [Fact]
-        public async Task UpdateUserExperienceAsync_ShouldUpdateUser_WhenUserExists()
-        {
-            var userName = "TestUser";
-            int experience = 10;
-            int updatedExperience = experience + (int)Difficulty.Nightmare;
-
-            var user = new User(userName) { Experience = experience };
-            var userId = user.UserId;
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            await _userService.UpdateUserExperienceAsync(userId, Difficulty.Nightmare);
-
-            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-
-            Assert.NotNull(userInDb);
-            Assert.Equal(userName, userInDb.UserName);
-            Assert.Equal(updatedExperience, userInDb.Experience);
-        }
-
-        [Fact]
-        public async Task UpdateUserExperienceAsync_ShouldThrowException_WhenUserDoesNotExist()
-        {
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.UpdateUserExperienceAsync(Guid.NewGuid(), Difficulty.Nightmare));
-
-            Assert.Equal("User was not found.", exception.Message);
         }
 
         #endregion

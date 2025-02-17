@@ -2,6 +2,8 @@
 using Data.DBContext;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace Tests.IntegrationTests.RepositoriesTests
 {
@@ -9,12 +11,15 @@ namespace Tests.IntegrationTests.RepositoriesTests
     {
         private readonly AppDbContext _context;
         private readonly UserRepository _userRepository;
+        private readonly Mock<ILogger<UserRepository>> _loggerMock;
 
         public UserRepositoryTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(dbContextOptions);
-            _userRepository = new UserRepository(_context);
+            _loggerMock = new Mock<ILogger<UserRepository>>();
+
+            _userRepository = new UserRepository(_context, _loggerMock.Object);
         }
 
         public Task InitializeAsync()

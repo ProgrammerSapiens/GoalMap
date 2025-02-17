@@ -1,5 +1,4 @@
-﻿using Castle.Core.Logging;
-using Core.Interfaces;
+﻿using Core.Interfaces;
 using Core.Models;
 using Core.Services;
 using Data.DBContext;
@@ -14,7 +13,8 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
     {
         private readonly IToDoRepository _toDoRepository;
         private readonly IToDoService _toDoService;
-        private readonly Mock<ILogger<ToDoService>> _logger;
+        private readonly Mock<ILogger<ToDoService>> _serviceLoggerMock;
+        private readonly Mock<ILogger<ToDoRepository>> _repositoryLoggerMock;
         private readonly AppDbContext _context;
 
         public ToDoServiceRepositoryTests()
@@ -22,9 +22,10 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(dbContextOptions);
 
-            _toDoRepository = new ToDoRepository(_context);
-            _logger = new Mock<ILogger<ToDoService>>();
-            _toDoService = new ToDoService(_toDoRepository, _logger.Object);
+            _serviceLoggerMock = new Mock<ILogger<ToDoService>>();
+            _repositoryLoggerMock = new Mock<ILogger<ToDoRepository>>();
+            _toDoRepository = new ToDoRepository(_context, _repositoryLoggerMock.Object);
+            _toDoService = new ToDoService(_toDoRepository, _serviceLoggerMock.Object);
         }
 
         public Task InitializeAsync()
@@ -198,6 +199,35 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         }
 
         [Fact]
+        public async Task UpdateToDoAsync_ShouldUpdateUserExperience_WhenUserExists()
+        {
+            string description = "testDescription";
+            TimeBlock timeBlock = TimeBlock.Day;
+            Difficulty difficulty = Difficulty.Easy;
+            DateTime toDoDate = DateTime.Today;
+            var toDoCategoryId = Guid.NewGuid();
+            DateTime deadline = DateTime.Today.AddDays(1);
+            var parentToDoId = Guid.NewGuid();
+            RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
+            var user = new User("TestUser");
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, user.UserId, deadline, parentToDoId, repeatFrequency);
+            var toDoId = toDo.ToDoId;
+
+
+            _context.ToDos.Add(toDo);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            toDo.CompletionStatus = true;
+
+            await _toDoService.UpdateToDoAsync(toDo);
+
+            var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
+            Assert.NotNull(userInDb);
+            Assert.Equal(5, userInDb.Experience);
+        }
+
+        [Fact]
         public async Task UpdateToDoAsync_ShouldThrowException_WhenToDoDoesNotExist()
         {
             string description = "testDescription";
@@ -214,6 +244,32 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.UpdateToDoAsync(toDo));
 
             Assert.Equal("Todo id does not exist.", exception.Message);
+        }
+
+        [Fact]
+        public async Task UpdateToDoAsync_ShouldThrowException_WhenToDoIsAlreadyCompleted()
+        {
+            string description = "testDescription";
+            TimeBlock timeBlock = TimeBlock.Day;
+            Difficulty difficulty = Difficulty.Easy;
+            DateTime toDoDate = DateTime.Today;
+            var toDoCategoryId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            DateTime deadline = DateTime.Today.AddDays(1);
+            var parentToDoId = Guid.NewGuid();
+            RepeatFrequency repeatFrequency = RepeatFrequency.Daily;
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
+            toDo.CompletionStatus = true;
+            var toDoId = toDo.ToDoId;
+
+            var user = new User("TestUser");
+
+            _context.ToDos.Add(toDo);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoService.UpdateToDoAsync(toDo));
+            Assert.Equal("You cannot update completed todo", exception.Message);
         }
 
         #endregion
