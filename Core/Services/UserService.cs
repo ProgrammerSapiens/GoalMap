@@ -106,28 +106,6 @@ namespace Core.Services
         }
 
         /// <summary>
-        /// Updates the user's experience points based on task difficulty.
-        /// </summary>
-        /// <param name="userId">The unique identifier of the user.</param>
-        /// <param name="taskDifficulty">The difficulty level of the completed task.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the user does not exist.</exception>
-        public async Task UpdateUserExperienceAsync(Guid userId, Difficulty taskDifficulty)
-        {
-            _logger.LogInformation($"RegisterUserAsync({userId}, {taskDifficulty})");
-
-            var user = await _repository.GetUserByUserIdAsync(userId);
-            if (user == null)
-            {
-                _logger.LogWarning("User was not found.");
-                throw new InvalidOperationException("User was not found.");
-            }
-
-            user.Experience += (int)taskDifficulty;
-            await _repository.UpdateUserAsync(user);
-        }
-
-        /// <summary>
         /// Creates default to-do categories for a newly registered user.
         /// </summary>
         /// <param name="userId">The unique identifier of the user.</param>
