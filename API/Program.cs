@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +58,20 @@ namespace API
                         ValidAudience = builder.Configuration["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                     };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = async context =>
+                        {
+                            var userIdClaim = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub);
+                            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
+                            {
+                                var todoService = context.HttpContext.RequestServices.GetRequiredService<IToDoService>();
+
+                                await todoService.MoveRepeatedToDosAsync(userId);
+                            }
+                        }
+                    };
                 });
 
             builder.Services.AddAuthorization();
@@ -79,11 +95,9 @@ namespace API
             }
 
             app.UseSerilogRequestLogging();
-
-            app.UseHttpsRedirection();
-
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+            app.UseHttpsRedirection();
             app.UseCors("AllowAll");
 
             app.UseAuthentication();
@@ -91,7 +105,7 @@ namespace API
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

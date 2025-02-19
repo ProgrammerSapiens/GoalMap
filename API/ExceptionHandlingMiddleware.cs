@@ -10,13 +10,13 @@ namespace API
     public class ExceptionHandlingMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly Logger<ExceptionHandlingMiddleware> _logger;
+        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionHandlingMiddleware"/> class.
         /// </summary>
         /// <param name="next">The next request delegate in the pipeline.</param>
-        public ExceptionHandlingMiddleware(RequestDelegate next, Logger<ExceptionHandlingMiddleware> logger)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
@@ -66,6 +66,7 @@ namespace API
             {
                 message = exception.Message,
                 statusCode = statusCode,
+                details = exception.StackTrace
             };
 
             return response.WriteAsync(JsonSerializer.Serialize(errorResponse));
