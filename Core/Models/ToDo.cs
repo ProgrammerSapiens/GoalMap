@@ -33,7 +33,8 @@
         private DateTime? deadline;
         private DateTime toDoDate;
         private bool completionStatus;
-        private Guid? parentToDoId;
+        private bool moved;
+        private Guid parentToDoId;
         private RepeatFrequency repeatFrequency;
         private Guid toDoCategoryId;
         private Guid userId;
@@ -126,9 +127,18 @@
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the task was moved.
+        /// </summary>
+        public bool Moved
+        {
+            get { return moved; }
+            set { moved = value; }
+        }
+
+        /// <summary>
         /// Gets the unique identifier of the parent task, if applicable.
         /// </summary>
-        public Guid? ParentToDoId
+        public Guid ParentToDoId
         {
             get { return parentToDoId; }
             private set { parentToDoId = value; }
@@ -206,6 +216,7 @@
             ToDoDate = toDoDate;
             Deadline = deadline;
             CompletionStatus = false;
+            Moved = false;
             this.parentToDoId = parentToDoId;
             RepeatFrequency = repeatFrequency;
             ToDoCategoryId = toDoCategoryId;
