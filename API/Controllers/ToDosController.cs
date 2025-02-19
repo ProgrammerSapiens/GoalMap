@@ -12,7 +12,7 @@ namespace API.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ToDosController : ControllerBase
     {
         private readonly IToDoService _service;
