@@ -52,6 +52,18 @@ namespace Data.Repositories
         }
 
         /// <summary>
+        /// Retrieves a list of repeated ToDo items for a specific user. 
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>A task representing the asynchronous operation, containing a list of repeated ToDo items.</returns>
+        public async Task<List<ToDo>> GetRepeatedToDosAsync(Guid userId)
+        {
+            _logger.LogInformation($"GetRepeatedToDosAsync({userId})");
+
+            return await _context.ToDos.AsNoTracking().Where(t => t.UserId == userId && t.RepeatFrequency != RepeatFrequency.None && !t.Moved).ToListAsync();
+        }
+
+        /// <summary>
         /// Adds a new ToDo item to the database.
         /// </summary>
         /// <param name="toDo">The ToDo item to add.</param>

@@ -24,6 +24,13 @@ namespace Core.Interfaces
         Task<List<ToDo>> GetToDosAsync(Guid userId, DateTime date, TimeBlock timeBlock);
 
         /// <summary>
+        /// Retrieves a list of repeated ToDo items for a specific user. 
+        /// </summary>
+        /// <param name="userId">The unique identifier of the user.</param>
+        /// <returns>A task representing the asynchronous operation, containing a list of repeated ToDo items.</returns>
+        Task<List<ToDo>> GetRepeatedToDosAsync(Guid userId);
+
+        /// <summary>
         /// Adds a new To-Do task to the repository.
         /// </summary>
         /// <param name="toDo">The To-Do task to be added.</param>
