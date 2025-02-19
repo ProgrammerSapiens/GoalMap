@@ -117,13 +117,7 @@ namespace Core.Services
         {
             _logger.LogInformation($"MoveRepeatedToDosAsync({userId})");
 
-            if (userId == Guid.Empty)
-            {
-                _logger.LogWarning("User id cannot be empty.");
-                throw new ArgumentException("User id cannot be empty.");
-            }
-
-            var todayToDos = await _repository.GetToDosAsync(userId, DateTime.Today, TimeBlock.Day);
+            var todayToDos = await _repository.GetRepeatedToDosAsync(userId);
             if (!todayToDos.Any())
             {
                 _logger.LogInformation("There are no todos that repeated");
@@ -132,16 +126,25 @@ namespace Core.Services
 
             foreach (var todo in todayToDos)
             {
-                todo.ToDoDate = todo.RepeatFrequency switch
+                if (todo.ToDoDate <= DateTime.Today)
                 {
-                    RepeatFrequency.Daily => todo.ToDoDate.AddDays(1),
-                    RepeatFrequency.Weekly => todo.ToDoDate.AddDays(7),
-                    RepeatFrequency.Monthly => todo.ToDoDate.AddMonths(1),
-                    RepeatFrequency.Yearly => todo.ToDoDate.AddYears(1),
-                    _ => todo.ToDoDate
-                };
+                    var nextDate = todo.RepeatFrequency switch
+                    {
+                        RepeatFrequency.Daily => todo.ToDoDate.AddDays(1),
+                        RepeatFrequency.Weekly => todo.ToDoDate.AddDays(7),
+                        RepeatFrequency.Monthly => todo.ToDoDate.AddMonths(1),
+                        RepeatFrequency.Yearly => todo.ToDoDate.AddYears(1),
+                        _ => todo.ToDoDate
+                    };
 
-                await _repository.UpdateToDoAsync(todo);
+                    var newToDo = new ToDo(todo.Description, todo.TimeBlock, todo.Difficulty, nextDate, todo.ToDoCategoryId, userId, todo.Deadline, todo.ParentToDoId, todo.RepeatFrequency);
+                    await _repository.AddToDoAsync(newToDo);
+                    _logger.LogInformation($"Created new ToDo {newToDo.Description} for user {userId} on {nextDate}");
+
+                    todo.Moved = true;
+                    await _repository.UpdateToDoAsync(todo);
+                    _logger.LogInformation($"Marked original ToDo as moved.");
+                }
             }
         }
     }
