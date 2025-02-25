@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Diagnostics;
 
 namespace API
 {
