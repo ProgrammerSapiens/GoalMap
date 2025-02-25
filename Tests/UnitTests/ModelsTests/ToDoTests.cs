@@ -38,7 +38,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
@@ -62,7 +62,7 @@ namespace Tests.UnitTests.ModelsTests
             DateTime deadline = DateTime.Now.AddDays(1);
             Guid parentToDoId = Guid.NewGuid();
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
@@ -88,7 +88,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid parentToDoId = Guid.NewGuid();
             RepeatFrequency repeatFrequency = RepeatFrequency.Weekly;
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency);
+            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency);
 
             Assert.Equal(description, toDo.Description);
             Assert.Equal(timeBlock, toDo.TimeBlock);
@@ -116,9 +116,9 @@ namespace Tests.UnitTests.ModelsTests
             RepeatFrequency repeatFrequency = RepeatFrequency.Weekly;
 
             Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency));
         }
 
         [Fact]
@@ -133,8 +133,8 @@ namespace Tests.UnitTests.ModelsTests
             DateTime earlierThenNowDeadline = DateTime.Now.AddDays(-1);
             DateTime earlierThenToDoDateDeadline = DateTime.Now.AddDays(1);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, earlierThenNowDeadline));
-            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, earlierThenToDoDateDeadline));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, earlierThenNowDeadline));
+            Assert.Throws<ArgumentException>(() => new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, earlierThenToDoDateDeadline));
         }
 
         #endregion
@@ -187,7 +187,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline);
 
             DateTime newDeadline = DateTime.Now.AddDays(4);
             toDo.Deadline = newDeadline;
@@ -206,7 +206,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(1);
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline);
 
             DateTime newDeadline = DateTime.Now.AddDays(-1);
 
@@ -224,7 +224,7 @@ namespace Tests.UnitTests.ModelsTests
             Guid userId = Guid.NewGuid();
             DateTime deadline = DateTime.Now.AddDays(3);
 
-            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline);
+            var toDo = new ToDo(initialDescription, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline);
 
             DateTime newDeadline = DateTime.Now.AddDays(1);
 
@@ -520,11 +520,11 @@ namespace Tests.UnitTests.ModelsTests
             var repeatFrequency4 = RepeatFrequency.Monthly;
             var repeatFrequency5 = RepeatFrequency.Yearly;
 
-            var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency1);
-            var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency2);
-            var toDo3 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency3);
-            var toDo4 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency4);
-            var toDo5 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, deadline, parentToDoId, repeatFrequency5);
+            var toDo1 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency1);
+            var toDo2 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency2);
+            var toDo3 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency3);
+            var toDo4 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency4);
+            var toDo5 = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId, null, deadline, parentToDoId, repeatFrequency5);
 
             Assert.Equal(repeatFrequency1, toDo1.RepeatFrequency);
             Assert.Equal(repeatFrequency2, toDo2.RepeatFrequency);

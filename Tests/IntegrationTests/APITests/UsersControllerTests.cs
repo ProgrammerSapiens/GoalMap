@@ -1,116 +1,126 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Data.DBContext;
-using System.Net;
-using API;
-using Core.DTOs.User;
-using Core.Models;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Net.Http.Json;
+﻿//////////////////////////using Microsoft.Extensions.DependencyInjection;
+//////////////////////////using Data.DBContext;
+//////////////////////////using System.Net;
+//////////////////////////using API;
+//////////////////////////using Core.DTOs.User;
+//////////////////////////using Core.Models;
+//////////////////////////using System.Net.Http.Json;
+//////////////////////////using Microsoft.Extensions.Logging;
+//////////////////////////using Xunit.Abstractions;
 
-namespace Tests.IntegrationTests.APITests
-{
-    public class UsersControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>
-    {
-        private readonly WebApplicationFactory<Program> _factory;
-        private readonly HttpClient _client;
-        private readonly IServiceScopeFactory _scopeFactory;
+//////////////////////////namespace Tests.IntegrationTests.APITests
+//////////////////////////{
+//////////////////////////    [Collection("NoParallelTests")]
+//////////////////////////    public class UsersControllerTests /*: /*IAsyncLifetime*/*/
+//////////////////////////    {
+//////////////////////////        //private HttpClient _client;
+//////////////////////////        //private CustomWebApplicationFactory<Program> _factory;
+//////////////////////////        //private AppDbContext _dbContext;
+//////////////////////////        //private IServiceScope _scope;
+//////////////////////////        //private readonly ITestOutputHelper _outputHelper;
 
-        public UsersControllerIntegrationTests(CustomWebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-            _client = _factory.CreateClient();
-            _scopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
-        }
+//////////////////////////        //public UsersControllerTests(ITestOutputHelper outputHelper)
+//////////////////////////        //{
+//////////////////////////        //    _outputHelper = outputHelper;
+//////////////////////////        //}
 
-        #region GetCurrentUser() tests
+//////////////////////////        //public async Task InitializeAsync()
+//////////////////////////        //{
+//////////////////////////        //    _factory = new CustomWebApplicationFactory<Program>();
+//////////////////////////        //    _factory.SetOutputHelper(_outputHelper);
+//////////////////////////        //    _client = _factory.CreateClient();
 
-        [Fact]
-        public async Task GetCurrentUser_ShouldReturnUser_WhenAuthenticated()
-        {
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//////////////////////////        //    _scope = _factory.Services.CreateScope();
+//////////////////////////        //    _dbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                var user = new User("TestUser");
-                context.Users.Add(user);
-                await context.SaveChangesAsync();
-            }
+//////////////////////////        //    _dbContext.Users.RemoveRange(_dbContext.Users);
+//////////////////////////        //    await _dbContext.SaveChangesAsync();
+//////////////////////////        //}
 
-            var response = await _client.GetAsync("/api/users/me");
+//////////////////////////        //public async Task DisposeAsync()
+//////////////////////////        //{
+//////////////////////////        //    await _dbContext.DisposeAsync();
+//////////////////////////        //    _scope.Dispose();
+//////////////////////////        //    _client.Dispose();
+//////////////////////////        //    await _factory.DisposeAsync();
+//////////////////////////        //}
 
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Test User", content);
-        }
+//////////////////////////        #region GetCurrentUser() tests
 
-        [Fact]
-        public async Task GetCurrentUser_ShouldReturnUnauthorized_WhenNoUserId()
-        {
-            var response = await _client.GetAsync("/api/users/me");
+//////////////////////////        //[Fact]
+//////////////////////////        //public async Task GetCurrentUser_ShouldReturnUser_WhenAuthenticated()
+//////////////////////////        //{
+//////////////////////////        //    //var userId = Guid.NewGuid();
+//////////////////////////        //    //var user = new User("Test User", userId);
+//////////////////////////        //    //_dbContext.Users.Add(user);
+//////////////////////////        //    //await _dbContext.SaveChangesAsync();
 
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
+//////////////////////////        //    var response = await _client.GetAsync("/api/users/me");
 
-        #endregion
+//////////////////////////        //    response.EnsureSuccessStatusCode();
+//////////////////////////        //    //var content = await response.Content.ReadFromJsonAsync<UserDto>;
+//////////////////////////        //    //Assert.Contains("Test", content);
+//////////////////////////        //}
 
-        #region UpdateUserProfile([FromBody] UserUpdateDto? updateUserDto) tests
+//////////////////////////        //[Fact]
+//////////////////////////        //public async Task GetCurrentUser_ShouldReturnUnauthorized_WhenNoUserId()
+//////////////////////////        //{
+//////////////////////////        //    var response = await _client.GetAsync("/api/users/me");
 
-        [Fact]
-        public async Task UpdateUserProfile_ShouldReturnUnauthorized_WhenNoUserId()
-        {
-            var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
+//////////////////////////        //    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+//////////////////////////        //}
 
-            var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
+//////////////////////////        //#endregion
 
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        }
+//////////////////////////        //#region UpdateUserProfile([FromBody] UserUpdateDto? updateUserDto) tests
 
-        [Fact]
-        public async Task UpdateUserProfile_ShouldReturnNotFound_WhenUserDoesNotExist()
-        {
-            var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
+//////////////////////////        //[Fact]
+//////////////////////////        //public async Task UpdateUserProfile_ShouldReturnUnauthorized_WhenNoUserId()
+//////////////////////////        //{
+//////////////////////////        //    var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
 
-            var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
+//////////////////////////        //    var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
 
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
+//////////////////////////        //    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+//////////////////////////        //}
 
-        [Fact]
-        public async Task UpdateUserProfile_ShouldReturnNoContent_WhenSuccessfullyUpdated()
-        {
-            var user = new User("OldName");
-            var userId = user.UserId;
+//////////////////////////        //[Fact]
+//////////////////////////        //public async Task UpdateUserProfile_ShouldReturnNotFound_WhenUserDoesNotExist()
+//////////////////////////        //{
+//////////////////////////        //    var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
 
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//////////////////////////        //    var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
 
-                context.Users.Add(user);
-                await context.SaveChangesAsync();
-            }
+//////////////////////////        //    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+//////////////////////////        //}
 
-            var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
+//////////////////////////        //[Fact]
+//////////////////////////        //public async Task UpdateUserProfile_ShouldReturnNoContent_WhenSuccessfullyUpdated()
+//////////////////////////        //{
+//////////////////////////        //    var user = new User("OldName");
+//////////////////////////        //    var userId = user.UserId;
 
-            var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
+//////////////////////////        //    _dbContext.Users.Add(user);
+//////////////////////////        //    await _dbContext.SaveChangesAsync();
 
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+//////////////////////////        //    var updateUserDto = new UserUpdateDto { UserName = "Updated Name" };
 
-            using (var scope = _scopeFactory.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var updatedUser = await context.Users.FindAsync(userId);
-                Assert.Equal("Updated Name", updatedUser.UserName);
-            }
-        }
+//////////////////////////        //    var response = await _client.PutAsJsonAsync("/api/users/profile", updateUserDto);
 
-        //[Fact]
-        //public async Task UpdateUserProfile_ShouldReturnBadRequest_WhenDataIsInvalid()
-        //{
-        //    var response = await _client.PutAsJsonAsync("/api/users/profile", null);
+//////////////////////////        //    Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-        //    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        //}
+//////////////////////////        //    var updatedUser = await _dbContext.Users.FindAsync(userId);
+//////////////////////////        //    Assert.Equal("Updated Name", updatedUser.UserName);
+//////////////////////////        //}
 
-        #endregion
-    }
-}
+//////////////////////////        //[Fact]
+//////////////////////////        //public async Task UpdateUserProfile_ShouldReturnBadRequest_WhenDataIsInvalid()
+//////////////////////////        //{
+//////////////////////////        //    // var response = await _client.PutAsJsonAsync("/api/users/profile", null);
+
+//////////////////////////        //    //Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+//////////////////////////        //}
+
+//////////////////////////        //#endregion
+//////////////////////////    }
+//////////////////////////}

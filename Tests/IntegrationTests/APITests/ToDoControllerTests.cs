@@ -1,24 +1,50 @@
 ﻿using Core.Models;
 using Data.DBContext;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http.Json;
-using System.Net;
-using Newtonsoft.Json;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using API;
+using Xunit.Abstractions;
+using Newtonsoft.Json;
+using System.Net;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Json;
+using Core.DTOs.ToDo;
+using System.Text;
 
 namespace Tests.IntegrationTests.APITests
 {
-    public class ToDoControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
+    public class ToDoControllerTests : IAsyncLifetime
     {
-        private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private HttpClient _client;
+        private CustomWebApplicationFactory<Program> _factory;
+        private AppDbContext _dbContext;
+        private IServiceScope _scope;
+        private readonly ITestOutputHelper _outputHelper;
 
-        public ToDoControllerTests(CustomWebApplicationFactory<Program> factory)
+        public ToDoControllerTests(ITestOutputHelper outputHelper)
         {
-            _client = factory.CreateClient();
-            _factory = factory;
+            _outputHelper = outputHelper;
+        }
+
+        public async Task InitializeAsync()
+        {
+            var dbName = Guid.NewGuid().ToString();
+
+            _factory = new CustomWebApplicationFactory<Program>(dbName, _outputHelper);
+            _client = _factory.CreateClient();
+
+            _scope = _factory.Services.CreateScope();
+            _dbContext = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            _dbContext.ToDos.RemoveRange(_dbContext.ToDos);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task DisposeAsync()
+        {
+            await _dbContext.DisposeAsync();
+            _scope.Dispose();
+            _client.Dispose();
+            await _factory.DisposeAsync();
         }
 
         #region GetToDoById tests
@@ -31,21 +57,20 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
 
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.ToDos.Add(toDo);
-                await dbContext.SaveChangesAsync();
-            }
+            await _dbContext.ToDos.AddAsync(toDo);
+            await _dbContext.SaveChangesAsync();
+
+            var savedToDo = await _dbContext.ToDos.FindAsync(toDo.ToDoId);
 
             var response = await _client.GetAsync($"/api/todos/{toDo.ToDoId}");
             response.EnsureSuccessStatusCode();
 
-            var toDoResponse = await response.Content.ReadFromJsonAsync<ToDo>();
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var toDoResponse = JsonConvert.DeserializeObject<ToDoDto>(jsonString);
             Assert.NotNull(toDoResponse);
             Assert.Equal(toDo.ToDoId, toDoResponse.ToDoId);
         }
@@ -58,20 +83,15 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
 
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var response = await _client.GetAsync($"/api/todos/{toDo.ToDoId}");
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var toDoInDb = await dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
-
-                Assert.Null(toDoInDb);
-            }
+            var toDoInDb = await _dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            Assert.Null(toDoInDb);
         }
 
         #endregion
@@ -86,7 +106,9 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
+
+            _outputHelper.WriteLine($"User id is {userId}");
 
             var toDos = new List<ToDo>()
             {
@@ -94,17 +116,20 @@ namespace Tests.IntegrationTests.APITests
                 new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId)
             };
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.ToDos.AddRange(toDos);
-                await dbContext.SaveChangesAsync();
-            }
+            await _dbContext.ToDos.AddRangeAsync(toDos);
+            await _dbContext.SaveChangesAsync();
 
-            var response = await _client.GetAsync($"/api/todos/{userId}/{toDoDate}/{timeBlock}");
+            var toDoGetByDateAndTimeBlockDto = new ToDoGetByDateAndTimeBlockDto
+            {
+                Date = toDoDate,
+                TimeBlock = timeBlock
+            };
+
+            var response = await _client.GetAsync($"/api/todos?date={toDoDate:yyyy-MM-dd}&timeBlock={timeBlock}");
             response.EnsureSuccessStatusCode();
 
-            var toDoResponse = await response.Content.ReadFromJsonAsync<List<ToDo>>();
+            var toDoResponse = await response.Content.ReadFromJsonAsync<List<ToDoDto>>();
+
             Assert.NotNull(toDoResponse);
             Assert.Equal(2, toDoResponse.Count);
             Assert.All(toDoResponse, t => Assert.Equal(description, t.Description));
@@ -115,10 +140,13 @@ namespace Tests.IntegrationTests.APITests
         {
             var timeBlock = TimeBlock.Day;
             var toDoDate = DateTime.Today;
-            var userId = Guid.NewGuid();
 
-            var response = await _client.GetAsync($"/api/todos/{userId}/{toDoDate}/{timeBlock}");
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            var response = await _client.GetAsync($"/api/todos?date={toDoDate:yyyy-MM-dd}&timeBlock={timeBlock}");
+            response.EnsureSuccessStatusCode();
+
+            var toDoResponse = await response.Content.ReadFromJsonAsync<List<ToDoDto>>();
+            Assert.NotNull(toDoResponse);
+            Assert.Empty(toDoResponse);
         }
 
         #endregion
@@ -133,28 +161,31 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
 
-            var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
+            var toDoAddDto = new ToDoAddDto
+            {
+                Description = description,
+                TimeBlock = timeBlock,
+                Difficulty = difficulty,
+                ToDoDate = toDoDate,
+                ToDoCategoryId = toDoCategoryId,
+                UserId = userId
+            };
 
-            var content = new StringContent(JsonConvert.SerializeObject(toDo), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(toDoAddDto), Encoding.UTF8, "application/json");
 
             var response = await _client.PostAsync($"/api/todos", content);
             response.EnsureSuccessStatusCode();
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var toDoInDb = await dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            var createdToDo = await response.Content.ReadFromJsonAsync<ToDoDto>();
 
-                Assert.NotNull(toDoInDb);
-                Assert.Equal(description, toDoInDb.Description);
-                Assert.Equal(timeBlock, toDoInDb.TimeBlock);
-                Assert.Equal(difficulty, toDoInDb.Difficulty);
-                Assert.Equal(toDoDate, toDoInDb.ToDoDate);
-                Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
-                Assert.Equal(userId, toDoInDb.UserId);
-            }
+            Assert.NotNull(createdToDo);
+            Assert.NotEqual(Guid.Empty, createdToDo.ToDoId);
+            Assert.Equal(difficulty, createdToDo.Difficulty);
+            Assert.Equal(toDoDate, createdToDo.ToDoDate);
+            Assert.Equal(toDoCategoryId, createdToDo.ToDoCategoryId);
+            Assert.Equal(userId, createdToDo.UserId);
         }
 
         #endregion
@@ -169,16 +200,12 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
 
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.ToDos.Add(toDo);
-                await dbContext.SaveChangesAsync();
-            }
+            await _dbContext.ToDos.AddAsync(toDo);
+            await _dbContext.SaveChangesAsync();
 
             var newDescription = "NewDescription";
             toDo.Description = newDescription;
@@ -188,19 +215,15 @@ namespace Tests.IntegrationTests.APITests
             var response = await _client.PutAsync($"/api/todos", content);
             response.EnsureSuccessStatusCode();
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var toDoInDb = await dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            var toDoInDb = await _dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
 
-                Assert.NotNull(toDoInDb);
-                Assert.Equal(description, toDoInDb.Description);
-                Assert.Equal(timeBlock, toDoInDb.TimeBlock);
-                Assert.Equal(difficulty, toDoInDb.Difficulty);
-                Assert.Equal(toDoDate, toDoInDb.ToDoDate);
-                Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
-                Assert.Equal(userId, toDoInDb.UserId);
-            }
+            Assert.NotNull(toDoInDb);
+            Assert.Equal(newDescription, toDoInDb.Description);
+            Assert.Equal(timeBlock, toDoInDb.TimeBlock);
+            Assert.Equal(difficulty, toDoInDb.Difficulty);
+            Assert.Equal(toDoDate, toDoInDb.ToDoDate);
+            Assert.Equal(toDoCategoryId, toDoInDb.ToDoCategoryId);
+            Assert.Equal(userId, toDoInDb.UserId);
         }
 
         [Fact]
@@ -211,22 +234,17 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
 
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
             var content = new StringContent(JsonConvert.SerializeObject(toDo), Encoding.UTF8, "application/json");
 
             var response = await _client.PutAsync($"/api/todos", content);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var toDoInDb = await dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
-
-                Assert.Null(toDoInDb);
-            }
+            var toDoInDb = await _dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            Assert.Null(toDoInDb);
         }
 
         #endregion
@@ -241,27 +259,18 @@ namespace Tests.IntegrationTests.APITests
             var difficulty = Difficulty.Easy;
             var toDoDate = DateTime.Today;
             var toDoCategoryId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
 
             var toDo = new ToDo(description, timeBlock, difficulty, toDoDate, toDoCategoryId, userId);
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                dbContext.ToDos.Add(toDo);
-                await dbContext.SaveChangesAsync();
-            }
+            await _dbContext.ToDos.AddAsync(toDo);
+            await _dbContext.SaveChangesAsync();
 
             var response = await _client.DeleteAsync($"/api/todos/{toDo.ToDoId}");
             response.EnsureSuccessStatusCode();
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var toDoInDb = await dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
-
-                Assert.Null(toDoInDb);
-            }
+            var toDoInDb = await _dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            Assert.Null(toDoInDb);
         }
 
         [Fact]
@@ -279,13 +288,8 @@ namespace Tests.IntegrationTests.APITests
             var response = await _client.DeleteAsync($"/api/todos/{toDo.ToDoId}");
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-            using (var scope = _factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var toDoInDb = await dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
-
-                Assert.Null(toDoInDb);
-            }
+            var toDoInDb = await _dbContext.ToDos.FirstOrDefaultAsync(t => t.ToDoId == toDo.ToDoId);
+            Assert.Null(toDoInDb);
         }
 
         #endregion
