@@ -58,12 +58,6 @@ namespace Core.Services
 
             toDoCategory.ToDoCategoryName = GetNameWithACapitalLetterAndValidate(toDoCategory.ToDoCategoryName);
 
-            if (await _repository.CategoryExistsByNameAsync(toDoCategory.UserId, toDoCategory.ToDoCategoryName))
-            {
-                _logger.LogWarning("Category with such name already exists.");
-                throw new InvalidOperationException("Category with such name already exists.");
-            }
-
             await _repository.AddToDoCategoryAsync(toDoCategory);
         }
 
