@@ -12,7 +12,7 @@ namespace API.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ToDosController : ControllerBase
     {
         private readonly IToDoService _service;
@@ -24,11 +24,11 @@ namespace API.Controllers
         /// </summary>
         /// <param name="service">Service for handling To-Do operations.</param>
         /// <param name="mapper">AutoMapper instance for DTO mapping.</param>
-        public ToDosController(IToDoService service, IMapper mapper, ILogger<ToDosController> logger)
+        public ToDosController(IToDoService service, IMapper mapper, ILoggerFactory loggerFactory)
         {
             _service = service;
             _mapper = mapper;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<ToDosController>();
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace API.Controllers
         [HttpGet("{toDoId}")]
         public async Task<ActionResult<ToDoDto>> GetToDoById(Guid toDoId)
         {
-            _logger.LogInformation("GetToDoById");
+            _logger.LogInformation($"GetToDoById(Guid {toDoId})");
 
             if (Guid.Empty == toDoId)
             {
@@ -63,7 +63,7 @@ namespace API.Controllers
         /// <param name="toDoGetByDateAndTimeBlockDto">DTO containing date and time block information.</param>
         /// <returns>A list of To-Do items.</returns>
         [HttpGet]
-        public async Task<ActionResult<List<ToDoDto>>> GetToDos(ToDoGetByDateAndTimeBlockDto toDoGetByDateAndTimeBlockDto)
+        public async Task<ActionResult<List<ToDoDto>>> GetToDos([FromQuery] ToDoGetByDateAndTimeBlockDto toDoGetByDateAndTimeBlockDto)
         {
             _logger.LogInformation("GetToDos");
 
@@ -99,6 +99,14 @@ namespace API.Controllers
                 _logger.LogWarning("The entered data is empty.");
                 return BadRequest("ToDo data cannot be null.");
             }
+
+            var userId = Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
+            if (Guid.Empty == userId)
+            {
+                _logger.LogWarning("User ID is not authenticated or invalid.");
+                return Unauthorized("User ID is not authenticated or invalid.");
+            }
+            toDoAddDto.UserId = userId;
 
             var toDo = _mapper.Map<ToDo>(toDoAddDto);
             await _service.AddToDoAsync(toDo);
