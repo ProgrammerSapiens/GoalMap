@@ -14,5 +14,10 @@
         /// The name of the To-Do category.
         /// </summary>
         public string? ToDoCategoryName { get; set; } = null;
+
+        /// <summary>
+        /// The unique identifier of the user assosiated with the category
+        /// </summary>
+        public Guid UserId { get; set; } = new Guid();
     }
 }
