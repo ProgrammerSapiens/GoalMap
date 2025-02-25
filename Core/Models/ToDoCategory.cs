@@ -63,14 +63,14 @@
         /// <param name="userId">The unique identifier of the user associated with this category.</param>
         /// <param name="toDoCategoryName">The name of the to-do category.</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="userId"/> is empty or <paramref name="toDoCategoryName"/> is null or empty.</exception>
-        public ToDoCategory(Guid userId, string toDoCategoryName)
+        public ToDoCategory(Guid userId, string toDoCategoryName, Guid? toDoCategoryId = null)
         {
             if (userId == Guid.Empty)
                 throw new ArgumentException(nameof(userId), "User ID cannot be empty");
             if (string.IsNullOrEmpty(toDoCategoryName))
                 throw new ArgumentException(nameof(toDoCategoryName), "Category name cannot be null or empty.");
 
-            toDoCategoryId = Guid.NewGuid();
+            ToDoCategoryId = toDoCategoryId ?? Guid.NewGuid();
             this.toDoCategoryName = toDoCategoryName;
             this.userId = userId;
         }

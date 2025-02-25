@@ -92,12 +92,12 @@
         /// </summary>
         /// <param name="userName">The name of the user.</param>
         /// <exception cref="ArgumentException">Thrown if the user name is null or empty.</exception>
-        public User(string userName)
+        public User(string userName, Guid? userId = null)
         {
             if (string.IsNullOrEmpty(userName))
                 throw new ArgumentException(nameof(userName), "The userName of the user cannot be null or empty");
 
-            userId = Guid.NewGuid();
+            UserId = userId ?? Guid.NewGuid();
             this.userName = userName;
             this.passwordHash = "NotHashed";
             Experience = 0;

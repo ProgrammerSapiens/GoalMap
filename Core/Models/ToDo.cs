@@ -163,7 +163,7 @@
             set
             {
                 if (Guid.Empty == value)
-                    throw new ArgumentException(nameof(value), "The category id cannot be empty");
+                    throw new ArgumentException("The category id cannot be empty");
                 toDoCategoryId = value;
             }
         }
@@ -204,12 +204,12 @@
         /// <param name="deadline">Deadline for the task (optional).</param>
         /// <param name="parentToDoId">Parent task ID (optional).</param>
         /// <param name="repeatFrequency">Repeat frequency of the task (optional).</param>
-        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId, DateTime? deadline = null, Guid parentToDoId = new Guid(), RepeatFrequency repeatFrequency = RepeatFrequency.None)
+        public ToDo(string description, TimeBlock timeBlock, Difficulty difficulty, DateTime toDoDate, Guid toDoCategoryId, Guid userId, Guid? toDoId = null, DateTime? deadline = null, Guid parentToDoId = new Guid(), RepeatFrequency repeatFrequency = RepeatFrequency.None)
         {
             if (string.IsNullOrEmpty(description))
                 throw new ArgumentException(nameof(description), "The description cannot be empty or null");
 
-            toDoId = Guid.NewGuid();
+            ToDoId = toDoId ?? Guid.NewGuid();
             this.description = description;
             this.timeBlock = timeBlock;
             Difficulty = difficulty;
