@@ -14,10 +14,10 @@ namespace API.DTOProfiles
         /// </summary>
         public ToDoProfile()
         {
-            CreateMap<ToDoGetByDateAndTimeBlockDto, ToDo>();
-            CreateMap<ToDoDto, ToDo>();
-            CreateMap<ToDoAddDto, ToDo>();
-            CreateMap<ToDoUpdateDto, ToDo>();
+            CreateMap<ToDoGetByDateAndTimeBlockDto, ToDo>().ReverseMap();
+            CreateMap<ToDoDto, ToDo>().ForMember(dest => dest.ToDoId, opt => opt.MapFrom(src => src.ToDoId)).ReverseMap();
+            CreateMap<ToDoAddDto, ToDo>().ReverseMap();
+            CreateMap<ToDoUpdateDto, ToDo>().ReverseMap();
         }
     }
 }

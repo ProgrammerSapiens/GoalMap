@@ -14,9 +14,9 @@ namespace API.DTOProfiles
         /// </summary>
         public UserProfile()
         {
-            CreateMap<UserDto, User>();
-            CreateMap<UserRegAndAuthDto, User>();
-            CreateMap<UserUpdateDto, User>();
+            CreateMap<UserDto, User>().ReverseMap();
+            CreateMap<UserRegAndAuthDto, User>().ReverseMap();
+            CreateMap<UserUpdateDto, User>().ReverseMap();
         }
     }
 }

@@ -14,7 +14,8 @@ namespace API.DTOProfiles
         /// </summary>
         public CategoryProfile()
         {
-            CreateMap<CategoryAddOrUpdateDto, ToDoCategory>();
+            CreateMap<CategoryAddOrUpdateDto, ToDoCategory>().ReverseMap();
+            CreateMap<CategoryDto, ToDoCategory>().ReverseMap();
         }
     }
 }
