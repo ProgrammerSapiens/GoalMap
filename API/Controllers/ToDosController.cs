@@ -24,11 +24,11 @@ namespace API.Controllers
         /// </summary>
         /// <param name="service">Service for handling To-Do operations.</param>
         /// <param name="mapper">AutoMapper instance for DTO mapping.</param>
-        public ToDosController(IToDoService service, IMapper mapper, ILoggerFactory loggerFactory)
+        public ToDosController(IToDoService service, IMapper mapper, ILogger<ToDosController> logger)
         {
             _service = service;
             _mapper = mapper;
-            _logger = loggerFactory.CreateLogger<ToDosController>();
+            _logger = logger;
         }
 
         /// <summary>
