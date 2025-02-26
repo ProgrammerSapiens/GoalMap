@@ -85,10 +85,18 @@ namespace Core.Services
             _logger.LogInformation($"AuthenticateUserAsync({userName}, {password})");
 
             var user = await _repository.GetUserByUserNameAsync(userName);
-            if (user == null) return false;
+            if (user == null)
+            {
+                _logger.LogInformation($"User {userName} was not found.");
+                return false;
+            }
 
             var passwordIsRight = await _passwordHasher.VerifyPasswordAsync(password, user.PasswordHash);
-            if (!passwordIsRight) return false;
+            if (!passwordIsRight)
+            {
+                _logger.LogInformation($"Password {password} is invalid");
+                return false;
+            }
 
             return true;
         }
