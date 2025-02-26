@@ -49,6 +49,10 @@ namespace Authentication
             var expiration = DateTime.UtcNow.Date.AddDays(1).AddTicks(-1);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            if (key == null)
+            {
+                throw new InvalidOperationException("Jwt:Key is missing in configuration");
+            }
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
