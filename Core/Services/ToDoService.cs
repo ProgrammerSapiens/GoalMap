@@ -137,7 +137,7 @@ namespace Core.Services
                         _ => todo.ToDoDate
                     };
 
-                    var newToDo = new ToDo(todo.Description, todo.TimeBlock, todo.Difficulty, nextDate, todo.ToDoCategoryId, userId, todo.ToDoId, todo.Deadline, todo.ParentToDoId, todo.RepeatFrequency);
+                    var newToDo = new ToDo(todo.Description, todo.TimeBlock, todo.Difficulty, nextDate, todo.ToDoCategoryId, userId, Guid.NewGuid(), todo.Deadline, todo.ParentToDoId, todo.RepeatFrequency);
                     await _repository.AddToDoAsync(newToDo);
                     _logger.LogInformation($"Created new ToDo {newToDo.Description} for user {userId} on {nextDate}");
 
