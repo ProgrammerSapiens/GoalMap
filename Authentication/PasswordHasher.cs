@@ -7,6 +7,13 @@ namespace Authentication
     /// </summary>
     public class PasswordHasher : IPasswordHasher
     {
+        private readonly ILogger<PasswordHasher> _logger;
+
+        public PasswordHasher(ILogger<PasswordHasher> logger)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// Asynchronously hashes a plain-text password.
         /// </summary>
@@ -19,6 +26,8 @@ namespace Authentication
         /// </remarks>
         public Task<string> HashPasswordAsync(string password)
         {
+            _logger.LogInformation($"HashPasswordAsync(string {password})");
+
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
             return Task.FromResult(hashedPassword);
         }
@@ -36,6 +45,8 @@ namespace Authentication
         /// </remarks>
         public Task<bool> VerifyPasswordAsync(string password, string hashedPassword)
         {
+            _logger.LogInformation($"VerifyPasswordAsync(string {password}, string {hashedPassword})");
+
             bool isVerified = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
             return Task.FromResult(isVerified);
         }
