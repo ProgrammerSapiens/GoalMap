@@ -139,7 +139,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoCategoryService.AddToDoCategoryAsync(toDoCategory));
 
-            Assert.Equal("Category with such name already exists.", exception.Message);
+            Assert.Equal("Todo category already exists.", exception.Message);
         }
 
         #endregion

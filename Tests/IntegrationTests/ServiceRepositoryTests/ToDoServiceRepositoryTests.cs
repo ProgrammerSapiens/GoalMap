@@ -335,23 +335,23 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             await _toDoService.MoveRepeatedToDosAsync(userId);
 
-            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Daily Task");
+            var toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Daily Task" && t.Moved != true);
             Assert.NotNull(toDoInDb);
             Assert.Equal(originalDate.AddDays(1), toDoInDb.ToDoDate);
 
-            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Weekly Task");
+            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Weekly Task" && t.Moved != true);
             Assert.NotNull(toDoInDb);
             Assert.Equal(originalDate.AddDays(7), toDoInDb.ToDoDate);
 
-            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Monthly Task");
+            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Monthly Task" && t.Moved != true);
             Assert.NotNull(toDoInDb);
             Assert.Equal(originalDate.AddMonths(1), toDoInDb.ToDoDate);
 
-            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Yearly Task");
+            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Yearly Task" && t.Moved != true);
             Assert.NotNull(toDoInDb);
             Assert.Equal(originalDate.AddYears(1), toDoInDb.ToDoDate);
 
-            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Not repeated task");
+            toDoInDb = await _context.ToDos.FirstOrDefaultAsync(t => t.Description == "Not repeated task" && t.Moved != true);
             Assert.NotNull(toDoInDb);
             Assert.Equal(originalDate, toDoInDb.ToDoDate);
         }

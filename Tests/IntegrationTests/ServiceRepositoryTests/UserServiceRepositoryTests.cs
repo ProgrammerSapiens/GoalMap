@@ -16,6 +16,7 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
         private readonly IPasswordHasher _passwordHasher;
         private readonly Mock<ILogger<UserService>> _serviceLoggerMock;
         private readonly Mock<ILogger<UserRepository>> _repositoryLoggerMock;
+        private readonly Mock<ILogger<PasswordHasher>> _passwordHasherLoggerMock;
         private readonly IUserService _userService;
         private readonly AppDbContext _context;
 
@@ -26,9 +27,10 @@ namespace Tests.IntegrationTests.Service_RepositoriyTests
 
             _serviceLoggerMock = new Mock<ILogger<UserService>>();
             _repositoryLoggerMock = new Mock<ILogger<UserRepository>>();
+            _passwordHasherLoggerMock = new Mock<ILogger<PasswordHasher>>();
 
             _userRepository = new UserRepository(_context, _repositoryLoggerMock.Object);
-            _passwordHasher = new PasswordHasher();
+            _passwordHasher = new PasswordHasher(_passwordHasherLoggerMock.Object);
             _userService = new UserService(_userRepository, _passwordHasher, _serviceLoggerMock.Object);
         }
 

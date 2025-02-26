@@ -106,21 +106,6 @@ namespace Tests.UnitTests.ServicesTests
         }
 
         [Fact]
-        public async Task AddToDoCategoryAsync_ShouldThrowException_WhenCategoryIsAlreadyExist()
-        {
-            var userId = Guid.NewGuid();
-            string toDoCategoryName = "Test category";
-            var toDoCategory = new ToDoCategory(userId, toDoCategoryName);
-
-            _toDoCategoryRepositoryMock.Setup(repo => repo.CategoryExistsByNameAsync(userId, toDoCategoryName)).ReturnsAsync(true);
-
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _toDoCategoryService.AddToDoCategoryAsync(toDoCategory));
-
-            _toDoCategoryRepositoryMock.Verify(repo => repo.CategoryExistsByNameAsync(userId, toDoCategory.ToDoCategoryName), Times.Once);
-            Assert.Equal("Category with such name already exists.", exception.Message);
-        }
-
-        [Fact]
         public async Task AddToDoCategoryAsync_ShouldThrowException_WhenCategoryNameContainsDigits()
         {
             var userId = Guid.NewGuid();

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Core.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Tests.IntegrationTests.APITests
 {
@@ -42,7 +43,7 @@ namespace Tests.IntegrationTests.APITests
 
             builder.ConfigureServices(services =>
             {
-                services.AddSingleton<ILoggerFactory>(_ =>
+                services.AddSingleton(_ =>
                 {
                     var loggerFactory = LoggerFactory.Create(builder =>
                     {
@@ -70,6 +71,14 @@ namespace Tests.IntegrationTests.APITests
                 var fakeUser = new User("Fake name", _fakeUserId);
                 db.Users.Add(fakeUser);
                 db.SaveChanges();
+
+                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(AuthenticationHandler<AuthenticationSchemeOptions>));
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
 
                 services.AddAuthentication("Test").AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
 
