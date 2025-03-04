@@ -101,6 +101,10 @@ namespace API.Controllers
                 _logger.LogError($"User with ID {userId} was not found.");
                 return NotFound("User was not found.");
             }
+            if (existingUser.UserName == updateUserDto.UserName)
+            {
+                return NoContent();
+            }
 
             _mapper.Map(updateUserDto, existingUser);
             await _userService.UpdateUserAsync(existingUser);

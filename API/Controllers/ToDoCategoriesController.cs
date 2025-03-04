@@ -144,6 +144,9 @@ namespace API.Controllers
                 return NotFound("Category was not found.");
             }
 
+            if (existingCategory.ToDoCategoryName == categoryAddOrUpdateDto.ToDoCategoryName)
+                return NoContent();
+
             _mapper.Map(categoryAddOrUpdateDto, existingCategory);
             await _service.UpdateToDoCategoryAsync(existingCategory);
 

@@ -137,6 +137,17 @@ namespace API.Controllers
                 return NotFound("ToDo was not found.");
             }
 
+            if (existingToDo.Description == toDoUpdateDto.Description
+                && existingToDo.Difficulty == toDoUpdateDto.Difficulty
+                && existingToDo.Deadline == toDoUpdateDto.Deadline
+                && existingToDo.ToDoDate == toDoUpdateDto.ToDoDate
+                && existingToDo.CompletionStatus == toDoUpdateDto.CompletionStatus
+                && existingToDo.RepeatFrequency == toDoUpdateDto.RepeatFrequency
+                && existingToDo.ToDoCategoryId == toDoUpdateDto.ToDoCategoryId)
+            {
+                return NoContent();
+            }
+
             _mapper.Map(toDoUpdateDto, existingToDo);
             await _service.UpdateToDoAsync(existingToDo);
 
