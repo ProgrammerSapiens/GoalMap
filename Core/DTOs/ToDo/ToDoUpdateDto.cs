@@ -45,6 +45,6 @@ namespace Core.DTOs.ToDo
         /// <summary>
         /// The name of the category associated with the To-Do item.
         /// </summary>
-        public string? ToDoCategoryName { get; set; } = null;
+        public Guid ToDoCategoryId { get; set; } = Guid.Empty;
     }
 }
