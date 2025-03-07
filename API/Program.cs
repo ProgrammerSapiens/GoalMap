@@ -8,6 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
+using Data.DBContext;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace API
 {
@@ -19,8 +22,33 @@ namespace API
 
             builder.Services.AddControllers();
 
+            builder.Configuration.SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "¬ведите токен в формате: Bearer {your_token}",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
@@ -47,6 +75,12 @@ namespace API
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    var jwtKey = builder.Configuration["Jwt:Key"];
+                    if (string.IsNullOrWhiteSpace(jwtKey))
+                    {
+                        throw new ArgumentNullException("Jwt:Key", "JWT Key is missing in configuration");
+                    }
+
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -55,7 +89,7 @@ namespace API
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
                     };
 
                     options.Events = new JwtBearerEvents
@@ -84,6 +118,15 @@ namespace API
                         .AllowAnyHeader();
                 });
             });
+
+            if (builder.Environment.IsEnvironment("Testing"))
+            {
+                builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("TestDb"));
+            }
+            else
+            {
+                builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            }
 
             var app = builder.Build();
 
