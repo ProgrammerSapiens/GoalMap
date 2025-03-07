@@ -31,9 +31,9 @@ namespace Tests.IntegrationTests.APITests
 
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, userId.ToString()),
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        };
+                new Claim("UserId", userId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+            };
 
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);

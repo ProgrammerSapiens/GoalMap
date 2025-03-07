@@ -19,18 +19,22 @@ namespace Tests.IntegrationTests.APITests
         private ITestOutputHelper? _outputHelper;
         private readonly Guid _fakeUserId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
         private readonly string _dbName;
+        private readonly IConfiguration _configuration;
 
-        public CustomWebApplicationFactory(string dbName, ITestOutputHelper outputHelper)
+        public CustomWebApplicationFactory(string dbName, ITestOutputHelper outputHelper, IConfiguration configuration)
         {
             _dbName = dbName;
             _outputHelper = outputHelper;
+            _configuration = configuration;
+
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                var testConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "IntegrationTests/APITests/appsettings.Test.json");
+                var testConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.Test.json");
                 if (File.Exists(testConfigPath))
                 {
                     config.AddJsonFile(testConfigPath, optional: true, reloadOnChange: true);
@@ -59,10 +63,7 @@ namespace Tests.IntegrationTests.APITests
                     services.Remove(dbContextDescriptor);
                 }
 
-                services.AddDbContext<AppDbContext>(options =>
-                {
-                    options.UseInMemoryDatabase(_dbName);
-                }, ServiceLifetime.Scoped);
+                services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase(_dbName));
 
                 using var scope = services.BuildServiceProvider().CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

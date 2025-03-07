@@ -86,7 +86,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ], "mock"));
 
             _toDosController.ControllerContext = new ControllerContext
@@ -149,7 +149,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ], "mock"));
 
             _toDosController.ControllerContext = new ControllerContext
@@ -206,8 +206,10 @@ namespace Tests.UnitTests.APITests
         [Fact]
         public async Task UpdateToDo_ShouldReturnNoContent_WhenValid()
         {
-            var toDo = new ToDo("Description", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
-            var toDoUpdateDto = new ToDoUpdateDto { ToDoId = toDo.ToDoId, Description = "Description", Difficulty = Difficulty.Easy, ToDoDate = DateTime.Today, ToDoCategoryName = "SomeCategory" };
+            var toDoCategoryId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var toDo = new ToDo("Description", TimeBlock.Day, Difficulty.Easy, DateTime.Today, toDoCategoryId, userId);
+            var toDoUpdateDto = new ToDoUpdateDto { ToDoId = toDo.ToDoId, Description = "Description", Difficulty = Difficulty.Easy, ToDoDate = DateTime.Today, ToDoCategoryId = toDoCategoryId };
 
             _toDoServiceMock.Setup(service => service.GetToDoByIdAsync(toDo.ToDoId)).ReturnsAsync(toDo);
             _mapperMock.Setup(mapper => mapper.Map(toDoUpdateDto, toDo)).Returns(toDo);
@@ -230,8 +232,10 @@ namespace Tests.UnitTests.APITests
         [Fact]
         public async Task UpdateToDo_ShouldReturnNotFound_WhenToDoDoesNotExist()
         {
-            var toDo = new ToDo("Description", TimeBlock.Day, Difficulty.Easy, DateTime.Today, Guid.NewGuid(), Guid.NewGuid());
-            var toDoUpdateDto = new ToDoUpdateDto { ToDoId = toDo.ToDoId, Description = "Description", Difficulty = Difficulty.Easy, ToDoDate = DateTime.Today, ToDoCategoryName = "SomeCategory" };
+            var toDoCategoryId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var toDo = new ToDo("Description", TimeBlock.Day, Difficulty.Easy, DateTime.Today, toDoCategoryId, userId);
+            var toDoUpdateDto = new ToDoUpdateDto { ToDoId = toDo.ToDoId, Description = "Description", Difficulty = Difficulty.Easy, ToDoDate = DateTime.Today, ToDoCategoryId = toDoCategoryId };
 
             _toDoServiceMock.Setup(service => service.GetToDoByIdAsync(toDo.ToDoId)).ReturnsAsync((ToDo?)null);
 

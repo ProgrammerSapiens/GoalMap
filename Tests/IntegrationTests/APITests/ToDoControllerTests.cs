@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 using Core.DTOs.ToDo;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Tests.IntegrationTests.APITests
 {
@@ -29,7 +30,9 @@ namespace Tests.IntegrationTests.APITests
         {
             var dbName = Guid.NewGuid().ToString();
 
-            _factory = new CustomWebApplicationFactory<Program>(dbName, _outputHelper);
+            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.Test.json").Build();
+
+            _factory = new CustomWebApplicationFactory<Program>(dbName, _outputHelper, configuration);
             _client = _factory.CreateClient();
 
             _scope = _factory.Services.CreateScope();

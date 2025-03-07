@@ -121,7 +121,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ]));
 
             _categoriesController.ControllerContext = new ControllerContext
@@ -175,7 +175,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ]));
 
             _categoriesController.ControllerContext = new ControllerContext
@@ -203,7 +203,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ]));
 
             _categoriesController.ControllerContext = new ControllerContext
@@ -211,15 +211,14 @@ namespace Tests.UnitTests.APITests
                 HttpContext = new DefaultHttpContext { User = userClaims }
             };
 
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryName = "TestCategory" };
-            var newCategory = new ToDoCategory(user.UserId, categoryAddOrUpdateDto.ToDoCategoryName);
+            var categoryAddDto = new CategoryAddDto { ToDoCategoryName = "TestCategory" };
+            var newCategory = new ToDoCategory(user.UserId, categoryAddDto.ToDoCategoryName);
             var categoryDto = new CategoryDto { ToDoCategoryId = newCategory.ToDoCategoryId, ToDoCategoryName = newCategory.ToDoCategoryName };
 
-            _mockMapper.Setup(mapper => mapper.Map<ToDoCategory>(categoryAddOrUpdateDto)).Returns(newCategory);
-            _mockService.Setup(service => service.AddToDoCategoryAsync(newCategory)).Returns(Task.CompletedTask);
-            _mockMapper.Setup(mapper => mapper.Map<CategoryDto>(newCategory)).Returns(categoryDto);
+            _mockService.Setup(service => service.AddToDoCategoryAsync(It.IsAny<ToDoCategory>())).Returns(Task.CompletedTask);
+            _mockMapper.Setup(mapper => mapper.Map<CategoryDto>(It.IsAny<ToDoCategory>())).Returns(categoryDto);
 
-            var result = await _categoriesController.AddToDoCategory(categoryAddOrUpdateDto);
+            var result = await _categoriesController.AddToDoCategory(categoryAddDto);
 
             var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
             var returnedCategoryDto = Assert.IsType<CategoryDto>(createdAtActionResult.Value);
@@ -241,7 +240,7 @@ namespace Tests.UnitTests.APITests
                 HttpContext = new DefaultHttpContext { User = userClaims }
             };
 
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryName = "TestCategory" };
+            var categoryAddOrUpdateDto = new CategoryAddDto { ToDoCategoryName = "TestCategory" };
 
             var result = await _categoriesController.AddToDoCategory(categoryAddOrUpdateDto);
 
@@ -256,7 +255,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ]));
 
             _categoriesController.ControllerContext = new ControllerContext
@@ -264,7 +263,7 @@ namespace Tests.UnitTests.APITests
                 HttpContext = new DefaultHttpContext { User = userClaims }
             };
 
-            CategoryAddOrUpdateDto? categoryAddOrUpdateDto = null;
+            CategoryAddDto? categoryAddOrUpdateDto = null;
 
             var result = await _categoriesController.AddToDoCategory(categoryAddOrUpdateDto);
 
@@ -294,25 +293,25 @@ namespace Tests.UnitTests.APITests
             var categoryName = "TestCategory";
             var existingCategory = new ToDoCategory(user.UserId, categoryName);
             var updatedCategory = new ToDoCategory(user.UserId, "NewName");
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { UserId = user.UserId, ToDoCategoryId = existingCategory.ToDoCategoryId, ToDoCategoryName = "NewName" };
+            var categoryUpdateDto = new CategoryUpdateDto { ToDoCategoryName = "NewName", ToDoCategoryId = existingCategory.ToDoCategoryId };
 
             _mockService.Setup(service => service.GetToDoCategoryByCategoryIdAsync(existingCategory.ToDoCategoryId)).ReturnsAsync(existingCategory);
-            _mockMapper.Setup(mapper => mapper.Map(categoryAddOrUpdateDto, existingCategory)).Returns(updatedCategory);
+            _mockMapper.Setup(mapper => mapper.Map(categoryUpdateDto, existingCategory)).Returns(updatedCategory);
             _mockService.Setup(service => service.UpdateToDoCategoryAsync(updatedCategory)).Returns(Task.CompletedTask);
 
-            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
+            var result = await _categoriesController.UpdateToDoCategory(categoryUpdateDto);
 
             Assert.IsType<NoContentResult>(result);
         }
 
         [Fact]
-        public async Task AddToDoCategory_ShouldReturnBadRequest_WhenDataIsNull()
+        public async Task UpdateToDoCategory_ShouldReturnBadRequest_WhenDataIsNull()
         {
             var user = new User("TestUser");
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ]));
 
             _categoriesController.ControllerContext = new ControllerContext
@@ -320,21 +319,21 @@ namespace Tests.UnitTests.APITests
                 HttpContext = new DefaultHttpContext { User = userClaims }
             };
 
-            CategoryAddOrUpdateDto? categoryAddOrUpdateDto = null;
+            CategoryUpdateDto? categoryUpdateDto = null;
 
-            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
+            var result = await _categoriesController.UpdateToDoCategory(categoryUpdateDto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("Category data cannot be null.", badRequestResult.Value);
         }
 
         [Fact]
-        public async Task AddToDoCategory_ShouldReturnNotFound_WhenCategoryDoesNotExist()
+        public async Task UpdateToDoCategory_ShouldReturnNotFound_WhenCategoryDoesNotExist()
         {
             var user = new User("TestUser");
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ]));
 
             _categoriesController.ControllerContext = new ControllerContext
@@ -344,11 +343,11 @@ namespace Tests.UnitTests.APITests
 
             var categoryName = "TestCategory";
             var existingCategory = new ToDoCategory(user.UserId, categoryName);
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { UserId = user.UserId, ToDoCategoryId = existingCategory.ToDoCategoryId, ToDoCategoryName = "NewName" };
+            var categoryUpdateDto = new CategoryUpdateDto { ToDoCategoryName = "NewName", ToDoCategoryId = existingCategory.ToDoCategoryId };
 
             _mockService.Setup(service => service.GetToDoCategoryByCategoryIdAsync(existingCategory.ToDoCategoryId)).ReturnsAsync((ToDoCategory?)null);
 
-            var result = await _categoriesController.UpdateToDoCategory(categoryAddOrUpdateDto);
+            var result = await _categoriesController.UpdateToDoCategory(categoryUpdateDto);
 
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             Assert.Equal("Category was not found.", notFoundResult.Value);

@@ -37,7 +37,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,userId.ToString())
+                new Claim("UserId", userId.ToString())
             ], "mock"));
 
             _usersController.ControllerContext = new ControllerContext
@@ -85,7 +85,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,userId.ToString())
+                new Claim("UserId", userId.ToString())
             ], "mock"));
 
             _usersController.ControllerContext = new ControllerContext
@@ -114,7 +114,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ], "mock"));
 
             _usersController.ControllerContext = new ControllerContext
@@ -160,7 +160,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ], "mock"));
 
             _usersController.ControllerContext = new ControllerContext
@@ -181,7 +181,7 @@ namespace Tests.UnitTests.APITests
 
             var userClaims = new ClaimsPrincipal(new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name,user.UserId.ToString())
+                new Claim("UserId", user.UserId.ToString())
             ], "mock"));
 
             _usersController.ControllerContext = new ControllerContext

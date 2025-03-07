@@ -195,7 +195,7 @@ namespace Tests.UnitTests.ServicesTests
             var newToDoCategoryId = defaultToDoCategory.ToDoCategoryId;
 
             _toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryIdAsync(toDoCategoryId)).ReturnsAsync(toDoCategory);
-            _toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryNameAsync("Other")).ReturnsAsync(defaultToDoCategory);
+            _toDoCategoryRepositoryMock.Setup(repo => repo.GetToDoCategoryByCategoryNameAsync("Other", userId)).ReturnsAsync(defaultToDoCategory);
             _toDoCategoryRepositoryMock.Setup(repo => repo.DeleteToDoCategoryAsync(toDoCategoryId)).Returns(Task.CompletedTask);
             _toDoCategoryRepositoryMock.Setup(repo => repo.UpdateCategoryInToDosAsync(userId, toDoCategoryId, newToDoCategoryId)).Returns(Task.CompletedTask);
 

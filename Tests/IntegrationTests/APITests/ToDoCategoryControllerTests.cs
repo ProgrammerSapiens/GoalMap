@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using API;
 using Xunit.Abstractions;
 using Core.DTOs.ToDoCategory;
+using Microsoft.Extensions.Configuration;
 
 namespace Tests.IntegrationTests.APITests
 {
@@ -29,7 +30,9 @@ namespace Tests.IntegrationTests.APITests
         {
             var dbName = Guid.NewGuid().ToString();
 
-            _factory = new CustomWebApplicationFactory<Program>(dbName, _outputHelper);
+            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.Test.json").Build();
+
+            _factory = new CustomWebApplicationFactory<Program>(dbName, _outputHelper, configuration);
             _client = _factory.CreateClient();
 
             _scope = _factory.Services.CreateScope();
@@ -127,7 +130,7 @@ namespace Tests.IntegrationTests.APITests
             var userId = Guid.Parse("80a87a51-d544-4653-ae91-c6395e5fd8ce");
             var toDoCategory = new ToDoCategory(userId, "Test Category");
 
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryId = toDoCategory.ToDoCategoryId, ToDoCategoryName = "Test Category", UserId = userId };
+            var categoryAddOrUpdateDto = new CategoryAddDto { ToDoCategoryName = "Test Category" };
 
             var content = new StringContent(JsonConvert.SerializeObject(categoryAddOrUpdateDto), Encoding.UTF8, "application/json");
 
@@ -147,6 +150,8 @@ namespace Tests.IntegrationTests.APITests
             var userId = Guid.NewGuid();
             var toDoCategory = new ToDoCategory(userId, "TestCategory");
 
+            var categoryAddDto = new CategoryAddDto { ToDoCategoryName = toDoCategory.ToDoCategoryName };
+
             using (var scope = _factory.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -154,7 +159,7 @@ namespace Tests.IntegrationTests.APITests
                 await dbContext.SaveChangesAsync();
             }
 
-            var content = new StringContent(JsonConvert.SerializeObject(toDoCategory), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(categoryAddDto), Encoding.UTF8, "application/json");
 
             var response = await _client.PostAsync("/api/todocategories", content);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -171,7 +176,7 @@ namespace Tests.IntegrationTests.APITests
             var toDoCategory = new ToDoCategory(userId, "TestCategory");
             var toDoCategoryId = toDoCategory.ToDoCategoryId;
 
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryId = toDoCategoryId, ToDoCategoryName = "TestCategory", UserId = userId };
+            var categoryAddOrUpdateDto = new CategoryUpdateDto { ToDoCategoryId = toDoCategoryId, ToDoCategoryName = "TestCategory" };
 
             _dbContext.ToDoCategories.Add(toDoCategory);
             await _dbContext.SaveChangesAsync();
@@ -200,7 +205,7 @@ namespace Tests.IntegrationTests.APITests
             _dbContext.ToDoCategories.Add(toDoCategory1);
             await _dbContext.SaveChangesAsync();
 
-            var categoryAddOrUpdateDto = new CategoryAddOrUpdateDto { ToDoCategoryId = toDoCategory1.ToDoCategoryId, ToDoCategoryName = "TestCategory", UserId = userId };
+            var categoryAddOrUpdateDto = new CategoryUpdateDto { ToDoCategoryId = toDoCategory1.ToDoCategoryId, ToDoCategoryName = "TestCategory" };
 
             var content = new StringContent(JsonConvert.SerializeObject(categoryAddOrUpdateDto), Encoding.UTF8, "application/json");
 
