@@ -120,7 +120,9 @@ namespace API.Controllers
         /// </returns>
         private Guid GetUserId()
         {
-            return Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
+            var userIdClaim = User.FindFirst("UserId");
+            _logger.LogInformation($"userIdClaim {userIdClaim?.Value}");
+            return userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
         }
     }
 }
