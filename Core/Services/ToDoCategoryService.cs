@@ -113,7 +113,7 @@ namespace Core.Services
                 throw new ArgumentException("You cannot delete this category.");
             }
 
-            var otherToDoCategory = await _repository.GetToDoCategoryByCategoryNameAsync("Other");
+            var otherToDoCategory = await _repository.GetToDoCategoryByCategoryNameAsync("Other", existingToDoCategory.UserId);
             if (otherToDoCategory == null)
             {
                 _logger.LogError("Default todo category was not found.");
