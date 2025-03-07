@@ -86,10 +86,10 @@ namespace API.Controllers
         /// <summary>
         /// Adds a new ToDo category.
         /// </summary>
-        /// <param name="categoryAddOrUpdateDto">The category data to be added.</param>
+        /// <param name="categoryAddDto">The category data to be added.</param>
         /// <returns>The created category.</returns>
         [HttpPost]
-        public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
+        public async Task<IActionResult> AddToDoCategory([FromBody] CategoryAddDto? categoryAddDto)
         {
             _logger.LogInformation("AddToDoCategory");
 
@@ -100,14 +100,13 @@ namespace API.Controllers
                 return Unauthorized("User ID is not authenticated or invalid.");
             }
 
-            if (categoryAddOrUpdateDto == null)
+            if (categoryAddDto == null || string.IsNullOrEmpty(categoryAddDto.ToDoCategoryName))
             {
                 _logger.LogWarning("The entered data is null.");
                 return BadRequest("Category data cannot be null.");
             }
 
-            categoryAddOrUpdateDto.UserId = userId;
-            var category = _mapper.Map<ToDoCategory>(categoryAddOrUpdateDto);
+            var category = new ToDoCategory(userId, categoryAddDto.ToDoCategoryName);
             await _service.AddToDoCategoryAsync(category);
 
             var categoryDto = _mapper.Map<CategoryDto>(category);
@@ -121,33 +120,38 @@ namespace API.Controllers
         /// <param name="categoryAddOrUpdateDto">The updated category data.</param>
         /// <returns>No content if the update was successful.</returns>
         [HttpPut]
-        public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryAddOrUpdateDto? categoryAddOrUpdateDto)
+        public async Task<IActionResult> UpdateToDoCategory([FromBody] CategoryUpdateDto? categoryUpdateDto)
         {
             _logger.LogInformation("UpdateToDoCategory");
 
-            if (categoryAddOrUpdateDto == null)
+            if (categoryUpdateDto == null)
             {
                 _logger.LogWarning("The entered data is null");
                 return BadRequest("Category data cannot be null.");
             }
 
-            if (Guid.Empty == categoryAddOrUpdateDto.ToDoCategoryId || string.IsNullOrEmpty(categoryAddOrUpdateDto.ToDoCategoryName))
+            if (string.IsNullOrEmpty(categoryUpdateDto.ToDoCategoryName))
             {
                 _logger.LogWarning("The entered data is invalid.");
                 return BadRequest("Category name cannot be empty.");
             }
 
-            var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(categoryAddOrUpdateDto.ToDoCategoryId);
+            var existingCategory = await _service.GetToDoCategoryByCategoryIdAsync(categoryUpdateDto.ToDoCategoryId);
             if (existingCategory == null)
             {
-                _logger.LogError($"Category with id {categoryAddOrUpdateDto.ToDoCategoryId} was not found.");
+                _logger.LogError($"Category with id {categoryUpdateDto.ToDoCategoryId} was not found.");
                 return NotFound("Category was not found.");
             }
+            if (existingCategory.ToDoCategoryName == "Other" || existingCategory.ToDoCategoryName == "Habbit")
+            {
+                _logger.LogInformation($"You cannot update this category");
+                return NoContent();
+            }
 
-            if (existingCategory.ToDoCategoryName == categoryAddOrUpdateDto.ToDoCategoryName)
+            if (existingCategory.ToDoCategoryName == categoryUpdateDto.ToDoCategoryName)
                 return NoContent();
 
-            _mapper.Map(categoryAddOrUpdateDto, existingCategory);
+            _mapper.Map(categoryUpdateDto, existingCategory);
             await _service.UpdateToDoCategoryAsync(existingCategory);
 
             return NoContent();
@@ -179,7 +183,9 @@ namespace API.Controllers
         /// </summary>
         private Guid GetUserId()
         {
-            return Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
+            var userIdClaim = User.FindFirst("UserId");
+            _logger.LogInformation($"userIdClaim {userIdClaim?.Value}");
+            return userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
         }
     }
 }
