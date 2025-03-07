@@ -42,11 +42,11 @@ namespace Data.Repositories
         /// </summary>
         /// <param name="toDoCategoryName">The name of the to-do category.</param>
         /// <returns>A ToDoCategory object if found, otherwise <c>null</c>.</returns>
-        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName)
+        public async Task<ToDoCategory?> GetToDoCategoryByCategoryNameAsync(string toDoCategoryName, Guid userId)
         {
             _logger.LogInformation($"GetToDoCategoryByCategoryNameAsync({toDoCategoryName})");
 
-            return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName);
+            return await _context.ToDoCategories.AsNoTracking().SingleOrDefaultAsync(c => c.ToDoCategoryName == toDoCategoryName && c.UserId == userId);
         }
 
         /// <summary>
