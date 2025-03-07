@@ -5,7 +5,7 @@
     /// <summary>
     /// Defines the time block for a task.
     /// </summary>
-    public enum TimeBlock { Day, Week, Month, Year }
+    public enum TimeBlock { Day = 1, Week = 2, Month = 3, Year = 4 }
 
     /// <summary>
     /// Represents the difficulty level of a task.
@@ -15,7 +15,7 @@
     /// <summary>
     /// Specifies how often a task should repeat.
     /// </summary>
-    public enum RepeatFrequency { None, Daily, Weekly, Monthly, Yearly }
+    public enum RepeatFrequency { None = 0, Daily = 1, Weekly = 2, Monthly = 3, Yearly = 4 }
 
     #endregion
 
