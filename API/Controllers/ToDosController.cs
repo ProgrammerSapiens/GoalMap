@@ -67,14 +67,14 @@ namespace API.Controllers
         {
             _logger.LogInformation("GetToDos");
 
-            var userId = Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
+            var userId = GetUserId();
             if (Guid.Empty == userId)
             {
                 _logger.LogWarning("User ID is not authenticated or invalid.");
                 return Unauthorized("User ID is not authenticated or invalid.");
             }
 
-            var toDos = await _service.GetToDosAsync(parsedUserId, toDoGetByDateAndTimeBlockDto.Date, toDoGetByDateAndTimeBlockDto.TimeBlock);
+            var toDos = await _service.GetToDosAsync(userId, toDoGetByDateAndTimeBlockDto.Date, toDoGetByDateAndTimeBlockDto.TimeBlock);
             if (toDos.Count == 0)
             {
                 _logger.LogWarning("This Timeblock or Date doesn't have any todos.");
@@ -100,7 +100,7 @@ namespace API.Controllers
                 return BadRequest("ToDo data cannot be null.");
             }
 
-            var userId = Guid.TryParse(User.Identity?.Name, out var parsedUserId) ? parsedUserId : new Guid();
+            var userId = GetUserId();
             if (Guid.Empty == userId)
             {
                 _logger.LogWarning("User ID is not authenticated or invalid.");
@@ -173,6 +173,13 @@ namespace API.Controllers
             await _service.DeleteToDoAsync(toDoId);
 
             return NoContent();
+        }
+
+        private Guid GetUserId()
+        {
+            var userIdClaim = User.FindFirst("UserId");
+            _logger.LogInformation($"userIdClaim {userIdClaim?.Value}");
+            return userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId) ? userId : Guid.Empty;
         }
     }
 }
