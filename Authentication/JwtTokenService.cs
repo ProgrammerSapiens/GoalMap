@@ -43,7 +43,9 @@ namespace Authentication
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.UserName),
+                new Claim("UserId", user.UserId.ToString())
             };
 
             var expiration = DateTime.UtcNow.Date.AddDays(1).AddTicks(-1);
