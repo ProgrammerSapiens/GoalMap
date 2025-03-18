@@ -1,10 +1,14 @@
-import "./styles/App.css";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Day from "./pages/Day";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <>
-      <h1 className="text-3xl font-bold underline bg-red-600">Hello world!</h1>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Day />} />
+      </Routes>
+    </Router>
   );
 }
 
