@@ -1,0 +1,24 @@
+.sidebar {
+  background-color: #e98074;
+  width: 16rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.navButton {
+  background-color: #d8c3a5;
+  color: #eae7dc;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.navButtonAlt {
+  background-color: #333;
+  color: white;
+}
+
+.navButtonAlt:hover {
+  background-color: #555;
+}

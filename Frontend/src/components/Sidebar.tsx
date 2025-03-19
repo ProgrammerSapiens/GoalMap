@@ -1,24 +1,16 @@
+import styles from "../styles/Sidebar.module.css";
+
 const Sidebar = () => {
   return (
-    <aside className="bg-[#E98074] w-64 p-4 flex flex-col justify-between">
+    <aside className={styles.sidebar}>
       <nav className="flex flex-col space-y-2">
-        <button className="bg-[#D8C3A5] text-[#EAE7DC] p-3 rounded-md">
-          Day
-        </button>
-        <button className="bg-[#333] hover:bg-[#555] text-white p-3 rounded-md">
-          Week
-        </button>
-        <button className="bg-[#333] hover:bg-[#555] text-white p-3 rounded-md">
-          Month
-        </button>
-        <button className="bg-[#333] hover:bg-[#555] text-white p-3 rounded-md">
-          Year
-        </button>
+        <button className={styles.navButton}> Day </button>
+        <button className={styles.navButtonAlt}>Week</button>
+        <button className={styles.navButtonAlt}>Month</button>
+        <button className={styles.navButtonAlt}>Year</button>
       </nav>
 
-      <button className="bg-[#333] hover:bg-[#555] text-white p-3 rounded-md">
-        Categories
-      </button>
+      <button className={styles.navButtonAlt}>Categories</button>
     </aside>
   );
 };

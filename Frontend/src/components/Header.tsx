@@ -1,10 +1,11 @@
 import { CircleUser } from "lucide-react";
+import styles from "../styles/Header.module.css";
 
 const Header = () => {
   return (
-    <header className="bg-[#8E8D8A] text-[#EAE7DC] p-4 flex flex-row justify-between">
+    <header className={styles.header}>
       <h1 className="text-xl">GoalMap</h1>
-      <CircleUser size={32} className="cursor-pointer hover:text-gray-300" />
+      <CircleUser size={32} className={styles.icon} />
     </header>
   );
 };

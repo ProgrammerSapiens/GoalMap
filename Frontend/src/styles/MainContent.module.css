@@ -1,0 +1,10 @@
+.table {
+  min-width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid black;
+}
+
+.thead {
+  background-color: #d8c3a5;
+  color: #333;
+}

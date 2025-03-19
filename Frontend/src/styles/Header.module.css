@@ -1,0 +1,15 @@
+.header {
+  background-color: #8e8d8a;
+  color: #eae7dc;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.icon {
+  cursor: pointer;
+}
+
+.icon:hover {
+  color: #d3d3d3;
+}

@@ -1,8 +1,10 @@
+import styles from "../styles/MainContent.module.css";
+
 const MainContent = () => {
   return (
     <div className="flex-1">
-      <table className="min-w-full table-auto border-collapse border-t border-black">
-        <thead className="bg-[#D8C3A5] text-[#333]">
+      <table className={styles.table}>
+        <thead className={styles.thead}>
           <tr>
             <th className="px-1 py-2 text-center">
               <input type="checkbox" />
